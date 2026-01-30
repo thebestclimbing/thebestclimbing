@@ -105,8 +105,7 @@ export function MemberActions({ profile }: { profile: ProfileRow }) {
             {loading === "pause" ? <LoadingSpinner size="sm" className="text-white" /> : "회원권 정지"}
           </button>
         )}
-      </div>
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error ? <p className="mt-1 text-xs text-red-500">{error}</p> : null}
     </div>
   );
 }
