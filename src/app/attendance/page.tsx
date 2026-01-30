@@ -87,7 +87,6 @@ export default function AttendancePage() {
     }
     if (profiles.length === 1) {
       await submitAttendance(profiles[0].id, profiles[0].name, profiles[0].membership_end);
-      setLoading(true);
       return;
     }
     setSelectModal((profiles ?? []) as ProfileRow[]);
