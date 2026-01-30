@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateKST } from "@/lib/date";
 
 export default async function GalleryPage() {
   const supabase = await createClient();
@@ -76,7 +77,7 @@ export default async function GalleryPage() {
                 </h2>
                 <p className="text-xs text-[var(--chalk-muted)]">
                   {author?.name ?? "-"} ·{" "}
-                  {new Date(row.created_at).toLocaleDateString("ko-KR")}
+                  {formatDateKST(row.created_at)}
                 </p>
               </div>
             </Link>

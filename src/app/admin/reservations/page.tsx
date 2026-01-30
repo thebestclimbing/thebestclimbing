@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateTimeKST } from "@/lib/date";
 import ReservationConfirmButton from "./ReservationConfirmButton";
 
 export default async function AdminReservationsPage() {
@@ -84,7 +85,7 @@ export default async function AdminReservationsPage() {
                     {r.depositor_name}
                   </td>
                   <td className="p-3 text-[var(--chalk-muted)]">
-                    {new Date(r.reserved_at).toLocaleString("ko-KR")}
+                    {formatDateTimeKST(r.reserved_at)}
                   </td>
                   <td className="p-3 text-[var(--chalk-muted)]">
                     {r.guest_count}명
@@ -137,7 +138,7 @@ export default async function AdminReservationsPage() {
                     {r.depositor_name}
                   </td>
                   <td className="p-3 text-[var(--chalk-muted)]">
-                    {new Date(r.reserved_at).toLocaleString("ko-KR")}
+                    {formatDateTimeKST(r.reserved_at)}
                   </td>
                   <td className="p-3 text-[var(--chalk-muted)]">
                     {r.guest_count}명

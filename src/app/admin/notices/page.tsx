@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateKST } from "@/lib/date";
 
 export default async function AdminNoticesPage() {
   const supabase = await createClient();
@@ -66,7 +67,7 @@ export default async function AdminNoticesPage() {
                   {(n as { popup_yn?: string }).popup_yn === "Y" ? "Y" : "N"}
                 </td>
                 <td className="p-3 text-[var(--chalk-muted)]">
-                  {new Date(n.created_at).toLocaleDateString("ko-KR")}
+                  {formatDateKST(n.created_at)}
                 </td>
               </tr>
             ))}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateKST } from "@/lib/date";
 
 export default async function NoticePage() {
   const supabase = await createClient();
@@ -75,7 +76,7 @@ export default async function NoticePage() {
                     {author?.name ?? "-"}
                   </td>
                   <td className="p-3 text-[var(--chalk-muted)]">
-                    {new Date(row.created_at).toLocaleDateString("ko-KR")}
+                    {formatDateKST(row.created_at)}
                   </td>
                 </tr>
               );

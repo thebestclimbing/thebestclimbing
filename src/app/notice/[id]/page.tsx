@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateTimeKST } from "@/lib/date";
 
 export default async function NoticeDetailPage({
   params,
@@ -42,7 +43,7 @@ export default async function NoticeDetailPage({
         </h1>
         <div className="mb-4 flex gap-4 text-sm text-[var(--chalk-muted)]">
           <span>작성자: {author?.name ?? "-"}</span>
-          <span>작성일자: {new Date(row.created_at).toLocaleString("ko-KR")}</span>
+          <span>작성일자: {formatDateTimeKST(row.created_at)}</span>
         </div>
         <div className="whitespace-pre-wrap text-[var(--chalk)]">
           {row.body || "(내용 없음)"}

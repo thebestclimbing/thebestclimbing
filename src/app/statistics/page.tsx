@@ -146,9 +146,12 @@ export default async function StatisticsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-[var(--chalk)]">
+      <h1 className="mb-2 text-2xl font-bold text-[var(--chalk)]">
         통계
       </h1>
+      <p className="mb-6 text-sm text-[var(--chalk-muted)]">
+        운동일지 항목을 기준으로 통계
+      </p>
 
       <section className="mb-10">
         <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)]">

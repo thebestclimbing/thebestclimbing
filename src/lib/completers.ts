@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { WALL_TYPE_LABELS, formatGrade } from "@/types/database";
 import type { GradeDetail, GradeValue } from "@/types/database";
+import { getTodayISOKST, getWeekStartEndKST } from "@/lib/date";
 
 export interface CompleterRow {
   id: string;
@@ -83,25 +84,22 @@ function normalizeCompleterRows(
   })) as CompleterRow[];
 }
 
-function getTodayISO(): string {
-  const now = new Date();
-  return now.toISOString().slice(0, 10);
-}
-
-function getWeekStartEnd(): { start: string; end: string } {
-  const now = new Date();
-  const day = now.getDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + mondayOffset);
-  const start = monday.toISOString().slice(0, 10);
-  const end = now.toISOString().slice(0, 10);
-  return { start, end };
+/** 동일 회원·동일 루트 중복 제거 (각 목록 내에서 1건만) */
+function dedupeByProfileAndRoute<T extends { profile: { id: string } | null; route: { id: string } }>(
+  rows: T[]
+): T[] {
+  const seen = new Set<string>();
+  return rows.filter((r) => {
+    const key = `${r.profile?.id ?? ""}-${r.route.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export async function getTodayCompleters(max = 3): Promise<CompleterDisplay[]> {
   const supabase = await createClient();
-  const today = getTodayISO();
+  const today = getTodayISOKST();
   const { data, error } = await supabase
     .from("exercise_logs")
     .select(
@@ -117,13 +115,14 @@ export async function getTodayCompleters(max = 3): Promise<CompleterDisplay[]> {
 
   if (error) return [];
   const rows = normalizeCompleterRows(data ?? []).filter(hasValidRoute);
-  rows.sort(sortCompleters);
-  return rows.slice(0, max).map(toDisplay);
+  const deduped = dedupeByProfileAndRoute(rows);
+  deduped.sort(sortCompleters);
+  return deduped.slice(0, max).map(toDisplay);
 }
 
 export async function getWeeklyCompleters(max = 3): Promise<CompleterDisplay[]> {
   const supabase = await createClient();
-  const { start, end } = getWeekStartEnd();
+  const { start, end } = getWeekStartEndKST();
   const { data, error } = await supabase
     .from("exercise_logs")
     .select(
@@ -140,6 +139,7 @@ export async function getWeeklyCompleters(max = 3): Promise<CompleterDisplay[]> 
 
   if (error) return [];
   const rows = normalizeCompleterRows(data ?? []).filter(hasValidRoute);
-  rows.sort(sortCompleters);
-  return rows.slice(0, max).map(toDisplay);
+  const deduped = dedupeByProfileAndRoute(rows);
+  deduped.sort(sortCompleters);
+  return deduped.slice(0, max).map(toDisplay);
 }
