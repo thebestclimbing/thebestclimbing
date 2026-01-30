@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
+import { RouteSelect } from "@/components/RouteSelect";
 
 interface RouteRow {
   id: string;
@@ -34,7 +35,6 @@ export default function ExerciseLogUpdateForm({
 }) {
   const router = useRouter();
   const [routeId, setRouteId] = useState(initial.route_id);
-  const [routeSearch, setRouteSearch] = useState("");
   const [progressHoldCountStr, setProgressHoldCountStr] = useState(
     String(initial.progress_hold_count)
   );
@@ -47,10 +47,6 @@ export default function ExerciseLogUpdateForm({
 
   const selectedRoute = routes.find((r) => r.id === routeId);
   const maxHold = selectedRoute?.hold_count ?? 0;
-  const routeFilter = routeSearch.trim().toLowerCase();
-  const filteredRoutes = routeFilter
-    ? routes.filter((r) => r.name.toLowerCase().includes(routeFilter))
-    : routes;
   const progressHoldCount = Math.min(
     Math.max(0, parseInt(progressHoldCountStr, 10) || 0),
     maxHold
@@ -87,32 +83,16 @@ export default function ExerciseLogUpdateForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">루트 *</label>
-          <input
-            type="text"
-            value={routeSearch}
-            onChange={(e) => setRouteSearch(e.target.value)}
-            placeholder="루트명 검색"
-            className="input-base mb-1"
-          />
-          <select
+          <RouteSelect
+            routes={routes}
             value={routeId}
-            onChange={(e) => {
-              setRouteId(e.target.value);
-              const r = routes.find((x) => x.id === e.target.value);
-              if (r) {
-                const next = Math.min(progressHoldCount, r.hold_count);
-                setProgressHoldCountStr(String(next));
-              }
+            onChange={setRouteId}
+            onSelectRoute={(r) => {
+              const next = Math.min(progressHoldCount, r.hold_count);
+              setProgressHoldCountStr(String(next));
             }}
             required
-            className="input-base"
-          >
-            {filteredRoutes.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name} (홀드 {r.hold_count})
-              </option>
-            ))}
-          </select>
+          />
         </div>
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">운동일 *</label>

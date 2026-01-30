@@ -102,13 +102,13 @@ export default function ExerciseLogList({
                     </span>
                     <span className="text-[var(--chalk-muted)]">난이도 {grade}</span>
                     {log.is_completed && (
-                      <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                        완등
+                      <span className="rounded border border-[var(--border)] bg-white px-1.5 py-0.5 text-xs font-medium text-green-700 dark:bg-[var(--surface)] dark:border-[var(--border)] dark:text-green-400">
+                        ✓ 완등 인증됨
                       </span>
                     )}
                     {log.completion_requested && !log.is_completed && (
-                      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                        완등요청됨
+                      <span className="rounded border border-[var(--border)] bg-white px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-[var(--surface)] dark:border-[var(--border)] dark:text-amber-400">
+                        인증 대기 중
                       </span>
                     )}
                   </div>
@@ -123,12 +123,12 @@ export default function ExerciseLogList({
                     type="button"
                     onClick={() => requestCompletion(log.id)}
                     disabled={!!requestingId}
-                    className="shrink-0 rounded-lg border border-[var(--primary)] px-3 py-1.5 text-xs font-medium text-[var(--primary)] transition hover:bg-[var(--primary-muted)] disabled:opacity-50"
+                    className="shrink-0 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] active:scale-[0.98] disabled:opacity-50 dark:bg-[var(--surface)]"
                   >
                     {requestingId === log.id ? (
                       <LoadingSpinner size="sm" />
                     ) : (
-                      "완등요청"
+                      "완등 인증 요청"
                     )}
                   </button>
                 )}

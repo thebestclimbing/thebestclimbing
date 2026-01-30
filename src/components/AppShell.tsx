@@ -6,12 +6,84 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+// iPhone / SF Symbols 스타일: outline(비선택) / filled(선택)
+const TabIcons = {
+  home: {
+    outline: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    ),
+    filled: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path d="M12 2.5L3 9v12h6v-7h6v7h6V9L12 2.5z" />
+      </svg>
+    ),
+  },
+  list: {
+    outline: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <line x1="8" y1="6" x2="21" y2="6" />
+        <line x1="8" y1="12" x2="21" y2="12" />
+        <line x1="8" y1="18" x2="21" y2="18" />
+        <line x1="3" y1="6" x2="3.01" y2="6" />
+        <line x1="3" y1="12" x2="3.01" y2="12" />
+        <line x1="3" y1="18" x2="3.01" y2="18" />
+      </svg>
+    ),
+    filled: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path d="M4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm0 6h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1zm0 6h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1z" />
+      </svg>
+    ),
+  },
+  check: {
+    outline: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    ),
+    filled: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+      </svg>
+    ),
+  },
+  bubble: {
+    outline: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+    filled: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+      </svg>
+    ),
+  },
+  person: {
+    outline: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
+    filled: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+      </svg>
+    ),
+  },
+};
+
 const TAB_ITEMS = [
-  { href: "/", label: "메인", icon: "🏠" },
-  { href: "/exercise", label: "운동일지", icon: "📋" },
-  { href: "/attendance", label: "출석", icon: "✓" },
-  { href: "/board", label: "게시판", icon: "💬" },
-  { href: "/member", label: "마이", icon: "👤" },
+  { href: "/", label: "메인", icon: "home" as keyof typeof TabIcons },
+  { href: "/exercise", label: "운동일지", icon: "list" as keyof typeof TabIcons },
+  { href: "/attendance", label: "출석", icon: "check" as keyof typeof TabIcons },
+  { href: "/board", label: "게시판", icon: "bubble" as keyof typeof TabIcons },
+  { href: "/member", label: "마이", icon: "person" as keyof typeof TabIcons },
 ] as const;
 
 const ADMIN_LINKS = [
@@ -305,7 +377,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition ${active ? "text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
                 >
-                  <span className="text-xl">{item.icon}</span>
+                  <span className="flex items-center justify-center">
+                    {active ? TabIcons[item.icon].filled : TabIcons[item.icon].outline}
+                  </span>
                   <span className={`text-xs ${active ? "font-semibold" : ""}`}>{item.label}</span>
                 </Link>
               );
