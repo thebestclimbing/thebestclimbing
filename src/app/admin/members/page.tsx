@@ -17,7 +17,7 @@ export default async function AdminMembersPage() {
 
   const { data: profiles, error } = await supabase
     .from("profiles")
-    .select("id, name, email, phone, phone_tail4, membership_start, membership_end, membership_paused, role, created_at")
+    .select("id, name, email, phone, phone_tail4, membership_start, membership_end, membership_paused, membership_paused_at, role, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -35,7 +35,7 @@ export default async function AdminMembersPage() {
         회원관리
       </h1>
       <p className="mb-4 text-sm text-[var(--chalk-muted)]">
-        성명, 이메일, 전화번호, 전화번호 뒷 4자리, 회원권 기간
+        성명, 전화번호, 회원권 기간
       </p>
       <MembersTableWithSearch profiles={profiles ?? []} />
       <p className="mt-6">

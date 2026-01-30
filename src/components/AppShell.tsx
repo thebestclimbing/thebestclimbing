@@ -95,12 +95,55 @@ const ADMIN_LINKS = [
   { href: "/admin/notices", label: "공지관리" },
 ] as const;
 
+const STATS_LINKS = [
+  { href: "/statistics", label: "통계 목록" },
+  { href: "/statistics/member-routes", label: "회원별 등록 루트" },
+  { href: "/statistics/member-completions", label: "회원별 루트 완등" },
+  { href: "/statistics/route-holds", label: "루트별 평균 홀드수" },
+  { href: "/statistics/route-completions", label: "루트별 완등" },
+  { href: "/statistics/month-logs", label: "기간별 등록 (월별)" },
+  { href: "/statistics/month-completions", label: "기간별 완등 (월별)" },
+] as const;
+
+/** 이름에서 아바타용 이니셜 추출 (최대 2자) */
+function getInitials(name: string | null | undefined): string | null {
+  const trimmed = name?.trim();
+  if (!trimmed) return null;
+  return trimmed.length >= 2 ? trimmed.slice(0, 2) : trimmed;
+}
+
+/** 마이 메뉴용 아바타: 이니셜 원형 또는 person 아이콘 */
+function MyAvatar({
+  name,
+  size = "md",
+  active,
+}: {
+  name: string | null | undefined;
+  size?: "sm" | "md";
+  active?: boolean;
+}) {
+  const initials = getInitials(name);
+  const sizeClass = size === "sm" ? "h-7 w-7 text-xs" : "h-8 w-8 text-sm";
+  const baseClass = `inline-flex shrink-0 items-center justify-center rounded-full font-semibold ${sizeClass} ${active ? "bg-[var(--primary)] text-white" : "bg-[var(--surface-muted)] text-[var(--chalk)]"}`;
+
+  if (initials) {
+    return <span className={baseClass} aria-hidden>{initials}</span>;
+  }
+  return (
+    <span className={baseClass} aria-hidden>
+      {active ? TabIcons.person.filled : TabIcons.person.outline}
+    </span>
+  );
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [role, setRole] = useState<string | null>(null);
+  const [profileName, setProfileName] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
 
   const isAuthPage = pathname === "/login" || pathname === "/member/register";
   const hideTabBar =
@@ -118,12 +161,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       if (u) {
         supabase
           .from("profiles")
-          .select("role")
+          .select("role, name")
           .eq("id", u.id)
           .single()
-          .then(({ data }) => setRole(data?.role ?? null));
+          .then(({ data }) => {
+            setRole(data?.role ?? null);
+            setProfileName(data?.name ?? null);
+          });
       } else {
         setRole(null);
+        setProfileName(null);
       }
     });
   }, [pathname]);
@@ -168,12 +215,43 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         사진첩
       </Link>
-      <Link
-        href="/statistics"
-        className={`text-sm transition hover:text-[var(--primary)] ${pathname === "/statistics" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
-      >
-        통계
-      </Link>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setStatsOpen((o) => !o)}
+          className={`text-sm transition hover:text-[var(--primary)] ${pathname.startsWith("/statistics") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        >
+          통계 ▾
+        </button>
+        <AnimatePresence>
+          {statsOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                aria-hidden
+                onClick={() => setStatsOpen(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2 shadow-lg"
+              >
+                {STATS_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setStatsOpen(false)}
+                    className={`block px-4 py-2 text-sm ${pathname === item.href ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk)]"} hover:bg-[var(--surface-muted)]`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
     </>
   );
 
@@ -183,7 +261,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 hidden border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur md:block">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <Link href="/" className="text-lg font-bold text-[var(--chalk)]">
-            베스트클라이밍
+            BestClimb
           </Link>
           <nav className="flex items-center gap-5">
             {navLinks}
@@ -229,9 +307,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {user ? (
               <Link
                 href="/member"
-                className={`text-sm transition hover:text-[var(--primary)] ${pathname === "/member" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+                className={`inline-flex items-center transition hover:opacity-80 ${pathname === "/member" ? "ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--surface)] rounded-full" : ""}`}
+                aria-label="마이"
               >
-                마이
+                <MyAvatar name={profileName} size="sm" active={pathname === "/member"} />
               </Link>
             ) : (
               <Link
@@ -248,15 +327,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* 상단 메뉴바 - 모바일: 햄버거 + 로고 */}
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-4 py-3 pt-[var(--safe-area-top)] md:hidden">
         <Link href="/" className="text-base font-bold text-[var(--chalk)]">
-          베스트클라이밍
+          BestClimb
         </Link>
         <div className="flex items-center gap-2">
           {user ? (
             <Link
               href="/member"
-              className="rounded-full bg-[var(--surface-muted)] px-4 py-2 text-sm font-medium text-[var(--chalk)]"
+              className={`inline-flex rounded-full transition hover:opacity-80 ${pathname === "/member" ? "ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--surface)]" : ""}`}
+              aria-label="마이"
             >
-              마이
+              <MyAvatar name={profileName} size="sm" active={pathname === "/member"} />
             </Link>
           ) : (
             <Link
@@ -329,9 +409,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link href="/gallery" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   사진첩
                 </Link>
-                <Link href="/statistics" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  통계
-                </Link>
+                <div className="my-2 border-t border-[var(--border)]" />
+                <span className="px-4 py-2 text-xs font-medium text-[var(--chalk-muted)]">통계</span>
+                {STATS_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
                 {isAdmin && (
                   <>
                     <div className="my-2 border-t border-[var(--border)]" />
@@ -371,6 +460,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {TAB_ITEMS.map((item) => {
               const active =
                 pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+              const isMyTab = item.href === "/member";
               return (
                 <Link
                   key={item.href}
@@ -378,7 +468,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition ${active ? "text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
                 >
                   <span className="flex items-center justify-center">
-                    {active ? TabIcons[item.icon].filled : TabIcons[item.icon].outline}
+                    {isMyTab ? (
+                      <MyAvatar name={profileName} size="md" active={active} />
+                    ) : (
+                      active ? TabIcons[item.icon].filled : TabIcons[item.icon].outline
+                    )}
                   </span>
                   <span className={`text-xs ${active ? "font-semibold" : ""}`}>{item.label}</span>
                 </Link>

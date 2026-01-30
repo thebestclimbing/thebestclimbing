@@ -38,25 +38,15 @@ export default async function AdminRoutesPage() {
         암벽문제관리
       </h1>
       <RouteForm />
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-        <table className="w-full text-left text-sm">
+      <div className="mt-8 overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
+        <table className="w-full min-w-[360px] text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
-              <th className="p-3 font-medium text-[var(--chalk)]">
-                암벽구분
-              </th>
-              <th className="p-3 font-medium text-[var(--chalk)]">
-                난이도
-              </th>
-              <th className="p-3 font-medium text-[var(--chalk)]">
-                루트명
-              </th>
-              <th className="p-3 font-medium text-[var(--chalk)]">
-                홀드수
-              </th>
-              <th className="p-3 font-medium text-[var(--chalk)]">
-                작업
-              </th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">암벽구분</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">난이도</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">루트명</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">홀드수</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">작업</th>
             </tr>
           </thead>
           <tbody>
@@ -73,19 +63,11 @@ export default async function AdminRoutesPage() {
                   key={r.id}
                   className="border-b border-[var(--border)]"
                 >
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {wallLabel}
-                  </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {grade}
-                  </td>
-                  <td className="p-3 font-medium text-[var(--chalk)]">
-                    {r.name}
-                  </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {r.hold_count}
-                  </td>
-                  <td className="p-3">
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{wallLabel}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{grade}</td>
+                  <td className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">{r.name}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{r.hold_count}</td>
+                  <td className="p-1.5 sm:p-2">
                     <RouteDeleteButton routeId={r.id} routeName={r.name} />
                   </td>
                 </tr>

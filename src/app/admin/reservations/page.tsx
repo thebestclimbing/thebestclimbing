@@ -51,25 +51,15 @@ export default async function AdminReservationsPage() {
         <h2 className="mb-4 text-lg font-semibold text-amber-600 dark:text-amber-400">
           예약중 ({pending?.length ?? 0})
         </h2>
-        <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
+          <table className="w-full min-w-[400px] text-left text-sm">
             <thead>
               <tr className="border-b border-[var(--border)]">
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  성명
-                </th>
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  입금자명
-                </th>
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  예약일시
-                </th>
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  인원
-                </th>
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  작업
-                </th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">성명</th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">입금자명</th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">예약일시</th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">인원</th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">작업</th>
               </tr>
             </thead>
             <tbody>
@@ -78,19 +68,11 @@ export default async function AdminReservationsPage() {
                   key={r.id}
                   className="border-b border-[var(--border)]"
                 >
-                  <td className="p-3 text-[var(--chalk)]">
-                    {r.guest_name}
-                  </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {r.depositor_name}
-                  </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {formatDateTimeKST(r.reserved_at)}
-                  </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {r.guest_count}명
-                  </td>
-                  <td className="p-3">
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk)]">{r.guest_name}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{r.depositor_name}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)] whitespace-nowrap">{formatDateTimeKST(r.reserved_at)}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{r.guest_count}명</td>
+                  <td className="p-1.5 sm:p-2">
                     <ReservationConfirmButton reservationId={r.id} />
                   </td>
                 </tr>
@@ -107,22 +89,14 @@ export default async function AdminReservationsPage() {
         <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)]">
           예약완료 (최근 20건)
         </h2>
-        <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
+          <table className="w-full min-w-[360px] text-left text-sm">
             <thead>
               <tr className="border-b border-[var(--border)]">
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  성명
-                </th>
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  입금자명
-                </th>
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  예약일시
-                </th>
-                <th className="p-3 font-medium text-[var(--chalk)]">
-                  인원
-                </th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">성명</th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">입금자명</th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">예약일시</th>
+                <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">인원</th>
               </tr>
             </thead>
             <tbody>
@@ -131,18 +105,10 @@ export default async function AdminReservationsPage() {
                   key={r.id}
                   className="border-b border-[var(--border)]"
                 >
-                  <td className="p-3 text-[var(--chalk)]">
-                    {r.guest_name}
-                  </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {r.depositor_name}
-                  </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {formatDateTimeKST(r.reserved_at)}
-                  </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
-                    {r.guest_count}명
-                  </td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk)]">{r.guest_name}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{r.depositor_name}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)] whitespace-nowrap">{formatDateTimeKST(r.reserved_at)}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{r.guest_count}명</td>
                 </tr>
               ))}
             </tbody>

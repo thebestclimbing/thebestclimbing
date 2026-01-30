@@ -43,19 +43,19 @@ export default async function AdminNoticesPage() {
           공지 추가
         </Link>
       </div>
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
+        <table className="w-full min-w-[280px] text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
-              <th className="p-3 font-medium text-[var(--chalk)]">제목</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">팝업</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">작성일</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">제목</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">팝업</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">작성일</th>
             </tr>
           </thead>
           <tbody>
             {(notices ?? []).map((n) => (
               <tr key={n.id} className="border-b border-[var(--border)]">
-                <td className="p-3">
+                <td className="p-1.5 sm:p-2">
                   <Link
                     href={"/notice/" + n.id}
                     className="font-medium text-[var(--chalk)] hover:underline"
@@ -63,10 +63,10 @@ export default async function AdminNoticesPage() {
                     {n.title}
                   </Link>
                 </td>
-                <td className="p-3 text-[var(--chalk-muted)]">
+                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">
                   {(n as { popup_yn?: string }).popup_yn === "Y" ? "Y" : "N"}
                 </td>
-                <td className="p-3 text-[var(--chalk-muted)]">
+                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)] whitespace-nowrap">
                   {formatDateKST(n.created_at)}
                 </td>
               </tr>

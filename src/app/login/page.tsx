@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
+import { formatPhone } from "@/lib/format";
 
 type ProfileRow = { id: string; email: string | null; name: string; phone: string };
 
@@ -153,7 +154,7 @@ function LoginForm() {
                         <span className="font-medium">{p.name}</span>
                         {p.phone && (
                           <span className="ml-2 text-sm text-[var(--chalk-muted)]">
-                            {p.phone}
+                            {formatPhone(p.phone)}
                           </span>
                         )}
                       </>

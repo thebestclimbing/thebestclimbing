@@ -40,17 +40,17 @@ export default async function NoticePage() {
       <h1 className="mb-6 text-2xl font-bold text-[var(--chalk)]">
         공지사항
       </h1>
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-        <table className="w-full text-left text-sm">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden overflow-x-auto -mx-4 sm:mx-0">
+        <table className="w-full min-w-[280px] text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
-              <th className="p-3 font-medium text-[var(--chalk)]">
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">
                 제목
               </th>
-              <th className="p-3 font-medium text-[var(--chalk)]">
+              <th className="hidden p-1.5 sm:p-2 font-medium text-[var(--chalk)] sm:table-cell">
                 작성자
               </th>
-              <th className="p-3 font-medium text-[var(--chalk)]">
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">
                 작성일자
               </th>
             </tr>
@@ -64,7 +64,7 @@ export default async function NoticePage() {
                   key={row.id}
                   className="border-b border-[var(--border)]"
                 >
-                  <td className="p-3">
+                  <td className="p-1.5 sm:p-2">
                     <Link
                       href={"/notice/" + row.id}
                       className="font-medium text-[var(--chalk)] hover:underline"
@@ -72,10 +72,10 @@ export default async function NoticePage() {
                       {row.title}
                     </Link>
                   </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
+                  <td className="hidden p-1.5 sm:p-2 text-[var(--chalk-muted)] sm:table-cell">
                     {author?.name ?? "-"}
                   </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)] whitespace-nowrap">
                     {formatDateKST(row.created_at)}
                   </td>
                 </tr>

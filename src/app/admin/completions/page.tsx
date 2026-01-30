@@ -61,15 +61,15 @@ export default async function AdminCompletionsPage() {
       <p className="mb-4 text-sm text-[var(--chalk-muted)]">
         회원이 완등요청한 기록을 조회하고 완등완료 처리합니다.
       </p>
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
+        <table className="w-full min-w-[360px] text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
-              <th className="p-3 font-medium text-[var(--chalk)]">날짜</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">회원</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">루트</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">난이도</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">동작</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">날짜</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">회원</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">루트</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">난이도</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">동작</th>
             </tr>
           </thead>
           <tbody>
@@ -80,15 +80,15 @@ export default async function AdminCompletionsPage() {
                 r.route.wall_type;
               return (
                 <tr key={r.id} className="border-b border-[var(--border)]">
-                  <td className="p-3 text-[var(--chalk-muted)]">{r.logged_at}</td>
-                  <td className="p-3 text-[var(--chalk)]">
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)] whitespace-nowrap">{r.logged_at}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk)]">
                     {(r as { profile: { name: string } | null }).profile?.name ?? "-"}
                   </td>
-                  <td className="p-3 text-[var(--chalk)]">
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk)]">
                     {r.route.name} ({wallLabel})
                   </td>
-                  <td className="p-3 text-[var(--chalk-muted)]">{grade}</td>
-                  <td className="p-3">
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{grade}</td>
+                  <td className="p-1.5 sm:p-2">
                     <CompletionConfirmButton logId={r.id} />
                   </td>
                 </tr>

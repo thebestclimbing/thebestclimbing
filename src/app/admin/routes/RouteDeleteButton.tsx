@@ -29,7 +29,7 @@ export default function RouteDeleteButton({
       type="button"
       onClick={handleDelete}
       disabled={loading}
-      className="inline-flex items-center gap-1.5 text-sm text-red-600 hover:underline disabled:opacity-50 disabled:pointer-events-none dark:text-red-400"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-2.5 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 disabled:pointer-events-none dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
     >
       {loading ? (
         <>

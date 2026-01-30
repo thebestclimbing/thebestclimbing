@@ -12,6 +12,7 @@ type ProfileRow = {
   membership_start: string | null;
   membership_end: string | null;
   membership_paused?: boolean;
+  membership_paused_at: number | null; // YYYYMMDD 정수
   role: string;
   created_at: string;
 };
@@ -31,11 +32,25 @@ export function MembersTableWithSearch({ profiles }: { profiles: ProfileRow[] })
     );
   }, [profiles, q]);
 
+  /** YYYYMMDD 정수 → 오늘까지 경과 일수 (정지 중일 때만 의미 있음) */
+  function getPausedDays(ymd: number | null, isPaused: boolean): number | null {
+    if (!isPaused || ymd == null) return null;
+    const y = Math.floor(ymd / 10000);
+    const m = Math.floor((ymd % 10000) / 100) - 1;
+    const d = ymd % 100;
+    const start = new Date(y, m, d);
+    const today = new Date();
+    start.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const diffMs = today.getTime() - start.getTime();
+    return Math.floor(diffMs / (24 * 60 * 60 * 1000));
+  }
+
   return (
     <>
       <div className="mb-4">
         <label htmlFor="member-search" className="mb-1 block text-sm text-[var(--chalk-muted)]">
-          검색 (성명, 이메일, 전화번호)
+          검색 (성명, 전화번호)
         </label>
         <input
           id="member-search"
@@ -46,31 +61,25 @@ export function MembersTableWithSearch({ profiles }: { profiles: ProfileRow[] })
           className="input-base max-w-sm"
         />
       </div>
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
+        <table className="w-full min-w-[560px] text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
-              <th className="p-3 font-medium text-[var(--chalk)]">성명</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">이메일</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">전화번호</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">뒷4자리</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">회원권 시작</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">회원권 종료</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">상태</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">역할</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">동작</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">성명</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">회원권 시작</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">회원권 종료</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">상태</th>
+              <th className="hidden p-1.5 sm:table-cell sm:p-2 font-medium text-[var(--chalk)]">정지일수</th>
+              <th className="p-1.5 sm:p-2 text-center font-medium text-[var(--chalk)]">회원권</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((p) => (
               <tr key={p.id} className="border-b border-[var(--border)]">
-                <td className="p-3 text-[var(--chalk)]">{p.name}</td>
-                <td className="p-3 text-[var(--chalk-muted)]">{p.email ?? "-"}</td>
-                <td className="p-3 text-[var(--chalk-muted)]">{p.phone}</td>
-                <td className="p-3 text-[var(--chalk-muted)]">{p.phone_tail4}</td>
-                <td className="p-3 text-[var(--chalk-muted)]">{p.membership_start ?? "-"}</td>
-                <td className="p-3 text-[var(--chalk-muted)]">{p.membership_end ?? "-"}</td>
-                <td className="p-3 text-[var(--chalk-muted)]">
+                <td className="p-1.5 sm:p-2 text-[var(--chalk)]">{p.name}</td>
+                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{p.membership_start ?? "-"}</td>
+                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{p.membership_end ?? "-"}</td>
+                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">
                   {p.membership_paused ? (
                     <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
                       정지
@@ -81,8 +90,13 @@ export function MembersTableWithSearch({ profiles }: { profiles: ProfileRow[] })
                     </span>
                   )}
                 </td>
-                <td className="p-3 text-[var(--chalk-muted)]">{p.role}</td>
-                <td className="p-3">
+                <td className="hidden p-1.5 sm:table-cell sm:p-2 text-[var(--chalk-muted)]">
+                  {(() => {
+                    const days = getPausedDays(p.membership_paused_at, p.membership_paused === true);
+                    return days != null ? `${days}일` : "-";
+                  })()}
+                </td>
+                <td className="p-1.5 sm:p-2">
                   <MemberActions profile={p} />
                 </td>
               </tr>

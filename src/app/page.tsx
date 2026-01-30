@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { getTodayCompleters, getWeeklyCompleters } from "@/lib/completers";
 import type { CompleterDisplay } from "@/lib/completers";
 import { HomeMotion } from "@/components/HomeMotion";
-import { createClient } from "@/lib/supabase/server";
 
 function CompleterCard({ c, rank }: { c: CompleterDisplay; rank: number }) {
   return (
@@ -18,14 +16,6 @@ function CompleterCard({ c, rank }: { c: CompleterDisplay; rank: number }) {
 }
 
 export default async function Home() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const role = user
-    ? (await supabase.from("profiles").select("role").eq("id", user.id).single()).data?.role ?? null
-    : null;
-  const isAdmin = role === "admin";
-  const isLoggedIn = !!user;
-
   const [todayCompleters, weeklyCompleters] = await Promise.all([
     getTodayCompleters(3),
     getWeeklyCompleters(3),
@@ -77,33 +67,6 @@ export default async function Home() {
             ))
           )}
         </div>
-      </section>
-
-      {/* 액션 링크 - 권한별 표시 */}
-      <section className="flex flex-wrap gap-3">
-        {isLoggedIn && (
-          <>
-            <Link href="/member" className="btn-primary inline-block text-center text-sm">
-              회원정보
-            </Link>
-            <Link href="/exercise" className="btn-primary inline-block text-center text-sm">
-              나의 운동일지
-            </Link>
-          </>
-        )}
-        {!isLoggedIn && (
-          <Link href="/member/register" className="btn-outline inline-block text-center text-sm">
-            회원가입
-          </Link>
-        )}
-        <Link href="/reservation" className="btn-outline inline-block text-center text-sm">
-          일일체험 예약
-        </Link>
-        {isAdmin && (
-          <Link href="/admin/members" className="btn-outline inline-block border-[var(--primary)] text-center text-sm text-[var(--primary)] hover:bg-[var(--primary-muted)]">
-            관리자
-          </Link>
-        )}
       </section>
     </HomeMotion>
   );

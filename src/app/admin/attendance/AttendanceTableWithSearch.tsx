@@ -48,14 +48,14 @@ export function AttendanceTableWithSearch({ attendances }: { attendances: Row[] 
           className="input-base max-w-sm"
         />
       </div>
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
+        <table className="w-full min-w-[320px] text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
-              <th className="p-3 font-medium text-[var(--chalk)]">출석일자</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">회원명</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">전화뒷4자리</th>
-              <th className="p-3 font-medium text-[var(--chalk)]">체크 시각</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">출석일자</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">회원명</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">전화뒷4자리</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">체크 시각</th>
             </tr>
           </thead>
           <tbody>
@@ -64,10 +64,10 @@ export function AttendanceTableWithSearch({ attendances }: { attendances: Row[] 
               const profile = getProfile(row);
               return (
                 <tr key={row.id} className="border-b border-[var(--border)]">
-                  <td className="p-3 text-[var(--chalk)]">{row.attended_at}</td>
-                  <td className="p-3 text-[var(--chalk-muted)]">{profile?.name ?? "-"}</td>
-                  <td className="p-3 text-[var(--chalk-muted)]">{profile?.phone_tail4 ?? "-"}</td>
-                  <td className="p-3 text-[var(--chalk-muted)]">
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk)] whitespace-nowrap">{row.attended_at}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{profile?.name ?? "-"}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{profile?.phone_tail4 ?? "-"}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)] whitespace-nowrap">
                     {formatDateTimeKST(row.checked_at)}
                   </td>
                 </tr>

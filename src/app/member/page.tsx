@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { formatPhone } from "@/lib/format";
 
 export default async function MemberPage() {
   const supabase = await createClient();
@@ -44,7 +45,7 @@ export default async function MemberPage() {
           <div>
             <dt className="text-sm text-[var(--chalk-muted)] ">전화번호</dt>
             <dd className="font-medium text-[var(--chalk)]">
-              {profile.phone}
+              {formatPhone(profile.phone)}
             </dd>
           </div>
           <div>
@@ -53,6 +54,12 @@ export default async function MemberPage() {
               {profile.membership_start && profile.membership_end
                 ? `${profile.membership_start} ~ ${profile.membership_end}`
                 : "-"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-[var(--chalk-muted)]">회원권 만료일자</dt>
+            <dd className="font-medium text-[var(--chalk)]">
+              {profile.membership_end ?? "-"}
             </dd>
           </div>
         </dl>

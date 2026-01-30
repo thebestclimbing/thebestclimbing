@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { formatPhone } from "@/lib/format";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "지우기", "0", "확인"];
 
@@ -236,7 +237,7 @@ export default function AttendancePage() {
                       <>
                         <span className="font-medium">{p.name}</span>
                         {p.phone && (
-                          <span className="ml-2 text-sm text-[var(--chalk-muted)]">{p.phone}</span>
+                          <span className="ml-2 text-sm text-[var(--chalk-muted)]">{formatPhone(p.phone)}</span>
                         )}
                         <span className="mt-1 block text-xs text-[var(--chalk-muted)]">
                           회원권 만료: {p.membership_end ?? "-"} ({formatDday(p.membership_end)})
