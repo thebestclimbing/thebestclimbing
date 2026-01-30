@@ -19,6 +19,7 @@ export default async function ExercisePage() {
       progress_hold_count,
       attempt_count,
       is_completed,
+      completion_requested,
       is_round_trip,
       round_trip_count,
       logged_at,
@@ -27,13 +28,14 @@ export default async function ExercisePage() {
     )
     .eq("profile_id", user.id)
     .order("logged_at", { ascending: false })
-    .limit(50);
+    .limit(100);
 
   type LogItem = {
     id: string;
     progress_hold_count: number;
     attempt_count: number;
     is_completed: boolean;
+    completion_requested: boolean;
     is_round_trip: boolean;
     round_trip_count: number;
     logged_at: string;
@@ -47,10 +49,11 @@ export default async function ExercisePage() {
     };
   };
   const logs = (logsRaw ?? []).map((l: unknown) => {
-    const r = l as LogItem & { route: LogItem["route"] | LogItem["route"][] };
+    const r = l as LogItem & { route: LogItem["route"] | LogItem["route"][]; completion_requested?: boolean };
     return {
       ...r,
       route: Array.isArray(r.route) ? r.route[0] : r.route,
+      completion_requested: r.completion_requested ?? false,
     } as LogItem;
   });
 
@@ -72,9 +75,7 @@ export default async function ExercisePage() {
         <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)]">
           기록 목록
         </h2>
-        <ExerciseLogList
-          logs={logs}
-        />
+        <ExerciseLogList logs={logs} profileId={user.id} />
       </section>
       <p className="mt-6">
         <Link

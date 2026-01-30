@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "지우기", "0", "확인"];
 
-type ProfileRow = { id: string; name: string; phone: string };
+type ProfileRow = { id: string; name: string; phone: string; membership_end: string | null };
 
 export default function AttendancePage() {
   const router = useRouter();
@@ -39,7 +39,7 @@ export default function AttendancePage() {
     }
   }
 
-  async function submitAttendance(profileId: string, profileName: string) {
+  async function submitAttendance(profileId: string, profileName: string, membershipEnd: string | null) {
     setLoading(true);
     setMessage(null);
     const today = new Date().toISOString().slice(0, 10);
@@ -58,7 +58,9 @@ export default function AttendancePage() {
       }
       return;
     }
-    setMessage({ type: "ok", text: `${profileName}님 출석 완료되었습니다.` });
+    const dday = formatDday(membershipEnd);
+    const expiryText = membershipEnd ? ` 회원권 만료: ${membershipEnd} (${dday})` : "";
+    setMessage({ type: "ok", text: `${profileName}님 출석 완료되었습니다.${expiryText}` });
     setDigits("");
     router.refresh();
   }
@@ -67,10 +69,9 @@ export default function AttendancePage() {
     setLoading(true);
     setMessage(null);
     const supabase = createClient();
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, name, phone")
-      .eq("phone_tail4", digits);
+    const { data: profiles } = await supabase.rpc("get_profiles_for_attendance", {
+      p_tail4: digits,
+    });
 
     setLoading(false);
 
@@ -79,11 +80,23 @@ export default function AttendancePage() {
       return;
     }
     if (profiles.length === 1) {
-      await submitAttendance(profiles[0].id, profiles[0].name);
+      await submitAttendance(profiles[0].id, profiles[0].name, profiles[0].membership_end);
       setLoading(true);
       return;
     }
-    setSelectModal(profiles as ProfileRow[]);
+    setSelectModal((profiles ?? []) as ProfileRow[]);
+  }
+
+  function formatDday(isoDate: string | null): string {
+    if (!isoDate) return "-";
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(isoDate + "T12:00:00");
+    end.setHours(0, 0, 0, 0);
+    const diff = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff > 0) return `D-${diff}`;
+    if (diff === 0) return "D-Day";
+    return `D+${-diff}`;
   }
 
   return (
@@ -94,6 +107,55 @@ export default function AttendancePage() {
       <p className="mb-4 text-sm text-[var(--chalk-muted)]">
         전화번호 뒤 4자리를 입력해 주세요.
       </p>
+
+      {/* 회원가입 이동 + QR코드 입력 */}
+      <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm text-[var(--chalk-muted)]">회원이 아니신가요?</span>
+          <Link
+            href="/member/register"
+            className="text-sm font-medium text-[var(--primary)] underline hover:no-underline"
+          >
+            회원가입
+          </Link>
+        </div>
+        <div>
+          <label htmlFor="qr-input" className="mb-1 block text-sm text-[var(--chalk-muted)]">
+            QR코드 입력
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="qr-input"
+              type="text"
+              inputMode="numeric"
+              maxLength={4}
+              placeholder="QR 스캔 후 4자리 입력"
+              className="input-base flex-1"
+              value={digits}
+              onChange={(e) => {
+                const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                setDigits(v);
+                setMessage(null);
+                setSelectModal(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && digits.length === 4) {
+                  e.preventDefault();
+                  doCheck();
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => digits.length === 4 && doCheck()}
+              disabled={digits.length !== 4 || loading}
+              className="rounded-xl bg-[var(--primary)] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-50 disabled:pointer-events-none"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      </div>
       <div className="card mb-6 rounded-2xl p-5 text-center text-2xl tracking-[0.5em] text-[var(--chalk)]">
         {digits.padEnd(4, "·")}
       </div>
@@ -154,7 +216,7 @@ export default function AttendancePage() {
                 <li key={p.id}>
                   <button
                     type="button"
-                    onClick={() => submitAttendance(p.id, p.name)}
+                    onClick={() => submitAttendance(p.id, p.name, p.membership_end)}
                     disabled={loading}
                     className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left text-[var(--chalk)] transition hover:bg-[var(--primary-muted)] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
                   >
@@ -167,10 +229,11 @@ export default function AttendancePage() {
                       <>
                         <span className="font-medium">{p.name}</span>
                         {p.phone && (
-                          <span className="ml-2 text-sm text-[var(--chalk-muted)]">
-                            {p.phone}
-                          </span>
+                          <span className="ml-2 text-sm text-[var(--chalk-muted)]">{p.phone}</span>
                         )}
+                        <span className="mt-1 block text-xs text-[var(--chalk-muted)]">
+                          회원권 만료: {p.membership_end ?? "-"} ({formatDday(p.membership_end)})
+                        </span>
                       </>
                     )}
                   </button>

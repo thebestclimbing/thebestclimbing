@@ -3,6 +3,7 @@ import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { SplashProvider } from "@/components/SplashProvider";
 import { AppShell } from "@/components/AppShell";
+import { NoticePopup } from "@/components/NoticePopup";
 
 const notoSans = Noto_Sans_KR({
   variable: "--font-climb-sans",
@@ -44,6 +45,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-[var(--background)] text-[var(--foreground)] antialiased">
         <SplashProvider>
           <AppShell>{children}</AppShell>
+          <NoticePopup />
         </SplashProvider>
       </body>
     </html>

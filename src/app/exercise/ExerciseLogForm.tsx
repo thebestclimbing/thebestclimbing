@@ -23,9 +23,9 @@ export default function ExerciseLogForm({
 }) {
   const router = useRouter();
   const [routeId, setRouteId] = useState("");
-  const [progressHoldCount, setProgressHoldCount] = useState(0);
+  const [routeSearch, setRouteSearch] = useState("");
+  const [progressHoldCountStr, setProgressHoldCountStr] = useState("");
   const [attemptCount, setAttemptCount] = useState(1);
-  const [isCompleted, setIsCompleted] = useState(false);
   const [isRoundTrip, setIsRoundTrip] = useState(false);
   const [roundTripCount, setRoundTripCount] = useState(0);
   const [loggedAt, setLoggedAt] = useState(
@@ -40,6 +40,10 @@ export default function ExerciseLogForm({
       setError("루트를 선택해 주세요.");
       return;
     }
+    const progressHoldCount = Math.min(
+      Math.max(0, parseInt(progressHoldCountStr, 10) || 0),
+      maxHold
+    );
     setError("");
     setLoading(true);
     const supabase = createClient();
@@ -48,7 +52,8 @@ export default function ExerciseLogForm({
       route_id: routeId,
       progress_hold_count: progressHoldCount,
       attempt_count: attemptCount,
-      is_completed: isCompleted,
+      is_completed: false,
+      completion_requested: false,
       is_round_trip: isRoundTrip,
       round_trip_count: roundTripCount,
       logged_at: loggedAt,
@@ -60,9 +65,9 @@ export default function ExerciseLogForm({
     }
     router.refresh();
     setRouteId("");
-    setProgressHoldCount(0);
+    setRouteSearch("");
+    setProgressHoldCountStr("");
     setAttemptCount(1);
-    setIsCompleted(false);
     setIsRoundTrip(false);
     setRoundTripCount(0);
     setLoggedAt(new Date().toISOString().slice(0, 10));
@@ -70,6 +75,10 @@ export default function ExerciseLogForm({
 
   const selectedRoute = routes.find((r) => r.id === routeId);
   const maxHold = selectedRoute?.hold_count ?? 0;
+  const routeFilter = routeSearch.trim().toLowerCase();
+  const filteredRoutes = routeFilter
+    ? routes.filter((r) => r.name.toLowerCase().includes(routeFilter))
+    : routes;
 
   return (
     <form onSubmit={handleSubmit} className="card rounded-2xl p-6">
@@ -77,18 +86,25 @@ export default function ExerciseLogForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">루트 *</label>
+          <input
+            type="text"
+            value={routeSearch}
+            onChange={(e) => setRouteSearch(e.target.value)}
+            placeholder="루트명 검색"
+            className="input-base mb-1"
+          />
           <select
             value={routeId}
             onChange={(e) => {
               setRouteId(e.target.value);
               const r = routes.find((x) => x.id === e.target.value);
-              if (r) setProgressHoldCount(r.hold_count);
+              if (r) setProgressHoldCountStr(String(r.hold_count));
             }}
             required
             className="input-base"
           >
             <option value="">선택</option>
-            {routes.map((r) => (
+            {filteredRoutes.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name} (홀드 {r.hold_count})
               </option>
@@ -101,15 +117,23 @@ export default function ExerciseLogForm({
         </div>
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">진행한 홀드수 (0 ~ {maxHold})</label>
-          <input type="number" min={0} max={maxHold} value={progressHoldCount} onChange={(e) => setProgressHoldCount(Number(e.target.value))} className="input-base" />
+          <input
+            type="text"
+            inputMode="numeric"
+            min={0}
+            max={maxHold}
+            value={progressHoldCountStr}
+            onChange={(e) => {
+              const v = e.target.value.replace(/\D/g, "");
+              if (v === "" || (Number(v) >= 0 && Number(v) <= maxHold)) setProgressHoldCountStr(v);
+            }}
+            placeholder="0"
+            className="input-base"
+          />
         </div>
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">등반횟수</label>
           <input type="number" min={1} value={attemptCount} onChange={(e) => setAttemptCount(Number(e.target.value))} className="input-base" />
-        </div>
-        <div className="flex items-center gap-2 sm:col-span-2">
-          <input type="checkbox" id="isCompleted" checked={isCompleted} onChange={(e) => setIsCompleted(e.target.checked)} className="rounded border-[var(--border)]" />
-          <label htmlFor="isCompleted" className="text-sm text-[var(--chalk)]">완등</label>
         </div>
         <div className="flex items-center gap-2 sm:col-span-2">
           <input type="checkbox" id="isRoundTrip" checked={isRoundTrip} onChange={(e) => setIsRoundTrip(e.target.checked)} className="rounded border-[var(--border)]" />

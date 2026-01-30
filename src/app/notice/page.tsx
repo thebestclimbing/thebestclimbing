@@ -9,6 +9,7 @@ export default async function NoticePage() {
       `
       id,
       title,
+      popup_yn,
       created_at,
       author:profiles(id, name)
     `

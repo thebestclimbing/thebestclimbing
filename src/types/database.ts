@@ -24,6 +24,7 @@ export interface Profile {
   phone_tail4: string; // 출석체크용 뒷 4자리
   membership_start: string | null; // ISO date
   membership_end: string | null;
+  membership_paused?: boolean; // 회원권 정지 여부
   role: UserRole;
   created_at: string;
   updated_at: string;
@@ -87,6 +88,7 @@ export interface Notice {
   author_id: string;
   title: string;
   body: string;
+  popup_yn?: "Y" | "N";
   created_at: string;
   updated_at: string;
 }
