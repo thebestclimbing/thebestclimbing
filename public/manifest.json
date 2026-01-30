@@ -1,0 +1,10 @@
+{
+  "name": "베스트클라이밍",
+  "short_name": "베스트클라이밍",
+  "description": "오늘의 완등자, 운동일지, 출석체크",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#0c0a09",
+  "orientation": "portrait-primary"
+}

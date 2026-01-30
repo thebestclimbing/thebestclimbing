@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
+/* 클라이밍 컨셉 테마: 암벽(rock) · 로프(rope) · 홀드(wall) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0c0a09;
+  --foreground: #fafaf9;
+  --rock: #1c1917;
+  --rock-muted: #292524;
+  --rope: #ea580c;
+  --rope-light: #f97316;
+  --rope-muted: #c2410c;
+  --wall: #44403c;
+  --chalk: #fafaf9;
+  --chalk-muted: #a8a29e;
+  --top: #22c55e;
+  --surface: #1c1917;
+  --surface-elevated: #292524;
+  --border: #44403c;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-top: env(safe-area-inset-top, 0px);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-rock: var(--rock);
+  --color-rope: var(--rope);
+  --color-surface: var(--surface);
+  --font-sans: var(--font-climb-sans);
+  --font-display: var(--font-climb-display);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(72px + var(--safe-area-bottom));
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-bottom: 0;
+  }
+}
+
+/* 모바일 앱 느낌: 터치 영역, 탭 바 높이 */
+.tab-bar-height {
+  height: calc(64px + var(--safe-area-bottom));
+}
+
+.min-content-with-tab {
+  min-height: calc(100dvh - 64px - var(--safe-area-bottom));
+}
+
+/* 스크롤 영역 */
+.overflow-touch {
+  -webkit-overflow-scrolling: touch;
 }

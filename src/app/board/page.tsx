@@ -19,8 +19,8 @@ export default async function BoardPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="mb-4 text-2xl font-bold">자유게시판</h1>
-        <p className="text-red-600">{error.message}</p>
+        <h1 className="mb-4 text-2xl font-bold text-[var(--chalk)]">자유게시판</h1>
+        <p className="text-red-400">{error.message}</p>
       </div>
     );
   }
@@ -34,29 +34,29 @@ export default async function BoardPage() {
   const getAuthor = (r: Row) => (Array.isArray(r.author) ? r.author[0] : r.author);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-4xl px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-xl font-bold text-[var(--chalk)] md:text-2xl">
           자유게시판
         </h1>
         <Link
           href="/board/new"
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          className="rounded-xl bg-[var(--rope)] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--rope-light)] active:scale-[0.98]"
         >
           글쓰기
         </Link>
       </div>
-      <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)]">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-700">
-              <th className="p-3 font-medium text-zinc-900 dark:text-zinc-50">
+            <tr className="border-b border-[var(--border)]">
+              <th className="p-3 font-medium text-[var(--chalk)]">
                 제목
               </th>
-              <th className="p-3 font-medium text-zinc-900 dark:text-zinc-50">
+              <th className="hidden p-3 font-medium text-[var(--chalk-muted)] sm:table-cell">
                 작성자
               </th>
-              <th className="p-3 font-medium text-zinc-900 dark:text-zinc-50">
+              <th className="p-3 font-medium text-[var(--chalk-muted)]">
                 작성일자
               </th>
             </tr>
@@ -68,20 +68,20 @@ export default async function BoardPage() {
               return (
                 <tr
                   key={row.id}
-                  className="border-b border-zinc-100 dark:border-zinc-800"
+                  className="border-b border-[var(--border)] transition hover:bg-[var(--surface)]/50"
                 >
                   <td className="p-3">
                     <Link
                       href={"/board/" + row.id}
-                      className="font-medium text-zinc-900 hover:underline dark:text-zinc-50"
+                      className="font-medium text-[var(--chalk)] hover:text-[var(--rope-light)] hover:underline"
                     >
                       {row.title}
                     </Link>
                   </td>
-                  <td className="p-3 text-zinc-600 dark:text-zinc-400">
+                  <td className="hidden p-3 text-[var(--chalk-muted)] sm:table-cell">
                     {author?.name ?? "-"}
                   </td>
-                  <td className="p-3 text-zinc-500 dark:text-zinc-400">
+                  <td className="p-3 text-[var(--chalk-muted)]">
                     {new Date(row.created_at).toLocaleDateString("ko-KR")}
                   </td>
                 </tr>
@@ -91,12 +91,12 @@ export default async function BoardPage() {
         </table>
       </div>
       {(!posts || posts.length === 0) && (
-        <p className="mt-4 text-zinc-500">글이 없습니다.</p>
+        <p className="mt-4 text-[var(--chalk-muted)]">글이 없습니다.</p>
       )}
       <p className="mt-6">
         <Link
           href="/"
-          className="text-sm text-zinc-600 underline hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          className="text-sm text-[var(--chalk-muted)] underline hover:text-[var(--rope-light)]"
         >
           메인으로
         </Link>
