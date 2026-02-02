@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
+import { addMember } from "../actions";
 
 function getPhoneTail4(phoneNumber: string): string {
   const digits = phoneNumber.replace(/\D/g, "");
@@ -54,41 +55,21 @@ export default function AdminMemberNewPage() {
       setLoading(false);
       return;
     }
-    const supabase = createClient();
-    const signUpEmail = email.trim() || `${phone.replace(/\D/g, "")}@guest.local`;
-    const password = "00" + tail4;
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: signUpEmail,
-      password,
-      options: { data: { name, phone, phone_tail4: tail4 } },
+    const result = await addMember({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      phone_tail4: tail4,
+      membership_start: membershipStart.trim(),
+      membership_end: membershipEnd.trim(),
     });
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-      return;
-    }
-    if (!authData.user) {
-      setError("회원 추가 처리 중 오류가 발생했습니다.");
-      setLoading(false);
-      return;
-    }
-    const updates: { membership_start?: string; membership_end?: string } = {};
-    if (membershipStart.trim()) updates.membership_start = membershipStart.trim();
-    if (membershipEnd.trim()) updates.membership_end = membershipEnd.trim();
-    if (Object.keys(updates).length > 0) {
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("id", authData.user.id);
-      if (updateError) {
-        setError(`회원은 생성되었으나 회원권 기간 저장 실패: ${updateError.message}`);
-        setLoading(false);
-        return;
-      }
-    }
     setLoading(false);
-    router.push("/admin/members");
-    router.refresh();
+    if (result.ok) {
+      router.push("/admin/members");
+      router.refresh();
+    } else {
+      setError(result.error);
+    }
   }
 
   if (!authChecked) {

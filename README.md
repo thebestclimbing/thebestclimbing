@@ -19,8 +19,20 @@ Next.js + Supabase 기반 클라이밍장 웹사이트입니다.
 cp .env.example .env.local
 ```
 
-- [Supabase Dashboard](https://supabase.com/dashboard) → 프로젝트 선택 → Settings → API에서  
-  `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 복사 후 `.env.local`에 설정
+- [Supabase Dashboard](https://supabase.com/dashboard) → 프로젝트 선택 → **Settings** → **API**에서 아래 값을 복사해 `.env.local`에 설정합니다.
+
+  | 변수명 | 설명 |
+  |--------|------|
+  | `NEXT_PUBLIC_SUPABASE_URL` | Project URL |
+  | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon public key |
+  | `SUPABASE_SERVICE_ROLE_KEY` | **service_role** key (출석체크·관리자 기능용, **브라우저에 노출 금지**) |
+
+  **출석체크**를 사용하려면 `SUPABASE_SERVICE_ROLE_KEY`를 반드시 설정하세요.  
+  API 화면에서 **Project API keys** → **service_role** (Reveal 후 복사) → `.env.local`에 추가:
+
+  ```bash
+  SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  ```
 
 ### 2. Supabase DB 마이그레이션
 
@@ -39,6 +51,7 @@ Vercel에 올릴 때는 **환경 변수**를 반드시 설정하세요.
 
 - Vercel 프로젝트 → **Settings** → **Environment Variables**
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 추가
+- **출석체크** 사용 시 `SUPABASE_SERVICE_ROLE_KEY`도 추가 (Production/Preview/Development 원하는 환경에 설정)
 
 자세한 절차는 [docs/VERCEL_DEPLOY.md](docs/VERCEL_DEPLOY.md)를 참고하세요.
 
@@ -78,7 +91,7 @@ npm run build
 
 **참고**
 
-- 출석체크: 로그인한 사용자만 출석 등록 가능 (002 마이그레이션 정책).
+- **출석체크**: 비로그인 키오스크에서도 동작합니다. 서버에서 `SUPABASE_SERVICE_ROLE_KEY`로 출석을 등록하므로, 이 키가 없으면 "출석 등록 설정이 되어 있지 않습니다" 메시지가 나옵니다. `.env.local`(로컬) 및 Vercel 환경 변수(배포)에 `SUPABASE_SERVICE_ROLE_KEY`를 설정하세요.
 - 관리자: `profiles.role = 'admin'`인 회원만 `/admin` 접근 가능. Supabase Dashboard에서 첫 관리자 프로필의 role을 수동으로 `admin`으로 변경하세요.
 - **"Email rate limit exceeded"**: Supabase 무료 플랜은 이메일 발송 제한이 있습니다. **개발 중**에는 이메일 확인을 끄면 됩니다.  
   → [Supabase Dashboard](https://supabase.com/dashboard) → 프로젝트 → **Authentication** → **Providers** → **Email** → **Confirm email** 끄기.  

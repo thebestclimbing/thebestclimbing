@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { formatPhone } from "@/lib/format";
@@ -47,50 +46,71 @@ export default function AttendancePage() {
     }
   }
 
-  async function submitAttendance(profileId: string, profileName: string, membershipEnd: string | null) {
+  async function submitAttendance(
+    tail4: string,
+    profileId: string,
+    _profileName: string,
+    _membershipEnd: string | null
+  ) {
     setLoading(true);
     setMessage(null);
-    const today = new Date().toISOString().slice(0, 10);
-    const supabase = createClient();
-    const { error: insertError } = await supabase.from("attendances").insert({
-      profile_id: profileId,
-      attended_at: today,
+    const res = await fetch("/api/attendance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tail4, profileId }),
     });
+    const data = await res.json().catch(() => ({}));
     setLoading(false);
     setSelectModal(null);
-    if (insertError) {
-      if (insertError.code === "23505") {
-        setMessage({ type: "ok", text: "오늘 이미 출석체크되었습니다." });
-      } else {
-        setMessage({ type: "error", text: insertError.message });
-      }
+    if (!res.ok) {
+      setMessage({ type: "error", text: data.error ?? "출석 등록에 실패했습니다." });
       return;
     }
-    const dday = formatDday(membershipEnd);
-    const expiryText = membershipEnd ? ` 회원권 만료: ${membershipEnd} (${dday})` : "";
-    setMessage({ type: "ok", text: `${profileName}님 출석 완료되었습니다.${expiryText}` });
+    if (data.already) {
+      setMessage({ type: "ok", text: "오늘 이미 출석체크되었습니다." });
+      setDigits("");
+      return;
+    }
+    const dday = formatDday(data.membershipEnd ?? null);
+    const expiryText = data.membershipEnd
+      ? ` 회원권 만료: ${data.membershipEnd} (${dday})`
+      : "";
+    setMessage({
+      type: "ok",
+      text: `${data.profileName}님 출석 완료되었습니다.${expiryText}`,
+    });
     setDigits("");
   }
 
   async function doCheck() {
     setLoading(true);
     setMessage(null);
-    const supabase = createClient();
-    const { data: profiles } = await supabase.rpc("get_profiles_for_attendance", {
-      p_tail4: digits,
-    });
-
+    const res = await fetch(`/api/attendance/profiles?tail4=${encodeURIComponent(digits)}`);
+    let profiles: ProfileRow[] = [];
+    let errorText = "등록된 회원이 없습니다.";
+    if (res.ok) {
+      const data = await res.json();
+      profiles = Array.isArray(data) ? data : [];
+    } else {
+      const data = await res.json().catch(() => ({}));
+      if (typeof data?.error === "string") errorText = data.error;
+    }
     setLoading(false);
 
-    if (!profiles?.length) {
-      setMessage({ type: "error", text: "등록된 회원이 없습니다." });
+    if (!profiles.length) {
+      setMessage({ type: "error", text: errorText });
       return;
     }
     if (profiles.length === 1) {
-      await submitAttendance(profiles[0].id, profiles[0].name, profiles[0].membership_end);
+      await submitAttendance(
+        digits,
+        profiles[0].id,
+        profiles[0].name,
+        profiles[0].membership_end
+      );
       return;
     }
-    setSelectModal((profiles ?? []) as ProfileRow[]);
+    setSelectModal(profiles);
   }
 
   function formatDday(isoDate: string | null): string {
@@ -111,21 +131,52 @@ export default function AttendancePage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-[var(--chalk)]">
-        출석체크
-      </h1>
+    <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-4 md:min-h-[100dvh] md:flex-row md:items-center md:justify-center md:gap-10 md:py-6 lg:gap-14 lg:px-6 xl:gap-16 xl:px-8">
+      {/* 왼쪽: 출석체크 (숫자 입력 + 키패드) */}
+      <div className="flex flex-1 flex-col items-center justify-center md:min-w-0">
+        <div className="mx-auto flex w-full max-w-[280px] flex-col md:max-w-[320px] md:gap-4 lg:max-w-[360px] lg:gap-5">
+          <div className="card mb-3 w-full rounded-2xl p-4 text-center text-2xl tracking-[0.5em] text-[var(--chalk)] md:mb-4 md:p-5 md:text-3xl lg:p-6 lg:text-4xl">
+            {digits.padEnd(4, "·")}
+          </div>
+          <div className="grid w-full grid-cols-3 gap-2 md:gap-3 lg:gap-4">
+          {KEYS.map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => handleKey(key)}
+              disabled={loading && key === "확인"}
+              className={
+                key === "확인"
+                  ? "col-span-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] py-3 font-medium text-white transition hover:bg-[var(--primary-hover)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none md:py-5 md:text-lg lg:py-6 lg:text-xl"
+                  : key === "지우기"
+                    ? "rounded-xl border border-[var(--border)] py-3 text-sm transition hover:bg-[var(--surface-muted)] active:scale-95 md:py-5 lg:py-6 lg:text-base"
+                    : "rounded-xl border border-[var(--border)] py-3 text-lg font-medium transition hover:bg-[var(--surface-muted)] active:scale-95 md:py-5 md:text-xl lg:py-6 lg:text-2xl"
+              }
+            >
+              {key === "확인" && loading ? (
+                <>
+                  <LoadingSpinner size="sm" className="text-white" />
+                  확인 중...
+                </>
+              ) : (
+                key
+              )}
+            </button>
+          ))}
+          </div>
+        </div>
+      </div>
 
-      {/* 회원가입 링크 QR코드 */}
+      {/* 오른쪽: 회원가입 QR (PC에서 같은 행, 2분할) */}
       {registerUrl && (
-        <div className="mb-6 flex flex-col items-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-          <p className="mb-2 text-sm font-medium text-[var(--chalk)]">회원가입 바로가기</p>
-          <p className="mb-3 text-xs text-[var(--chalk-muted)]">QR 스캔 시 회원가입 페이지로 이동</p>
+        <div className="mt-6 flex flex-1 flex-col items-center justify-center md:mt-0 md:min-w-0">
+          <p className="mb-2 text-sm font-medium text-[var(--chalk)] md:text-base lg:text-lg">회원가입 바로가기</p>
+          <p className="mb-2 text-xs text-[var(--chalk-muted)] md:mb-3 lg:text-sm">QR 스캔 시 회원가입 페이지로 이동</p>
           <a
             href="/member/register"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block rounded-xl border-2 border-[var(--border)] bg-white p-2"
+            className="inline-block rounded-xl border-2 border-[var(--border)] bg-white p-2 lg:p-3"
             aria-label="회원가입 QR코드"
           >
             <img
@@ -133,47 +184,24 @@ export default function AttendancePage() {
               alt="회원가입 링크 QR코드"
               width={160}
               height={160}
-              className="block"
+              className="block h-28 w-28 md:h-36 md:w-36 lg:h-44 lg:w-44"
             />
           </a>
           <Link
             href="/member/register"
-            className="mt-3 inline-block text-sm font-medium text-[var(--primary)] underline hover:no-underline"
+            className="mt-3 inline-block text-sm font-medium text-[var(--primary)] underline hover:no-underline md:text-base lg:text-lg"
           >
             회원가입
           </Link>
         </div>
       )}
 
-      <div className="card mb-6 rounded-2xl p-5 text-center text-2xl tracking-[0.5em] text-[var(--chalk)]">
-        {digits.padEnd(4, "·")}
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {KEYS.map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => handleKey(key)}
-            disabled={loading && key === "확인"}
-            className={
-              key === "확인"
-                ? "col-span-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] py-3 font-medium text-white transition hover:bg-[var(--primary-hover)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
-                : key === "지우기"
-                  ? "rounded-xl border border-[var(--border)] py-3 text-sm transition hover:bg-[var(--surface-muted)] active:scale-95"
-                  : "rounded-xl border border-[var(--border)] py-3 text-lg font-medium transition hover:bg-[var(--surface-muted)] active:scale-95"
-            }
-          >
-            {key === "확인" && loading ? (
-              <>
-                <LoadingSpinner size="sm" className="text-white" />
-                확인 중...
-              </>
-            ) : (
-              key
-            )}
-          </button>
-        ))}
-      </div>
+      {/* 메인으로 링크 - 하단 고정 */}
+      <p className="mt-4 flex-shrink-0 text-center md:absolute md:bottom-4 md:left-1/2 md:mt-0 md:-translate-x-1/2">
+        <Link href="/" className="text-sm text-[var(--chalk-muted)] hover:underline">
+          메인으로
+        </Link>
+      </p>
 
       {/* 결과 모달: 확인 버튼 누르면 닫고 새로고침 */}
       {message && (
@@ -224,7 +252,7 @@ export default function AttendancePage() {
                 <li key={p.id}>
                   <button
                     type="button"
-                    onClick={() => submitAttendance(p.id, p.name, p.membership_end)}
+                    onClick={() => submitAttendance(digits, p.id, p.name, p.membership_end)}
                     disabled={loading}
                     className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left text-[var(--chalk)] transition hover:bg-[var(--primary-muted)] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
                   >
@@ -258,12 +286,6 @@ export default function AttendancePage() {
           </div>
         </div>
       )}
-
-      <p className="mt-8 text-center">
-        <Link href="/" className="text-sm text-[var(--chalk-muted)] hover:underline">
-          메인으로
-        </Link>
-      </p>
     </div>
   );
 }

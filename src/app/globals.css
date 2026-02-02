@@ -30,6 +30,26 @@
   --font-display: var(--font-climb-display);
 }
 
+/* PC/큰 화면에서 전체 요소 스케일 업 (rem 기준) */
+html {
+  font-size: 16px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+}
+@media (min-width: 1024px) {
+  html {
+    font-size: 18px;
+  }
+}
+@media (min-width: 1280px) {
+  html {
+    font-size: 20px;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -44,12 +64,17 @@ body {
   }
 }
 
-/* 플랜핏 스타일: 카드·입력 공통 */
+/* 플랜핏 스타일: 카드·입력 공통 (PC에서 더 크게) */
 .card {
   background: var(--surface);
   border-radius: 16px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
+}
+@media (min-width: 1024px) {
+  .card {
+    border-radius: 20px;
+  }
 }
 
 .input-base {
@@ -61,6 +86,19 @@ body {
   font-size: 16px;
   color: var(--chalk);
   transition: border-color 0.15s, box-shadow 0.15s;
+}
+@media (min-width: 1024px) {
+  .input-base {
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 1rem;
+  }
+}
+@media (min-width: 1280px) {
+  .input-base {
+    border-radius: 16px;
+    padding: 16px 20px;
+  }
 }
 .input-base::placeholder {
   color: var(--chalk-muted);
@@ -79,6 +117,19 @@ body {
   background: var(--primary);
   color: white;
   transition: background 0.15s, transform 0.05s;
+}
+@media (min-width: 1024px) {
+  .btn-primary {
+    border-radius: 14px;
+    padding: 16px 24px;
+    font-size: 1rem;
+  }
+}
+@media (min-width: 1280px) {
+  .btn-primary {
+    border-radius: 16px;
+    padding: 18px 28px;
+  }
 }
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-hover);
@@ -100,6 +151,19 @@ body {
   color: var(--chalk);
   border: 1px solid var(--border);
   transition: background 0.15s, border-color 0.15s, transform 0.05s;
+}
+@media (min-width: 1024px) {
+  .btn-outline {
+    border-radius: 14px;
+    padding: 16px 24px;
+    font-size: 1rem;
+  }
+}
+@media (min-width: 1280px) {
+  .btn-outline {
+    border-radius: 16px;
+    padding: 18px 28px;
+  }
 }
 .btn-outline:hover:not(:disabled) {
   background: var(--surface-muted);

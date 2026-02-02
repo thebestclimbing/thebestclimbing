@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -138,6 +138,7 @@ function MyAvatar({
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
@@ -181,37 +182,43 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <>
       <Link
         href="/"
-        className={`text-sm transition hover:text-[var(--primary)] ${pathname === "/" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
         메인
       </Link>
       <Link
         href="/exercise"
-        className={`text-sm transition hover:text-[var(--primary)] ${pathname.startsWith("/exercise") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/exercise") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
         운동일지
       </Link>
       <Link
         href="/attendance"
-        className={`text-sm transition hover:text-[var(--primary)] ${pathname === "/attendance" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/attendance" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
         출석
       </Link>
       <Link
+        href="/reservation"
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/reservation" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+      >
+        예약
+      </Link>
+      <Link
         href="/board"
-        className={`text-sm transition hover:text-[var(--primary)] ${pathname.startsWith("/board") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/board") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
         게시판
       </Link>
       <Link
         href="/notice"
-        className={`text-sm transition hover:text-[var(--primary)] ${pathname.startsWith("/notice") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/notice") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
         공지
       </Link>
       <Link
         href="/gallery"
-        className={`text-sm transition hover:text-[var(--primary)] ${pathname.startsWith("/gallery") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/gallery") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
         사진첩
       </Link>
@@ -219,7 +226,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <button
           type="button"
           onClick={() => setStatsOpen((o) => !o)}
-          className={`text-sm transition hover:text-[var(--primary)] ${pathname.startsWith("/statistics") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+          className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/statistics") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
         >
           통계 ▾
         </button>
@@ -259,18 +266,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <>
       {/* 상단 메뉴바 - 데스크톱 */}
       <header className="sticky top-0 z-50 hidden border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur md:block">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <Link href="/" className="text-lg font-bold text-[var(--chalk)]">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 lg:max-w-5xl lg:px-6 lg:py-4 xl:max-w-6xl xl:px-8">
+          <Link href="/" className="text-lg font-bold text-[var(--chalk)] lg:text-xl xl:text-2xl">
             BestClimb
           </Link>
-          <nav className="flex items-center gap-5">
+          <nav className="flex items-center gap-5 lg:gap-6">
             {navLinks}
             {isAdmin && (
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setAdminOpen((o) => !o)}
-                  className={`text-sm transition hover:text-[var(--primary)] ${pathname.startsWith("/admin") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+                  className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/admin") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
                 >
                   관리자 ▾
                 </button>
@@ -315,7 +322,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ) : (
               <Link
                 href="/login"
-                className="text-sm text-[var(--chalk-muted)] transition hover:text-[var(--primary)]"
+                className="text-sm text-[var(--chalk-muted)] transition hover:text-[var(--primary)] lg:text-base"
               >
                 로그인
               </Link>
@@ -400,6 +407,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link href="/attendance" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   출석
                 </Link>
+                <Link href="/reservation" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                  예약
+                </Link>
                 <Link href="/board" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   게시판
                 </Link>
@@ -437,13 +447,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     ))}
                   </>
                 )}
+                {user && (
+                  <>
+                    <div className="my-2 border-t border-[var(--border)]" />
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setMenuOpen(false);
+                        const supabase = createClient();
+                        await supabase.auth.signOut();
+                        router.push("/");
+                        router.refresh();
+                      }}
+                      className="w-full rounded-xl px-4 py-2.5 pl-6 text-left text-sm text-[var(--chalk-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--chalk)]"
+                    >
+                      로그아웃
+                    </button>
+                  </>
+                )}
               </nav>
             </motion.aside>
           </>
         )}
       </AnimatePresence>
 
-      <main className="mx-auto max-w-4xl px-4 pb-8 md:pb-0">
+      <main className="mx-auto max-w-4xl px-4 pb-8 md:pb-0 lg:max-w-5xl lg:px-6 lg:pb-10 xl:max-w-6xl xl:px-8 xl:pb-12">
         {children}
       </main>
 

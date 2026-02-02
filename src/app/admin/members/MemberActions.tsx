@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { deleteMember } from "./actions";
+import { formatDateKST } from "@/lib/date";
 
 type ProfileRow = {
   id: string;
@@ -71,6 +72,7 @@ export function MemberActions({
   const router = useRouter();
   const [loading, setLoading] = useState<"extend" | "pause" | "resume" | "delete" | null>(null);
   const [error, setError] = useState("");
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [extendModalOpen, setExtendModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const canDelete = currentUserId != null && profile.id !== currentUserId;
@@ -160,6 +162,14 @@ export function MemberActions({
     <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
+        onClick={() => setDetailModalOpen(true)}
+        disabled={!!loading}
+        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--chalk)] transition hover:bg-[var(--surface-muted)] disabled:opacity-50"
+      >
+        상세
+      </button>
+      <button
+        type="button"
         onClick={() => setExtendModalOpen(true)}
         disabled={!!loading}
         className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--chalk)] transition hover:bg-[var(--surface-muted)] disabled:opacity-50"
@@ -185,17 +195,103 @@ export function MemberActions({
           {loading === "pause" ? <LoadingSpinner size="sm" className="text-white" /> : "정지"}
         </button>
       )}
-      {canDelete && (
-        <button
-          type="button"
-          onClick={() => setDeleteModalOpen(true)}
-          disabled={!!loading}
-          className="rounded-lg border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/30"
-        >
-          삭제
-        </button>
-      )}
       {error ? <p className="mt-1 w-full text-xs text-red-500">{error}</p> : null}
+
+      {/* 회원상세 모달 */}
+      {detailModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50"
+            aria-hidden
+            onClick={() => !loading && setDetailModalOpen(false)}
+          />
+          <div className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[min(90vw,400px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-[var(--chalk)]">회원 상세</h3>
+              <button
+                type="button"
+                onClick={() => !loading && setDetailModalOpen(false)}
+                className="rounded-full p-1.5 text-[var(--chalk-muted)] hover:bg-[var(--surface-muted)]"
+                aria-label="닫기"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <dl className="space-y-3 text-sm">
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">성명</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">{profile.name}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">이메일</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">{profile.email ?? "-"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">전화번호</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">{profile.phone}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">전화번호 뒤 4자리</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">{profile.phone_tail4}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">회원권 시작</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">{profile.membership_start ?? "-"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">회원권 종료</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">{profile.membership_end ?? "-"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">상태</dt>
+                <dd className="mt-0.5">
+                  {profile.membership_paused ? (
+                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                      정지
+                    </span>
+                  ) : (
+                    <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                      정상
+                    </span>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">역할</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">{profile.role}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">가입일</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">{formatDateKST(profile.created_at)}</dd>
+              </div>
+            </dl>
+            <div className="mt-6 flex gap-2 border-t border-[var(--border)] pt-4">
+              <button
+                type="button"
+                onClick={() => !loading && setDetailModalOpen(false)}
+                className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] py-2.5 text-sm font-medium text-[var(--chalk)] disabled:opacity-50"
+              >
+                닫기
+              </button>
+              {canDelete && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDetailModalOpen(false);
+                    setDeleteModalOpen(true);
+                  }}
+                  disabled={!!loading}
+                  className="rounded-xl border border-red-300 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/30"
+                >
+                  삭제
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* 연장 모달 */}
       {extendModalOpen && (

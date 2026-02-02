@@ -63,21 +63,21 @@ export default async function ExercisePage() {
     .order("name");
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-4xl px-4 py-8 lg:max-w-5xl lg:px-6 lg:py-10 xl:max-w-6xl xl:px-8 xl:py-12">
       <ExerciseLogAddSection
         profileId={user.id}
         routes={routes ?? []}
       />
-      <section className="mt-8">
-        <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)]">
+      <section className="mt-8 lg:mt-10">
+        <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)] md:text-xl lg:text-2xl">
           기록 목록
         </h2>
         <ExerciseLogList logs={logs} profileId={user.id} />
       </section>
-      <p className="mt-6">
+      <p className="mt-6 lg:mt-8">
         <Link
           href="/"
-          className="text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
+          className="text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)] md:text-base"
         >
           메인으로
         </Link>

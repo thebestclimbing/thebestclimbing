@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatPhone } from "@/lib/format";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default async function MemberPage() {
   const supabase = await createClient();
@@ -64,14 +65,15 @@ export default async function MemberPage() {
           </div>
         </dl>
       </div>
-      <p className="mt-4">
+      <div className="mt-4 flex flex-wrap items-center gap-4">
         <Link
           href="/"
           className="text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
         >
           메인으로
         </Link>
-      </p>
+        <LogoutButton />
+      </div>
     </div>
   );
 }
