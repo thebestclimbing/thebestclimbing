@@ -25,6 +25,11 @@ export default function AdminPage() {
             일일체험예약자관리
           </Link>
         </li>
+        <li>
+          <Link href="/admin/board" className="text-blue-600 hover:underline">
+            게시판관리
+          </Link>
+        </li>
       </ul>
     </div>
   );

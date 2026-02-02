@@ -6,12 +6,24 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
 
-export default function BoardWriteForm({ authorId }: { authorId: string }) {
+type PostInitial = { id: string; title: string; body: string };
+
+export default function BoardWriteForm({
+  authorId,
+  post,
+  redirectTo,
+}: {
+  authorId: string;
+  post?: PostInitial;
+  redirectTo?: string;
+}) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [title, setTitle] = useState(post?.title ?? "");
+  const [body, setBody] = useState(post?.body ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const isEdit = Boolean(post?.id);
+  const listPath = redirectTo ?? "/board";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,17 +34,29 @@ export default function BoardWriteForm({ authorId }: { authorId: string }) {
     setError("");
     setLoading(true);
     const supabase = createClient();
-    const { error: err } = await supabase.from("free_board_posts").insert({
-      author_id: authorId,
-      title: title.trim(),
-      body: body.trim(),
-    });
-    setLoading(false);
-    if (err) {
-      setError(err.message);
-      return;
+    if (isEdit) {
+      const { error: err } = await supabase
+        .from("free_board_posts")
+        .update({ title: title.trim(), body: body.trim() })
+        .eq("id", post!.id);
+      setLoading(false);
+      if (err) {
+        setError(err.message);
+        return;
+      }
+    } else {
+      const { error: err } = await supabase.from("free_board_posts").insert({
+        author_id: authorId,
+        title: title.trim(),
+        body: body.trim(),
+      });
+      setLoading(false);
+      if (err) {
+        setError(err.message);
+        return;
+      }
     }
-    router.push("/board");
+    router.push(listPath);
     router.refresh();
   }
 
@@ -48,10 +72,14 @@ export default function BoardWriteForm({ authorId }: { authorId: string }) {
       </div>
       {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
       <div className="flex gap-2">
-        <SubmitButton loading={loading} loadingLabel="등록 중..." className="btn-primary disabled:pointer-events-none">
-          등록
+        <SubmitButton
+          loading={loading}
+          loadingLabel={isEdit ? "수정 중..." : "등록 중..."}
+          className="btn-primary disabled:pointer-events-none"
+        >
+          {isEdit ? "수정" : "등록"}
         </SubmitButton>
-        <Link href="/board" className="btn-outline inline-block px-4 py-3 text-center text-sm">
+        <Link href={listPath} className="btn-outline inline-block px-4 py-3 text-center text-sm">
           취소
         </Link>
       </div>

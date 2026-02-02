@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateKST } from "@/lib/date";
+import { NoticeDeleteButton } from "./NoticeDeleteButton";
 
 export default async function AdminNoticesPage() {
   const supabase = await createClient();
@@ -50,6 +51,7 @@ export default async function AdminNoticesPage() {
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">제목</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">팝업</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">작성일</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">액션</th>
             </tr>
           </thead>
           <tbody>
@@ -68,6 +70,17 @@ export default async function AdminNoticesPage() {
                 </td>
                 <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)] whitespace-nowrap">
                   {formatDateKST(n.created_at)}
+                </td>
+                <td className="p-1.5 sm:p-2 whitespace-nowrap">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={"/admin/notices/" + n.id + "/edit"}
+                      className="text-sm text-[var(--primary)] hover:underline"
+                    >
+                      수정
+                    </Link>
+                    <NoticeDeleteButton noticeId={n.id} />
+                  </div>
                 </td>
               </tr>
             ))}

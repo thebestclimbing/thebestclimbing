@@ -93,6 +93,7 @@ const ADMIN_LINKS = [
   { href: "/admin/reservations", label: "예약관리" },
   { href: "/admin/completions", label: "완등관리" },
   { href: "/admin/notices", label: "공지관리" },
+  { href: "/admin/board", label: "게시판관리" },
 ] as const;
 
 const STATS_LINKS = [

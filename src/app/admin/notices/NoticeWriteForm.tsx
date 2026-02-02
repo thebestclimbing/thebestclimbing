@@ -5,29 +5,54 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
 
-export function NoticeWriteForm({ authorId }: { authorId: string }) {
+type NoticeInitial = { id: string; title: string; body: string; popup_yn?: "Y" | "N" };
+
+export function NoticeWriteForm({
+  authorId,
+  notice,
+}: {
+  authorId: string;
+  notice?: NoticeInitial;
+}) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [popupYn, setPopupYn] = useState<"Y" | "N">("N");
+  const [title, setTitle] = useState(notice?.title ?? "");
+  const [body, setBody] = useState(notice?.body ?? "");
+  const [popupYn, setPopupYn] = useState<"Y" | "N">(notice?.popup_yn ?? "N");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const isEdit = Boolean(notice?.id);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
     const supabase = createClient();
-    const { error: err } = await supabase.from("notices").insert({
-      author_id: authorId,
-      title: title.trim(),
-      body: body.trim() || "",
-      popup_yn: popupYn,
-    });
-    setLoading(false);
-    if (err) {
-      setError(err.message);
-      return;
+    if (isEdit) {
+      const { error: err } = await supabase
+        .from("notices")
+        .update({
+          title: title.trim(),
+          body: body.trim() || "",
+          popup_yn: popupYn,
+        })
+        .eq("id", notice!.id);
+      setLoading(false);
+      if (err) {
+        setError(err.message);
+        return;
+      }
+    } else {
+      const { error: err } = await supabase.from("notices").insert({
+        author_id: authorId,
+        title: title.trim(),
+        body: body.trim() || "",
+        popup_yn: popupYn,
+      });
+      setLoading(false);
+      if (err) {
+        setError(err.message);
+        return;
+      }
     }
     router.push("/admin/notices");
     router.refresh();
@@ -78,10 +103,10 @@ export function NoticeWriteForm({ authorId }: { authorId: string }) {
       <div className="mt-4">
         <SubmitButton
           loading={loading}
-          loadingLabel="저장 중..."
+          loadingLabel={isEdit ? "수정 중..." : "저장 중..."}
           className="btn-primary disabled:pointer-events-none"
         >
-          저장
+          {isEdit ? "수정" : "저장"}
         </SubmitButton>
       </div>
     </form>

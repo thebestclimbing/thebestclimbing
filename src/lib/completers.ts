@@ -1,7 +1,8 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { WALL_TYPE_LABELS, formatGrade } from "@/types/database";
 import type { GradeDetail, GradeValue } from "@/types/database";
-import { getTodayISOKST, getWeekStartEndKST } from "@/lib/date";
+import { getTodayISOKST, getWeekStartEndKST, getMonthStartEndKST } from "@/lib/date";
 
 export interface CompleterRow {
   id: string;
@@ -97,9 +98,13 @@ function dedupeByProfileAndRoute<T extends { profile: { id: string } | null; rou
   });
 }
 
-export async function getTodayCompleters(max = 3): Promise<CompleterDisplay[]> {
-  const supabase = await createClient();
-  const today = getTodayISOKST();
+/** 기간 내 완등자 조회 (공통 로직, API·서버 양쪽에서 사용) */
+export async function getCompletersInRange(
+  supabase: SupabaseClient,
+  startDate: string,
+  endDate: string,
+  max = 3
+): Promise<CompleterDisplay[]> {
   const { data, error } = await supabase
     .from("exercise_logs")
     .select(
@@ -111,7 +116,8 @@ export async function getTodayCompleters(max = 3): Promise<CompleterDisplay[]> {
     `
     )
     .eq("is_completed", true)
-    .eq("logged_at", today);
+    .gte("logged_at", startDate)
+    .lte("logged_at", endDate);
 
   if (error) return [];
   const rows = normalizeCompleterRows(data ?? []).filter(hasValidRoute);
@@ -120,26 +126,20 @@ export async function getTodayCompleters(max = 3): Promise<CompleterDisplay[]> {
   return deduped.slice(0, max).map(toDisplay);
 }
 
+export async function getTodayCompleters(max = 3): Promise<CompleterDisplay[]> {
+  const supabase = await createClient();
+  const today = getTodayISOKST();
+  return getCompletersInRange(supabase, today, today, max);
+}
+
 export async function getWeeklyCompleters(max = 3): Promise<CompleterDisplay[]> {
   const supabase = await createClient();
   const { start, end } = getWeekStartEndKST();
-  const { data, error } = await supabase
-    .from("exercise_logs")
-    .select(
-      `
-      id,
-      logged_at,
-      route:routes(id, wall_type, grade_value, grade_detail, name, hold_count),
-      profile:profiles(id, name)
-    `
-    )
-    .eq("is_completed", true)
-    .gte("logged_at", start)
-    .lte("logged_at", end);
+  return getCompletersInRange(supabase, start, end, max);
+}
 
-  if (error) return [];
-  const rows = normalizeCompleterRows(data ?? []).filter(hasValidRoute);
-  const deduped = dedupeByProfileAndRoute(rows);
-  deduped.sort(sortCompleters);
-  return deduped.slice(0, max).map(toDisplay);
+export async function getMonthlyCompleters(max = 3): Promise<CompleterDisplay[]> {
+  const supabase = await createClient();
+  const { start, end } = getMonthStartEndKST();
+  return getCompletersInRange(supabase, start, end, max);
 }

@@ -1,6 +1,8 @@
-import { getTodayCompleters, getWeeklyCompleters } from "@/lib/completers";
-import type { CompleterDisplay } from "@/lib/completers";
+"use client";
+
+import { useState, useEffect } from "react";
 import { HomeMotion } from "@/components/HomeMotion";
+import type { CompleterDisplay } from "@/lib/completers";
 
 function CompleterCard({ c, rank }: { c: CompleterDisplay; rank: number }) {
   return (
@@ -15,59 +17,100 @@ function CompleterCard({ c, rank }: { c: CompleterDisplay; rank: number }) {
   );
 }
 
-export default async function Home() {
-  const [todayCompleters, weeklyCompleters] = await Promise.all([
-    getTodayCompleters(3),
-    getWeeklyCompleters(3),
-  ]);
+function CompleterSection({
+  title,
+  list,
+  emptyText,
+  loading,
+}: {
+  title: string;
+  list: CompleterDisplay[];
+  emptyText: string;
+  loading: boolean;
+}) {
+  return (
+    <section className="mb-10 md:mb-12 lg:mb-14">
+      <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)] md:text-xl lg:text-2xl">
+        {title}
+      </h2>
+      <div className="flex flex-col gap-3 md:gap-4">
+        {loading ? (
+          <p className="card rounded-2xl p-6 text-center text-[var(--chalk-muted)] md:p-8 lg:p-10">
+            조회 중...
+          </p>
+        ) : list.length === 0 ? (
+          <p className="card rounded-2xl p-6 text-center text-[var(--chalk-muted)] md:p-8 lg:p-10">
+            {emptyText}
+          </p>
+        ) : (
+          list.map((c, i) => <CompleterCard key={i} c={c} rank={i + 1} />)
+        )}
+      </div>
+    </section>
+  );
+}
+
+export default function Home() {
+  const [today, setToday] = useState<CompleterDisplay[]>([]);
+  const [weekly, setWeekly] = useState<CompleterDisplay[]>([]);
+  const [monthly, setMonthly] = useState<CompleterDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetch("/api/completers?limit=3")
+      .then((res) => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setToday(Array.isArray(data.today) ? data.today : []);
+        setWeekly(Array.isArray(data.weekly) ? data.weekly : []);
+        setMonthly(Array.isArray(data.monthly) ? data.monthly : []);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e?.message ?? "조회에 실패했습니다.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <HomeMotion>
-      {/* 히어로 */}
-      <section className="mb-10 md:mb-12 lg:mb-14">
-        <h1 className="mb-1 text-xl font-bold text-[var(--chalk)] md:text-2xl lg:text-3xl">
-          오늘도 한 걸음 더
-        </h1>
-        <p className="text-sm text-[var(--chalk-muted)] md:text-base lg:text-lg">
-          완등 기록을 확인하고 동기부여를 받아보세요.
-        </p>
-      </section>
+      <div className="pt-4 md:pt-6">
+        {error && (
+          <p className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+            {error}
+          </p>
+        )}
 
-      {/* 오늘의 완등자 */}
-      <section className="mb-10 md:mb-12 lg:mb-14">
-        <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)] md:text-xl lg:text-2xl">
-          오늘의 완등자
-        </h2>
-        <div className="flex flex-col gap-3 md:gap-4">
-          {todayCompleters.length === 0 ? (
-            <p className="card rounded-2xl p-6 text-center text-[var(--chalk-muted)] md:p-8 lg:p-10">
-              오늘 완등 기록이 없습니다.
-            </p>
-          ) : (
-            todayCompleters.map((c, i) => (
-              <CompleterCard key={i} c={c} rank={i + 1} />
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* 주간 완등자 */}
-      <section className="mb-10 md:mb-12 lg:mb-14">
-        <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)] md:text-xl lg:text-2xl">
-          주간 완등자
-        </h2>
-        <div className="flex flex-col gap-3 md:gap-4">
-          {weeklyCompleters.length === 0 ? (
-            <p className="card rounded-2xl p-6 text-center text-[var(--chalk-muted)] md:p-8 lg:p-10">
-              이번 주 완등 기록이 없습니다.
-            </p>
-          ) : (
-            weeklyCompleters.map((c, i) => (
-              <CompleterCard key={i} c={c} rank={i + 1} />
-            ))
-          )}
-        </div>
-      </section>
+        <CompleterSection
+          title="오늘의 완등자"
+        list={today}
+        emptyText="오늘 완등 기록이 없습니다."
+        loading={loading}
+      />
+      <CompleterSection
+        title="주간 완등자"
+        list={weekly}
+        emptyText="이번 주 완등 기록이 없습니다."
+        loading={loading}
+      />
+      <CompleterSection
+        title="월간 완등자"
+        list={monthly}
+        emptyText="이번 달 완등 기록이 없습니다."
+        loading={loading}
+      />
+      </div>
     </HomeMotion>
   );
 }

@@ -36,6 +36,14 @@ export function getWeekStartEndKST(): { start: string; end: string } {
   return { start, end: today };
 }
 
+/** 한국 시간 기준 이번 달 1일~오늘 { start, end } (YYYY-MM-DD) */
+export function getMonthStartEndKST(): { start: string; end: string } {
+  const today = getTodayISOKST();
+  const [y, m] = today.split("-");
+  const start = `${y}-${m}-01`;
+  return { start, end: today };
+}
+
 /** ISO 타임스탬프/날짜 문자열을 한국 시간으로 포맷 (날짜+시간) */
 export function formatDateTimeKST(iso: string): string {
   return new Date(iso).toLocaleString("ko-KR", { timeZone: TZ });
