@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { deleteMember } from "./actions";
 
 type ProfileRow = {
   id: string;
@@ -60,11 +61,19 @@ function yesterdayYmd(): number {
   return y * 10000 + m * 100 + day;
 }
 
-export function MemberActions({ profile }: { profile: ProfileRow }) {
+export function MemberActions({
+  profile,
+  currentUserId,
+}: {
+  profile: ProfileRow;
+  currentUserId?: string;
+}) {
   const router = useRouter();
-  const [loading, setLoading] = useState<"extend" | "pause" | "resume" | null>(null);
+  const [loading, setLoading] = useState<"extend" | "pause" | "resume" | "delete" | null>(null);
   const [error, setError] = useState("");
   const [extendModalOpen, setExtendModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const canDelete = currentUserId != null && profile.id !== currentUserId;
   const [extendMonths, setExtendMonths] = useState<1 | 3>(1);
   const [modalStart, setModalStart] = useState("");
   const [modalEnd, setModalEnd] = useState("");
@@ -176,6 +185,16 @@ export function MemberActions({ profile }: { profile: ProfileRow }) {
           {loading === "pause" ? <LoadingSpinner size="sm" className="text-white" /> : "정지"}
         </button>
       )}
+      {canDelete && (
+        <button
+          type="button"
+          onClick={() => setDeleteModalOpen(true)}
+          disabled={!!loading}
+          className="rounded-lg border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/30"
+        >
+          삭제
+        </button>
+      )}
       {error ? <p className="mt-1 w-full text-xs text-red-500">{error}</p> : null}
 
       {/* 연장 모달 */}
@@ -266,6 +285,56 @@ export function MemberActions({ profile }: { profile: ProfileRow }) {
                 {loading === "extend" ? <LoadingSpinner size="sm" className="mx-auto text-white" /> : "확인"}
               </button>
             </div>
+          </div>
+        </>
+      )}
+
+      {/* 회원 삭제 확인 모달 */}
+      {deleteModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50"
+            aria-hidden
+            onClick={() => !loading && setDeleteModalOpen(false)}
+          />
+          <div className="fixed left-1/2 top-1/2 z-50 w-[min(90vw,320px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-xl">
+            <h3 className="mb-2 text-base font-semibold text-[var(--chalk)]">회원 삭제</h3>
+            <p className="mb-4 text-sm text-[var(--chalk-muted)]">
+              <strong className="text-[var(--chalk)]">{profile.name}</strong> 회원을 삭제하시겠습니까? 로그인 계정과 프로필·출석·운동일지 등 관련 데이터가 모두 삭제되며 복구할 수 없습니다.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteModalOpen(false)}
+                disabled={!!loading}
+                className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] py-2.5 text-sm font-medium text-[var(--chalk)] disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setError("");
+                  setLoading("delete");
+                  try {
+                    const result = await deleteMember(profile.id);
+                    if (result.ok) {
+                      setDeleteModalOpen(false);
+                      router.refresh();
+                    } else {
+                      setError(result.error);
+                    }
+                  } finally {
+                    setLoading(null);
+                  }
+                }}
+                disabled={!!loading}
+                className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {loading === "delete" ? <LoadingSpinner size="sm" className="mx-auto text-white" /> : "삭제"}
+              </button>
+            </div>
+            {error ? <p className="mt-3 text-xs text-red-500">{error}</p> : null}
           </div>
         </>
       )}

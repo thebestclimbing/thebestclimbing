@@ -1,0 +1,202 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { SubmitButton } from "@/components/SubmitButton";
+
+function getPhoneTail4(phoneNumber: string): string {
+  const digits = phoneNumber.replace(/\D/g, "");
+  return digits.slice(-4);
+}
+
+export default function AdminMemberNewPage() {
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [membershipStart, setMembershipStart] = useState("");
+  const [membershipEnd, setMembershipEnd] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        router.replace("/login?next=/admin/members/new");
+        return;
+      }
+      supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data?.role !== "admin") {
+            router.replace("/admin/members");
+            return;
+          }
+          setAuthChecked(true);
+        });
+    });
+  }, [router]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    const tail4 = getPhoneTail4(phone);
+    if (tail4.length !== 4) {
+      setError("전화번호 뒤 4자리를 입력해 주세요.");
+      setLoading(false);
+      return;
+    }
+    const supabase = createClient();
+    const signUpEmail = email.trim() || `${phone.replace(/\D/g, "")}@guest.local`;
+    const password = "00" + tail4;
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      email: signUpEmail,
+      password,
+      options: { data: { name, phone, phone_tail4: tail4 } },
+    });
+    if (signUpError) {
+      setError(signUpError.message);
+      setLoading(false);
+      return;
+    }
+    if (!authData.user) {
+      setError("회원 추가 처리 중 오류가 발생했습니다.");
+      setLoading(false);
+      return;
+    }
+    const updates: { membership_start?: string; membership_end?: string } = {};
+    if (membershipStart.trim()) updates.membership_start = membershipStart.trim();
+    if (membershipEnd.trim()) updates.membership_end = membershipEnd.trim();
+    if (Object.keys(updates).length > 0) {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", authData.user.id);
+      if (updateError) {
+        setError(`회원은 생성되었으나 회원권 기간 저장 실패: ${updateError.message}`);
+        setLoading(false);
+        return;
+      }
+    }
+    setLoading(false);
+    router.push("/admin/members");
+    router.refresh();
+  }
+
+  if (!authChecked) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-8">
+        <p className="text-[var(--chalk-muted)]">확인 중...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-md px-4 py-8">
+      <h1 className="mb-6 text-2xl font-bold text-[var(--chalk)]">
+        회원 추가
+      </h1>
+      <p className="mb-4 text-sm text-[var(--chalk-muted)]">
+        이름·전화번호(필수), 이메일·회원권 기간(선택)을 입력하세요. 로그인은 이름 + 전화번호 뒤 4자리로 합니다.
+      </p>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div>
+          <label htmlFor="name" className="mb-1 block text-sm font-medium text-[var(--chalk-muted)]">
+            이름 *
+          </label>
+          <input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="input-base w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--chalk)]"
+          />
+        </div>
+        <div>
+          <label htmlFor="email" className="mb-1 block text-sm font-medium text-[var(--chalk-muted)]">
+            이메일 (선택)
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input-base w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--chalk)]"
+          />
+        </div>
+        <div>
+          <label htmlFor="phone" className="mb-1 block text-sm font-medium text-[var(--chalk-muted)]">
+            전화번호 *
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="01012345678"
+            required
+            className="input-base w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--chalk)]"
+          />
+          <p className="mt-1 text-xs text-[var(--chalk-muted)]">
+            로그인·출석체크 시 전화번호 뒤 4자리가 사용됩니다.
+          </p>
+        </div>
+        <div>
+          <label htmlFor="membershipStart" className="mb-1 block text-sm font-medium text-[var(--chalk-muted)]">
+            회원권 시작일 (선택)
+          </label>
+          <input
+            id="membershipStart"
+            type="date"
+            value={membershipStart}
+            onChange={(e) => setMembershipStart(e.target.value)}
+            className="input-base w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--chalk)]"
+          />
+        </div>
+        <div>
+          <label htmlFor="membershipEnd" className="mb-1 block text-sm font-medium text-[var(--chalk-muted)]">
+            회원권 종료일 (선택)
+          </label>
+          <input
+            id="membershipEnd"
+            type="date"
+            value={membershipEnd}
+            onChange={(e) => setMembershipEnd(e.target.value)}
+            className="input-base w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--chalk)]"
+          />
+        </div>
+        {error && (
+          <p className="text-sm text-red-500">{error}</p>
+        )}
+        <div className="flex gap-2">
+          <Link
+            href="/admin/members"
+            className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] py-2.5 text-center text-sm font-medium text-[var(--chalk)] transition hover:bg-[var(--surface)]"
+          >
+            취소
+          </Link>
+          <SubmitButton loading={loading} loadingLabel="추가 중...">
+            회원 추가
+          </SubmitButton>
+        </div>
+      </form>
+      <p className="mt-6">
+        <Link
+          href="/admin/members"
+          className="text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
+        >
+          회원관리 목록
+        </Link>
+      </p>
+    </div>
+  );
+}

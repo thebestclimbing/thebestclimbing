@@ -31,13 +31,21 @@ export default async function AdminMembersPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-[var(--chalk)]">
-        회원관리
-      </h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-[var(--chalk)]">
+          회원관리
+        </h1>
+        <Link
+          href="/admin/members/new"
+          className="rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--primary-hover)]"
+        >
+          회원 추가
+        </Link>
+      </div>
       <p className="mb-4 text-sm text-[var(--chalk-muted)]">
         성명, 전화번호, 회원권 기간
       </p>
-      <MembersTableWithSearch profiles={profiles ?? []} />
+      <MembersTableWithSearch profiles={profiles ?? []} currentUserId={user.id} />
       <p className="mt-6">
         <Link
           href="/admin"

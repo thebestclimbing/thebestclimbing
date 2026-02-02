@@ -17,7 +17,13 @@ type ProfileRow = {
   created_at: string;
 };
 
-export function MembersTableWithSearch({ profiles }: { profiles: ProfileRow[] }) {
+export function MembersTableWithSearch({
+  profiles,
+  currentUserId,
+}: {
+  profiles: ProfileRow[];
+  currentUserId?: string;
+}) {
   const [q, setQ] = useState("");
 
   const filtered = useMemo(() => {
@@ -97,7 +103,7 @@ export function MembersTableWithSearch({ profiles }: { profiles: ProfileRow[] })
                   })()}
                 </td>
                 <td className="p-1.5 sm:p-2">
-                  <MemberActions profile={p} />
+                  <MemberActions profile={p} currentUserId={currentUserId} />
                 </td>
               </tr>
             ))}

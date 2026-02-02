@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { WALL_TYPE_LABELS, formatGrade } from "@/types/database";
 import type { GradeDetail, GradeValue } from "@/types/database";
-import ExerciseLogForm from "./ExerciseLogForm";
+import ExerciseLogAddSection from "./ExerciseLogAddSection";
 import ExerciseLogList from "./ExerciseLogList";
 
 export default async function ExercisePage() {
@@ -64,10 +64,7 @@ export default async function ExercisePage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-[var(--chalk)]">
-        나의 운동일지
-      </h1>
-      <ExerciseLogForm
+      <ExerciseLogAddSection
         profileId={user.id}
         routes={routes ?? []}
       />

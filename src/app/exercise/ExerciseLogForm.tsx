@@ -18,9 +18,11 @@ interface RouteRow {
 export default function ExerciseLogForm({
   profileId,
   routes,
+  onSuccess,
 }: {
   profileId: string;
   routes: RouteRow[];
+  onSuccess?: () => void;
 }) {
   const router = useRouter();
   const [routeId, setRouteId] = useState("");
@@ -70,6 +72,7 @@ export default function ExerciseLogForm({
     setIsRoundTrip(false);
     setRoundTripCount(0);
     setLoggedAt(new Date().toISOString().slice(0, 10));
+    onSuccess?.();
   }
 
   const selectedRoute = routes.find((r) => r.id === routeId);
