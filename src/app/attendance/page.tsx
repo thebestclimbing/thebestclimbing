@@ -131,14 +131,14 @@ export default function AttendancePage() {
   }
 
   return (
-    <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-4 md:min-h-[100dvh] md:flex-row md:items-center md:justify-center md:gap-10 md:py-6 lg:gap-14 lg:px-6 xl:gap-16 xl:px-8">
-      {/* 왼쪽: 출석체크 (숫자 입력 + 키패드) */}
-      <div className="flex flex-1 flex-col items-center justify-center md:min-w-0">
-        <div className="mx-auto flex w-full max-w-[280px] flex-col md:max-w-[320px] md:gap-4 lg:max-w-[360px] lg:gap-5">
-          <div className="card mb-3 w-full rounded-2xl p-4 text-center text-2xl tracking-[0.5em] text-[var(--chalk)] md:mb-4 md:p-5 md:text-3xl lg:p-6 lg:text-4xl">
+    <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-4 md:h-[100dvh] md:min-h-0 md:flex-row md:items-stretch md:justify-center md:overflow-hidden md:py-0 md:gap-10 lg:gap-14 lg:px-6 xl:gap-16 xl:px-8">
+      {/* 왼쪽: 출석체크 (숫자 입력 + 키패드) - PC에서 화면 꽉 채움 */}
+      <div className="flex flex-1 flex-col items-center justify-center md:min-h-0 md:min-w-0 md:py-6">
+        <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col md:max-w-[468px] md:min-h-0 lg:max-w-[520px]">
+          <div className="card mb-3 w-full flex-shrink-0 rounded-2xl p-4 text-center text-2xl tracking-[0.5em] text-[var(--chalk)] md:mb-4 md:p-5 md:text-3xl lg:p-6 lg:text-4xl">
             {digits.padEnd(4, "·")}
           </div>
-          <div className="grid w-full grid-cols-3 gap-2 md:gap-3 lg:gap-4">
+          <div className="grid w-full flex-1 grid-cols-3 grid-rows-4 gap-2 min-h-0 md:gap-3 lg:gap-4">
           {KEYS.map((key) => (
             <button
               key={key}
@@ -147,10 +147,10 @@ export default function AttendancePage() {
               disabled={loading && key === "확인"}
               className={
                 key === "확인"
-                  ? "col-span-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] py-3 font-medium text-white transition hover:bg-[var(--primary-hover)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none md:py-5 md:text-lg lg:py-6 lg:text-xl"
+                  ? "col-span-1 inline-flex h-full min-h-0 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] py-3 font-medium text-white transition hover:bg-[var(--primary-hover)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none md:py-5 md:text-lg lg:py-6 lg:text-xl"
                   : key === "지우기"
-                    ? "rounded-xl border border-[var(--border)] py-3 text-sm transition hover:bg-[var(--surface-muted)] active:scale-95 md:py-5 lg:py-6 lg:text-base"
-                    : "rounded-xl border border-[var(--border)] py-3 text-lg font-medium transition hover:bg-[var(--surface-muted)] active:scale-95 md:py-5 md:text-xl lg:py-6 lg:text-2xl"
+                    ? "h-full min-h-0 rounded-xl border border-[var(--border)] py-3 text-sm transition hover:bg-[var(--surface-muted)] active:scale-95 md:py-5 lg:py-6 lg:text-base inline-flex items-center justify-center"
+                    : "h-full min-h-0 rounded-xl border border-[var(--border)] py-3 text-lg font-medium transition hover:bg-[var(--surface-muted)] active:scale-95 md:py-5 md:text-xl lg:py-6 lg:text-2xl inline-flex items-center justify-center"
               }
             >
               {key === "확인" && loading ? (
@@ -196,12 +196,13 @@ export default function AttendancePage() {
         </div>
       )}
 
-      {/* 메인으로 링크 - 하단 고정 */}
-      <p className="mt-4 flex-shrink-0 text-center md:absolute md:bottom-4 md:left-1/2 md:mt-0 md:-translate-x-1/2">
-        <Link href="/" className="text-sm text-[var(--chalk-muted)] hover:underline">
-          메인으로
-        </Link>
-      </p>
+      {/* 메인으로 - 우측 상단 버튼 */}
+      <Link
+        href="/"
+        className="absolute right-4 top-4 z-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] md:right-6 md:top-6 md:px-5 md:py-3 md:text-base"
+      >
+        메인으로
+      </Link>
 
       {/* 결과 모달: 확인 버튼 누르면 닫고 새로고침 */}
       {message && (

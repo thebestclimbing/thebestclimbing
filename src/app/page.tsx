@@ -50,7 +50,16 @@ function CompleterSection({
   );
 }
 
+type Segment = "today" | "weekly" | "monthly";
+
+const SEGMENTS: { key: Segment; label: string }[] = [
+  { key: "today", label: "오늘의 완등자" },
+  { key: "weekly", label: "주간 완등자" },
+  { key: "monthly", label: "월간 완등자" },
+];
+
 export default function Home() {
+  const [segment, setSegment] = useState<Segment>("today");
   const [today, setToday] = useState<CompleterDisplay[]>([]);
   const [weekly, setWeekly] = useState<CompleterDisplay[]>([]);
   const [monthly, setMonthly] = useState<CompleterDisplay[]>([]);
@@ -92,24 +101,60 @@ export default function Home() {
           </p>
         )}
 
-        <CompleterSection
-          title="오늘의 완등자"
-        list={today}
-        emptyText="오늘 완등 기록이 없습니다."
-        loading={loading}
-      />
-      <CompleterSection
-        title="주간 완등자"
-        list={weekly}
-        emptyText="이번 주 완등 기록이 없습니다."
-        loading={loading}
-      />
-      <CompleterSection
-        title="월간 완등자"
-        list={monthly}
-        emptyText="이번 달 완등 기록이 없습니다."
-        loading={loading}
-      />
+        <section className="card rounded-2xl overflow-hidden" aria-label="완등자">
+          <div className="border-b border-[var(--border)]" role="tablist" aria-label="완등자 기간 선택">
+            <div className="flex">
+              {SEGMENTS.map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={segment === key}
+                  onClick={() => setSegment(key)}
+                  className={`relative flex flex-1 items-center justify-center py-3 text-sm font-medium transition md:py-4 md:text-base ${
+                    segment === key
+                      ? "text-[var(--chalk)]"
+                      : "text-[var(--chalk-muted)] hover:text-[var(--chalk)]"
+                  }`}
+                >
+                  <span>{label}</span>
+                  {segment === key && (
+                    <span
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--primary)]"
+                      aria-hidden
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="px-4 py-4 md:px-5 md:py-5">
+            {segment === "today" && (
+              <CompleterSection
+                title="오늘의 완등자"
+                list={today}
+                emptyText="오늘 완등 기록이 없습니다."
+                loading={loading}
+              />
+            )}
+            {segment === "weekly" && (
+              <CompleterSection
+                title="주간 완등자"
+                list={weekly}
+                emptyText="이번 주 완등 기록이 없습니다."
+                loading={loading}
+              />
+            )}
+            {segment === "monthly" && (
+              <CompleterSection
+                title="월간 완등자"
+                list={monthly}
+                emptyText="이번 달 완등 기록이 없습니다."
+                loading={loading}
+              />
+            )}
+          </div>
+        </section>
       </div>
     </HomeMotion>
   );

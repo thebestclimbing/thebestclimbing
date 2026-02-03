@@ -265,7 +265,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* 상단 메뉴바 - 데스크톱 */}
+      {/* 상단 메뉴바 - 데스크톱 (출석체크 PC에서는 숨김) */}
+      {pathname !== "/attendance" && (
       <header className="sticky top-0 z-50 hidden border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur md:block">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 lg:max-w-5xl lg:px-6 lg:py-4 xl:max-w-6xl xl:px-8">
           <Link href="/" className="text-lg font-bold text-[var(--chalk)] lg:text-xl xl:text-2xl">
@@ -331,6 +332,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
         </div>
       </header>
+      )}
 
       {/* 상단 메뉴바 - 모바일: 햄버거 + 로고 */}
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-4 py-3 pt-[var(--safe-area-top)] md:hidden">

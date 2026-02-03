@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
+import { TermsModalButton } from "@/components/TermsModal";
+import { AccountCopyBlock } from "@/components/AccountCopyBlock";
 
 export default function ReservationPage() {
   const [guestName, setGuestName] = useState("");
@@ -60,9 +62,16 @@ export default function ReservationPage() {
   if (success) {
     return (
       <div className="mx-auto max-w-md px-4 py-8">
-        <h1 className="mb-4 text-2xl font-bold text-[var(--chalk)]">
-          일일체험 예약
-        </h1>
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-bold text-[var(--chalk)]">
+            일일체험 예약
+          </h1>
+          <TermsModalButton />
+        </div>
+        <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-3 text-sm text-[var(--chalk)]">
+          <p className="font-medium text-[var(--chalk)]">입금계좌</p>
+          <AccountCopyBlock className="mt-1" />
+        </div>
         <p className="rounded-xl bg-[var(--primary-muted)] p-4 text-[var(--primary)] font-medium">
           예약이 접수되었습니다. 관리자 확인 후 예약완료 처리됩니다.
         </p>
@@ -86,9 +95,16 @@ export default function ReservationPage() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-[var(--chalk)]">
-        일일체험 예약
-      </h1>
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-bold text-[var(--chalk)]">
+          일일체험 예약
+        </h1>
+        <TermsModalButton />
+      </div>
+      <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-3 text-sm text-[var(--chalk)]">
+        <p className="font-medium text-[var(--chalk)]">입금계좌</p>
+        <AccountCopyBlock className="mt-1" />
+      </div>
       <p className="mb-4 text-sm text-[var(--chalk-muted)]">
         비회원 일일체험 예약입니다. 성명, 입금자명, 예약일시, 인원수를 입력해 주세요.
       </p>
