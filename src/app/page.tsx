@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { HomeMotion } from "@/components/HomeMotion";
 import type { CompleterDisplay } from "@/lib/completers";
+
+const SWIPE_THRESHOLD = 50;
 
 function CompleterCard({ c, rank }: { c: CompleterDisplay; rank: number }) {
   return (
@@ -65,6 +67,21 @@ export default function Home() {
   const [monthly, setMonthly] = useState<CompleterDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  function goToSegment(index: number) {
+    const next = SEGMENTS[Math.max(0, Math.min(index, SEGMENTS.length - 1))];
+    setSegment(next.key);
+  }
+
+  function handleSegmentSwipe(deltaX: number) {
+    const currentIndex = SEGMENTS.findIndex((s) => s.key === segment);
+    if (deltaX < -SWIPE_THRESHOLD && currentIndex < SEGMENTS.length - 1) {
+      goToSegment(currentIndex + 1);
+    } else if (deltaX > SWIPE_THRESHOLD && currentIndex > 0) {
+      goToSegment(currentIndex - 1);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -102,7 +119,21 @@ export default function Home() {
         )}
 
         <section className="card rounded-2xl overflow-hidden" aria-label="완등자">
-          <div className="border-b border-[var(--border)]" role="tablist" aria-label="완등자 기간 선택">
+          <div
+            className="border-b border-[var(--border)] touch-pan-y"
+            role="tablist"
+            aria-label="완등자 기간 선택"
+            onTouchStart={(e) => {
+              touchStartX.current = e.targetTouches[0]?.clientX ?? null;
+            }}
+            onTouchEnd={(e) => {
+              if (touchStartX.current == null) return;
+              const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
+              const deltaX = endX - touchStartX.current;
+              handleSegmentSwipe(deltaX);
+              touchStartX.current = null;
+            }}
+          >
             <div className="flex">
               {SEGMENTS.map(({ key, label }) => (
                 <button

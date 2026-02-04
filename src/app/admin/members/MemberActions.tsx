@@ -183,7 +183,7 @@ export function MemberActions({
           disabled={!!loading}
           className="rounded-lg bg-green-600 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-green-700 disabled:opacity-50"
         >
-          {loading === "resume" ? <LoadingSpinner size="sm" className="text-white" /> : "회원권 시작"}
+          {loading === "resume" ? <LoadingSpinner size="sm" className="text-white" /> : "시작"}
         </button>
       ) : (
         <button

@@ -17,6 +17,7 @@ interface LogItem {
   is_round_trip: boolean;
   round_trip_count: number;
   logged_at: string;
+  memo: string | null;
   route: {
     id: string;
     wall_type: string;
@@ -37,6 +38,9 @@ export default function ExerciseLogList({
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [requestingId, setRequestingId] = useState<string | null>(null);
+  const [memoLogId, setMemoLogId] = useState<string | null>(null);
+  const [memoDraft, setMemoDraft] = useState("");
+  const [savingMemoId, setSavingMemoId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return logs;
@@ -57,6 +61,31 @@ export default function ExerciseLogList({
       .eq("id", logId)
       .eq("profile_id", profileId);
     setRequestingId(null);
+    router.refresh();
+  }
+
+  function openMemoModal(log: LogItem) {
+    setMemoLogId(log.id);
+    setMemoDraft(log.memo ?? "");
+  }
+
+  function closeMemoModal() {
+    setMemoLogId(null);
+    setMemoDraft("");
+    setSavingMemoId(null);
+  }
+
+  async function saveMemo() {
+    if (!memoLogId) return;
+    setSavingMemoId(memoLogId);
+    const supabase = createClient();
+    await supabase
+      .from("exercise_logs")
+      .update({ memo: memoDraft.trim() || null })
+      .eq("id", memoLogId)
+      .eq("profile_id", profileId);
+    setSavingMemoId(null);
+    closeMemoModal();
     router.refresh();
   }
 
@@ -89,7 +118,11 @@ export default function ExerciseLogList({
             WALL_TYPE_LABELS[log.route.wall_type as keyof typeof WALL_TYPE_LABELS] ??
             log.route.wall_type;
           const grade = formatGrade(log.route.grade_value, log.route.grade_detail);
-          const canRequest = !log.is_completed && !log.completion_requested;
+          const canRequest =
+            !log.is_completed &&
+            !log.completion_requested &&
+            log.route.hold_count === log.progress_hold_count &&
+            log.attempt_count === 1;
           return (
             <li key={log.id} className="card rounded-2xl p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
@@ -118,20 +151,30 @@ export default function ExerciseLogList({
                     {log.is_round_trip && ` · 왕복 ${log.round_trip_count}회`}
                   </div>
                 </Link>
-                {canRequest && (
+                <div className="flex shrink-0 items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => requestCompletion(log.id)}
-                    disabled={!!requestingId}
-                    className="shrink-0 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] active:scale-[0.98] disabled:opacity-50 dark:bg-[var(--surface)]"
+                    onClick={() => openMemoModal(log)}
+                    className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] active:scale-[0.98] dark:bg-[var(--surface)]"
+                    title="메모"
                   >
-                    {requestingId === log.id ? (
-                      <LoadingSpinner size="sm" />
-                    ) : (
-                      "완등 인증 요청"
-                    )}
+                    메모{log.memo ? " ✓" : ""}
                   </button>
-                )}
+                  {canRequest && (
+                    <button
+                      type="button"
+                      onClick={() => requestCompletion(log.id)}
+                      disabled={!!requestingId}
+                      className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] active:scale-[0.98] disabled:opacity-50 dark:bg-[var(--surface)]"
+                    >
+                      {requestingId === log.id ? (
+                        <LoadingSpinner size="sm" />
+                      ) : (
+                        "완등인증요청"
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </li>
           );
@@ -139,6 +182,50 @@ export default function ExerciseLogList({
       </ul>
       {filtered.length === 0 && (
         <p className="text-[var(--chalk-muted)]">검색 결과가 없습니다.</p>
+      )}
+
+      {memoLogId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="memo-dialog-title"
+          onClick={closeMemoModal}
+        >
+          <div
+            className="card w-full max-w-md rounded-2xl p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="memo-dialog-title" className="mb-3 text-sm font-semibold text-[var(--chalk)]">
+              메모
+            </h2>
+            <textarea
+              value={memoDraft}
+              onChange={(e) => setMemoDraft(e.target.value)}
+              placeholder="이 일지에 대한 메모를 입력하세요"
+              rows={4}
+              className="input-base mb-4 w-full resize-y"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeMemoModal}
+                className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--chalk)] hover:bg-[var(--surface-muted)] dark:bg-[var(--surface)]"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={saveMemo}
+                disabled={!!savingMemoId}
+                className="rounded-lg bg-[var(--chalk)] px-3 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {savingMemoId ? <LoadingSpinner size="sm" /> : "저장"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

@@ -23,6 +23,7 @@ export default async function ExercisePage() {
       is_round_trip,
       round_trip_count,
       logged_at,
+      memo,
       route:routes(id, wall_type, grade_value, grade_detail, name, hold_count)
     `
     )
@@ -39,6 +40,7 @@ export default async function ExercisePage() {
     is_round_trip: boolean;
     round_trip_count: number;
     logged_at: string;
+    memo: string | null;
     route: {
       id: string;
       wall_type: string;
@@ -49,11 +51,12 @@ export default async function ExercisePage() {
     };
   };
   const logs = (logsRaw ?? []).map((l: unknown) => {
-    const r = l as LogItem & { route: LogItem["route"] | LogItem["route"][]; completion_requested?: boolean };
+    const r = l as LogItem & { route: LogItem["route"] | LogItem["route"][]; completion_requested?: boolean; memo?: string | null };
     return {
       ...r,
       route: Array.isArray(r.route) ? r.route[0] : r.route,
       completion_requested: r.completion_requested ?? false,
+      memo: r.memo ?? null,
     } as LogItem;
   });
 

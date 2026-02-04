@@ -69,7 +69,7 @@ export default function ReservationPage() {
           <TermsModalButton />
         </div>
         <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-3 text-sm text-[var(--chalk)]">
-          <p className="font-medium text-[var(--chalk)]">입금계좌</p>
+          <p className="font-medium text-[var(--chalk)]">입금계좌(예약금 1만원/1인)</p>
           <AccountCopyBlock className="mt-1" />
         </div>
         <p className="rounded-xl bg-[var(--primary-muted)] p-4 text-[var(--primary)] font-medium">
@@ -102,7 +102,7 @@ export default function ReservationPage() {
         <TermsModalButton />
       </div>
       <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-3 text-sm text-[var(--chalk)]">
-        <p className="font-medium text-[var(--chalk)]">입금계좌</p>
+        <p className="font-medium text-[var(--chalk)]">입금계좌(예약금 1만원/1인)</p>
         <AccountCopyBlock className="mt-1" />
       </div>
       <p className="mb-4 text-sm text-[var(--chalk-muted)]">

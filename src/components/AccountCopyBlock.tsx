@@ -4,13 +4,7 @@ import { useState } from "react";
 
 const ACCOUNT_TEXT = "카카오뱅크 3333-07-2364579 정호영";
 
-export function AccountCopyBlock({
-  label = "계좌번호",
-  className,
-}: {
-  label?: string;
-  className?: string;
-}) {
+export function AccountCopyBlock({ className }: { className?: string }) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -27,7 +21,7 @@ export function AccountCopyBlock({
     <div className={className}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-[var(--chalk-muted)]">
-          {label} : {ACCOUNT_TEXT}
+          {ACCOUNT_TEXT}
         </span>
         <button
           type="button"

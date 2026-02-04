@@ -51,6 +51,7 @@ export interface ExerciseLog {
   is_round_trip: boolean;
   round_trip_count: number;
   logged_at: string;
+  memo: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -57,12 +57,6 @@ export default async function MemberPage() {
                 : "-"}
             </dd>
           </div>
-          <div>
-            <dt className="text-sm text-[var(--chalk-muted)]">회원권 만료일자</dt>
-            <dd className="font-medium text-[var(--chalk)]">
-              {profile.membership_end ?? "-"}
-            </dd>
-          </div>
         </dl>
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-4">

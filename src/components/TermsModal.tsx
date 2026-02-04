@@ -23,7 +23,7 @@ const TERMS_CONTENT = (
       {`가족(직계 2인 이상) : 상기 이용료에서 1만원 할인 적용(단, 3개월 등록시)
 개인 암벽화 및 장비는 별도 구매하셔야 하며, 센터에서 구매 또는 대여할 수 있습니다.`}
     </p>
-    <h3 className="mb-2 font-semibold text-[var(--chalk)]">* 입금계좌</h3>
+    <h3 className="mb-2 font-semibold text-[var(--chalk)]">* 입금계좌(예약금 1만원/1인)</h3>
     <div className="mb-4 text-sm">
       <AccountCopyBlock />
     </div>
