@@ -68,6 +68,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const touchStartX = useRef<number | null>(null);
+  const justSwiped = useRef(false);
 
   function goToSegment(index: number) {
     const next = SEGMENTS[Math.max(0, Math.min(index, SEGMENTS.length - 1))];
@@ -78,9 +79,22 @@ export default function Home() {
     const currentIndex = SEGMENTS.findIndex((s) => s.key === segment);
     if (deltaX < -SWIPE_THRESHOLD && currentIndex < SEGMENTS.length - 1) {
       goToSegment(currentIndex + 1);
+      justSwiped.current = true;
+      setTimeout(() => {
+        justSwiped.current = false;
+      }, 300);
     } else if (deltaX > SWIPE_THRESHOLD && currentIndex > 0) {
       goToSegment(currentIndex - 1);
+      justSwiped.current = true;
+      setTimeout(() => {
+        justSwiped.current = false;
+      }, 300);
     }
+  }
+
+  function handleSegmentClick(key: Segment) {
+    if (justSwiped.current) return;
+    setSegment(key);
   }
 
   useEffect(() => {
@@ -118,21 +132,25 @@ export default function Home() {
           </p>
         )}
 
-        <section className="card rounded-2xl overflow-hidden" aria-label="완등자">
+        <section
+          className="card rounded-2xl overflow-hidden touch-pan-y"
+          style={{ touchAction: "pan-y" }}
+          aria-label="완등자"
+          onTouchStart={(e) => {
+            touchStartX.current = e.targetTouches[0]?.clientX ?? null;
+          }}
+          onTouchEnd={(e) => {
+            if (touchStartX.current == null) return;
+            const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
+            const deltaX = endX - touchStartX.current;
+            handleSegmentSwipe(deltaX);
+            touchStartX.current = null;
+          }}
+        >
           <div
-            className="border-b border-[var(--border)] touch-pan-y"
+            className="border-b border-[var(--border)]"
             role="tablist"
             aria-label="완등자 기간 선택"
-            onTouchStart={(e) => {
-              touchStartX.current = e.targetTouches[0]?.clientX ?? null;
-            }}
-            onTouchEnd={(e) => {
-              if (touchStartX.current == null) return;
-              const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
-              const deltaX = endX - touchStartX.current;
-              handleSegmentSwipe(deltaX);
-              touchStartX.current = null;
-            }}
           >
             <div className="flex">
               {SEGMENTS.map(({ key, label }) => (
@@ -141,7 +159,7 @@ export default function Home() {
                   type="button"
                   role="tab"
                   aria-selected={segment === key}
-                  onClick={() => setSegment(key)}
+                  onClick={() => handleSegmentClick(key)}
                   className={`relative flex flex-1 items-center justify-center py-3 text-sm font-medium transition md:py-4 md:text-base ${
                     segment === key
                       ? "text-[var(--chalk)]"
