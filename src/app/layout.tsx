@@ -15,6 +15,14 @@ export const metadata: Metadata = {
   title: "베스트클라이밍",
   description: "베스트클라이밍 - 오늘의 완등자, 운동일지, 출석체크",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
