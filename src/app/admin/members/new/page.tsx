@@ -11,6 +11,7 @@ import { addMember } from "../actions";
 function getEndDateFromStartPlusMonths(startIso: string, months: number): string {
   const d = new Date(startIso + "T12:00:00");
   d.setMonth(d.getMonth() + months);
+  d.setDate(d.getDate() - 1);
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
