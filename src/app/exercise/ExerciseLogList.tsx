@@ -31,9 +31,12 @@ interface LogItem {
 export default function ExerciseLogList({
   logs,
   profileId,
+  completedRouteIdToDate = {},
 }: {
   logs: LogItem[];
   profileId: string;
+  /** 루트별 완등 인증일 — 이 날짜 이후 기록에만 '완등 인증됨' 표시 */
+  completedRouteIdToDate?: Record<string, string>;
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -118,7 +121,14 @@ export default function ExerciseLogList({
             WALL_TYPE_LABELS[log.route.wall_type as keyof typeof WALL_TYPE_LABELS] ??
             log.route.wall_type;
           const grade = formatGrade(log.route.grade_value, log.route.grade_detail);
+          const certDate = completedRouteIdToDate[log.route.id];
+          const showCompletedBadge =
+            log.is_completed || (!!certDate && log.logged_at >= certDate);
+          const completedCertDate = showCompletedBadge
+            ? (log.is_completed ? log.logged_at : certDate ?? "")
+            : "";
           const canRequest =
+            !showCompletedBadge &&
             !log.is_completed &&
             !log.completion_requested &&
             log.route.hold_count === log.progress_hold_count &&
@@ -134,9 +144,14 @@ export default function ExerciseLogList({
                       {log.route.name}
                     </span>
                     <span className="text-[var(--chalk-muted)]">난이도 {grade}</span>
-                    {log.is_completed && (
+                    {showCompletedBadge && (
                       <span className="rounded border border-[var(--border)] bg-white px-1.5 py-0.5 text-xs font-medium text-green-700 dark:bg-[var(--surface)] dark:border-[var(--border)] dark:text-green-400">
                         ✓ 완등 인증됨
+                        {completedCertDate && (
+                          <span className="ml-1 font-normal text-green-600 dark:text-green-500">
+                            ({completedCertDate})
+                          </span>
+                        )}
                       </span>
                     )}
                     {log.completion_requested && !log.is_completed && (

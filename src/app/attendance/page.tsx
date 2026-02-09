@@ -24,6 +24,16 @@ export default function AttendancePage() {
     }
   }, []);
 
+  // 결과 모달 3초 후 자동 닫기
+  useEffect(() => {
+    if (!message) return;
+    const t = setTimeout(() => {
+      setMessage(null);
+      router.refresh();
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [message, router]);
+
   // PC: 키보드로 숫자/지우기/확인 입력
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -31,6 +41,13 @@ export default function AttendancePage() {
       if (target.closest("input") || target.closest("textarea") || target.closest("[contenteditable]")) return;
 
       const key = e.key;
+      // 결과 팝업이 열려 있을 때 엔터는 팝업만 닫기 (확인 버튼과 중복 방지)
+      if (message && key === "Enter") {
+        e.preventDefault();
+        setMessage(null);
+        router.refresh();
+        return;
+      }
       if (key >= "0" && key <= "9") {
         e.preventDefault();
         handleKey(key);
@@ -48,7 +65,7 @@ export default function AttendancePage() {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [digits, loading]); // handleKey가 digits/loading을 참조하므로 의존
+  }, [digits, loading, message]); // handleKey가 digits/loading을 참조, message로 팝업 시 엔터 분기
 
   function handleKey(key: string) {
     if (key === "지우기") {

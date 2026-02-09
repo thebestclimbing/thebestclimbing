@@ -25,6 +25,8 @@ export function MembersTableWithSearch({
   currentUserId?: string;
 }) {
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   const filtered = useMemo(() => {
     if (!q.trim()) return profiles;
@@ -37,6 +39,15 @@ export function MembersTableWithSearch({
         p.phone_tail4.includes(lower)
     );
   }, [profiles, q]);
+
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, page]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const hasPrev = page > 1;
+  const hasNext = page < totalPages;
 
   /** YYYYMMDD 정수 → 오늘까지 경과 일수 (정지 중일 때만 의미 있음) */
   function getPausedDays(ymd: number | null, isPaused: boolean): number | null {
@@ -62,7 +73,10 @@ export function MembersTableWithSearch({
           id="member-search"
           type="search"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+          setQ(e.target.value);
+          setPage(1);
+        }}
           placeholder="검색어 입력"
           className="input-base max-w-sm"
         />
@@ -80,7 +94,7 @@ export function MembersTableWithSearch({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p) => (
+            {paginated.map((p) => (
               <tr key={p.id} className="border-b border-[var(--border)]">
                 <td className="p-1.5 sm:p-2 text-[var(--chalk)]">{p.name}</td>
                 <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{p.membership_start ?? "-"}</td>
@@ -114,6 +128,34 @@ export function MembersTableWithSearch({
         <p className="mt-4 text-[var(--chalk-muted)]">
           {q.trim() ? "검색 결과가 없습니다." : "등록된 회원이 없습니다."}
         </p>
+      )}
+      {filtered.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-4">
+          <p className="text-sm text-[var(--chalk-muted)]">
+            {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} / 총 {filtered.length}건
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={!hasPrev}
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--chalk)] disabled:opacity-40 disabled:pointer-events-none hover:bg-[var(--surface-muted)]"
+            >
+              이전
+            </button>
+            <span className="text-sm text-[var(--chalk-muted)]">
+              {page} / {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={!hasNext}
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--chalk)] disabled:opacity-40 disabled:pointer-events-none hover:bg-[var(--surface-muted)]"
+            >
+              다음
+            </button>
+          </div>
+        </div>
       )}
     </>
   );

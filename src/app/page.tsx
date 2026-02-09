@@ -101,7 +101,7 @@ export default function Home() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetch("/api/completers?limit=3")
+    fetch("/api/completers?limit=5")
       .then((res) => {
         if (!res.ok) throw new Error(res.statusText);
         return res.json();

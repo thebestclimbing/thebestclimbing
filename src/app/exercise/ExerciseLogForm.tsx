@@ -18,10 +18,12 @@ interface RouteRow {
 export default function ExerciseLogForm({
   profileId,
   routes,
+  completedRouteIds = [],
   onSuccess,
 }: {
   profileId: string;
   routes: RouteRow[];
+  completedRouteIds?: string[];
   onSuccess?: () => void;
 }) {
   const router = useRouter();
@@ -77,6 +79,7 @@ export default function ExerciseLogForm({
 
   const selectedRoute = routes.find((r) => r.id === routeId);
   const maxHold = selectedRoute?.hold_count ?? 0;
+  const isRouteAlreadyCompleted = routeId ? completedRouteIds.includes(routeId) : false;
 
   return (
     <form onSubmit={handleSubmit} className="card rounded-2xl p-6">
@@ -84,6 +87,11 @@ export default function ExerciseLogForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">루트 *</label>
+          {isRouteAlreadyCompleted && (
+            <span className="mb-1.5 inline-block rounded border border-[var(--border)] bg-white px-1.5 py-0.5 text-xs font-medium text-green-700 dark:bg-[var(--surface)] dark:border-[var(--border)] dark:text-green-400">
+              ✓ 완등 인증됨
+            </span>
+          )}
           <RouteSelect
             routes={routes}
             value={routeId}

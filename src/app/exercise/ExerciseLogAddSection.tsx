@@ -16,9 +16,11 @@ interface RouteRow {
 export default function ExerciseLogAddSection({
   profileId,
   routes,
+  completedRouteIds = [],
 }: {
   profileId: string;
   routes: RouteRow[];
+  completedRouteIds?: string[];
 }) {
   const [showForm, setShowForm] = useState(false);
 
@@ -81,6 +83,7 @@ export default function ExerciseLogAddSection({
             <ExerciseLogForm
               profileId={profileId}
               routes={routes}
+              completedRouteIds={completedRouteIds}
               onSuccess={() => setShowForm(false)}
             />
           </motion.div>

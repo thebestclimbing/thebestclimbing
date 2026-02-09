@@ -5,7 +5,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
+import { getTodayISOKST } from "@/lib/date";
 import { addMember } from "../actions";
+
+function getEndDateFromStartPlusMonths(startIso: string, months: number): string {
+  const d = new Date(startIso + "T12:00:00");
+  d.setMonth(d.getMonth() + months);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 function getPhoneTail4(phoneNumber: string): string {
   const digits = phoneNumber.replace(/\D/g, "");
@@ -132,6 +142,31 @@ export default function AdminMemberNewPage() {
           </p>
         </div>
         <div>
+          <div className="mb-1.5 flex items-center gap-2">
+            <span className="text-sm font-medium text-[var(--chalk-muted)]">회원권 기간 빠른 설정</span>
+            <button
+              type="button"
+              onClick={() => {
+                const start = getTodayISOKST();
+                setMembershipStart(start);
+                setMembershipEnd(getEndDateFromStartPlusMonths(start, 1));
+              }}
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-medium text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+            >
+              1개월
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const start = getTodayISOKST();
+                setMembershipStart(start);
+                setMembershipEnd(getEndDateFromStartPlusMonths(start, 3));
+              }}
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-medium text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+            >
+              3개월
+            </button>
+          </div>
           <label htmlFor="membershipStart" className="mb-1 block text-sm font-medium text-[var(--chalk-muted)]">
             회원권 시작일 (선택)
           </label>

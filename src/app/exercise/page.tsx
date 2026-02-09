@@ -65,17 +65,33 @@ export default async function ExercisePage() {
     .select("id, wall_type, grade_value, grade_detail, name, hold_count")
     .order("name");
 
+  // 루트별 완등 인증일 (가장 이른 완등일 1건) — 이 날짜 이후 기록에만 '완등 인증됨' 표시
+  const completedRouteIdToDate: Record<string, string> = {};
+  for (const l of logs) {
+    if (!l.is_completed) continue;
+    const id = l.route.id;
+    const date = l.logged_at;
+    if (!(id in completedRouteIdToDate) || date < completedRouteIdToDate[id]) {
+      completedRouteIdToDate[id] = date;
+    }
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 lg:max-w-5xl lg:px-6 lg:py-10 xl:max-w-6xl xl:px-8 xl:py-12">
       <ExerciseLogAddSection
         profileId={user.id}
         routes={routes ?? []}
+        completedRouteIds={Array.from(new Set(logs.filter((l) => l.is_completed).map((l) => l.route.id)))}
       />
       <section className="mt-8 lg:mt-10">
         <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)] md:text-xl lg:text-2xl">
           기록 목록
         </h2>
-        <ExerciseLogList logs={logs} profileId={user.id} />
+        <ExerciseLogList
+          logs={logs}
+          profileId={user.id}
+          completedRouteIdToDate={completedRouteIdToDate}
+        />
       </section>
       <p className="mt-6 lg:mt-8">
         <Link
