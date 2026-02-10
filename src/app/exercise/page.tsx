@@ -76,8 +76,6 @@ export default async function ExercisePage() {
     .lte("logged_at", monthEnd);
   const monthLogs = (monthLogsRaw ?? []) as { progress_hold_count: number; logged_at: string }[];
   const totalHolds = monthLogs.reduce((s, l) => s + l.progress_hold_count, 0);
-  const attendanceDays = new Set(monthLogs.map((l) => l.logged_at)).size;
-  const averageHolds = attendanceDays > 0 ? totalHolds / attendanceDays : 0;
   const holdsByDay: Record<string, number> = {};
   for (const l of monthLogs) {
     holdsByDay[l.logged_at] = (holdsByDay[l.logged_at] ?? 0) + l.progress_hold_count;
@@ -93,6 +91,8 @@ export default async function ExercisePage() {
     .gte("attended_at", monthStart)
     .lte("attended_at", monthEnd);
   const monthAttendanceCount = attendanceCount ?? 0;
+  const averageHolds =
+    monthAttendanceCount > 0 ? totalHolds / monthAttendanceCount : 0;
 
   // 최근 4주 단위 진행 홀드 (월~일, 요일별 합계)
   const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
