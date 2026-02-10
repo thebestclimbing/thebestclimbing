@@ -85,34 +85,63 @@ export default async function ExercisePage() {
   const maxDailyHolds = Object.values(holdsByDay).reduce((m, v) => Math.max(m, v), 0);
   const routeCount = monthLogs.length;
 
-  // 한 주 단위 진행 홀드 (월~일, 요일별 합계)
+  // 이달 출석 횟수 (attendances 테이블)
+  const { count: attendanceCount } = await supabase
+    .from("attendances")
+    .select("id", { count: "exact", head: true })
+    .eq("profile_id", user.id)
+    .gte("attended_at", monthStart)
+    .lte("attended_at", monthEnd);
+  const monthAttendanceCount = attendanceCount ?? 0;
+
+  // 최근 4주 단위 진행 홀드 (월~일, 요일별 합계)
   const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
-  const { start: weekStart } = getWeekStartEndKST();
-  const weekDates: string[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(weekStart + "T12:00:00");
-    d.setDate(d.getDate() + i);
-    weekDates.push(d.toISOString().slice(0, 10));
+  const { start: currentWeekStart } = getWeekStartEndKST(); // 이번 주 월요일
+
+  function addDaysIso(baseIso: string, days: number): string {
+    const d = new Date(baseIso + "T12:00:00");
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
   }
-  const weekEnd = weekDates[6];
+
+  // 최근 4주 월요일들 (0: 이번 주, 1: 1주 전, 2: 2주 전, 3: 3주 전)
+  const mondayIsos: string[] = [];
+  for (let i = 0; i < 4; i++) {
+    mondayIsos.push(addDaysIso(currentWeekStart, -7 * i));
+  }
+  const earliestMonday = mondayIsos[3];
+  const latestSunday = addDaysIso(currentWeekStart, 6);
+
   const { data: weekLogsRaw } = await supabase
     .from("exercise_logs")
     .select("progress_hold_count, logged_at")
     .eq("profile_id", user.id)
-    .gte("logged_at", weekStart)
-    .lte("logged_at", weekEnd);
-  const weekLogs = (weekLogsRaw ?? []) as { progress_hold_count: number; logged_at: string }[];
-  const holdsByWeekDay: Record<string, number> = {};
-  for (const d of weekDates) holdsByWeekDay[d] = 0;
-  for (const l of weekLogs) {
-    holdsByWeekDay[l.logged_at] = (holdsByWeekDay[l.logged_at] ?? 0) + l.progress_hold_count;
+    .gte("logged_at", earliestMonday)
+    .lte("logged_at", latestSunday);
+  const allWeekLogs = (weekLogsRaw ?? []) as { progress_hold_count: number; logged_at: string }[];
+
+  const holdsByDate: Record<string, number> = {};
+  for (const l of allWeekLogs) {
+    holdsByDate[l.logged_at] = (holdsByDate[l.logged_at] ?? 0) + l.progress_hold_count;
   }
-  const weekData = weekDates.map((date, i) => ({
-    date,
-    dayLabel: DAY_LABELS[i],
-    shortDate: date.slice(5).replace("-", "/"),
-    holds: holdsByWeekDay[date] ?? 0,
-  }));
+
+  const weekSummaries = mondayIsos.map((mondayIso, index) => {
+    const dates: string[] = [];
+    for (let i = 0; i < 7; i++) {
+      dates.push(addDaysIso(mondayIso, i));
+    }
+    const data = dates.map((date, i) => ({
+      date,
+      dayLabel: DAY_LABELS[i],
+      shortDate: date.slice(5).replace("-", "/"),
+      holds: holdsByDate[date] ?? 0,
+    }));
+    const startLabel = dates[0].slice(5).replace("-", "/");
+    const endLabel = dates[6].slice(5).replace("-", "/");
+    const label = index === 0 ? "이번 주" : `${index}주 전`;
+    const rangeLabel = `${startLabel} ~ ${endLabel}`;
+    return { label, rangeLabel, data };
+  });
 
   // 루트별 완등 인증일 (가장 이른 완등일 1건) — 이 날짜 이후 기록에만 '완등 인증됨' 표시
   const completedRouteIdToDate: Record<string, string> = {};
@@ -138,7 +167,8 @@ export default async function ExercisePage() {
           averageHolds={averageHolds}
           maxDailyHolds={maxDailyHolds}
           routeCount={routeCount}
-          weekData={weekData}
+          attendanceCount={monthAttendanceCount}
+          weekSummaries={weekSummaries}
         />
       </section>
       <section className="mt-8 lg:mt-10">
