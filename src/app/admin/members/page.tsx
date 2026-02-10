@@ -18,7 +18,7 @@ export default async function AdminMembersPage() {
   const { data: profiles, error } = await supabase
     .from("profiles")
     .select("id, name, email, phone, phone_tail4, membership_start, membership_end, membership_paused, membership_paused_at, role, created_at")
-    .order("created_at", { ascending: false });
+    .order("name", { ascending: true });
 
   if (error) {
     return (

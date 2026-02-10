@@ -84,7 +84,8 @@ export function MemberActions({
     if (extendModalOpen) {
       setExtendMonths(1);
       setModalStart(profile.membership_start ?? todayISO());
-      setModalEnd(addMonths(profile.membership_end, 1));
+      const endPlus1 = addMonths(profile.membership_end, 1);
+      setModalEnd(addDays(endPlus1, -1));
     }
   }, [extendModalOpen, profile.membership_start, profile.membership_end]);
 
@@ -112,7 +113,9 @@ export function MemberActions({
 
   function applyExtendMonths(months: 1 | 3) {
     setExtendMonths(months);
-    setModalEnd(addMonths(modalEnd || profile.membership_end, months));
+    setModalStart(profile.membership_start ?? todayISO());
+    const endPlusMonths = addMonths(profile.membership_end, months);
+    setModalEnd(addDays(endPlusMonths, -1));
   }
 
   async function setPaused(paused: boolean) {

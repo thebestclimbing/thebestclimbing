@@ -25,7 +25,7 @@ export default async function AdminAttendancePage() {
       profile:profiles(id, name, phone_tail4)
     `
     )
-    .order("attended_at", { ascending: false })
+    .order("checked_at", { ascending: false })
     .limit(200);
 
   if (error) {
