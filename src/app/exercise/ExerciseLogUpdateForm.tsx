@@ -45,12 +45,7 @@ export default function ExerciseLogUpdateForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const selectedRoute = routes.find((r) => r.id === routeId);
-  const maxHold = selectedRoute?.hold_count ?? 0;
-  const progressHoldCount = Math.min(
-    Math.max(0, parseInt(progressHoldCountStr, 10) || 0),
-    maxHold
-  );
+  const progressHoldCount = Math.max(0, parseInt(progressHoldCountStr, 10) || 0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -87,10 +82,7 @@ export default function ExerciseLogUpdateForm({
             routes={routes}
             value={routeId}
             onChange={setRouteId}
-            onSelectRoute={(r) => {
-              const next = Math.min(progressHoldCount, r.hold_count);
-              setProgressHoldCountStr(String(next));
-            }}
+            onSelectRoute={() => {}}
             required
           />
         </div>
@@ -99,14 +91,14 @@ export default function ExerciseLogUpdateForm({
           <input type="date" value={loggedAt} onChange={(e) => setLoggedAt(e.target.value)} required className="input-base" />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-[var(--chalk-muted)]">진행한 홀드수 (0 ~ {maxHold})</label>
+          <label className="mb-1 block text-sm text-[var(--chalk-muted)]">진행한 홀드수</label>
           <input
             type="text"
             inputMode="numeric"
             value={progressHoldCountStr}
             onChange={(e) => {
               const v = e.target.value.replace(/\D/g, "");
-              if (v === "" || (Number(v) >= 0 && Number(v) <= maxHold)) setProgressHoldCountStr(v);
+              if (v === "" || Number(v) >= 0) setProgressHoldCountStr(v);
             }}
             placeholder="0"
             className="input-base"
