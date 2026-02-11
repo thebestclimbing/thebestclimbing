@@ -44,10 +44,7 @@ export default function ExerciseLogForm({
       setError("루트를 선택해 주세요.");
       return;
     }
-    const progressHoldCount = Math.min(
-      Math.max(0, parseInt(progressHoldCountStr, 10) || 0),
-      maxHold
-    );
+    const progressHoldCount = Math.max(0, parseInt(progressHoldCountStr, 10) || 0);
     setError("");
     setLoading(true);
     const supabase = createClient();
@@ -77,8 +74,6 @@ export default function ExerciseLogForm({
     onSuccess?.();
   }
 
-  const selectedRoute = routes.find((r) => r.id === routeId);
-  const maxHold = selectedRoute?.hold_count ?? 0;
   const isRouteAlreadyCompleted = routeId ? completedRouteIds.includes(routeId) : false;
 
   return (
@@ -105,16 +100,15 @@ export default function ExerciseLogForm({
           <input type="date" value={loggedAt} onChange={(e) => setLoggedAt(e.target.value)} required className="input-base" />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-[var(--chalk-muted)]">진행한 홀드수 (0 ~ {maxHold})</label>
+          <label className="mb-1 block text-sm text-[var(--chalk-muted)]">진행한 홀드수</label>
           <input
             type="text"
             inputMode="numeric"
             min={0}
-            max={maxHold}
             value={progressHoldCountStr}
             onChange={(e) => {
               const v = e.target.value.replace(/\D/g, "");
-              if (v === "" || (Number(v) >= 0 && Number(v) <= maxHold)) setProgressHoldCountStr(v);
+              if (v === "" || Number(v) >= 0) setProgressHoldCountStr(v);
             }}
             placeholder="0"
             className="input-base"

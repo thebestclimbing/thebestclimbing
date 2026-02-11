@@ -63,6 +63,17 @@ export function MembersTableWithSearch({
     return Math.floor(diffMs / (24 * 60 * 60 * 1000));
   }
 
+  /** 잔여일수: 회원권 종료일 - 현재날짜. 종료일 없으면 null, 이미 지났으면 null(표기는 '만료') */
+  function getRemainingDays(membershipEnd: string | null): number | null {
+    if (!membershipEnd) return null;
+    const end = new Date(membershipEnd + "T12:00:00");
+    const today = new Date();
+    end.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const diffMs = end.getTime() - today.getTime();
+    return Math.floor(diffMs / (24 * 60 * 60 * 1000));
+  }
+
   return (
     <>
       <div className="mb-4">
@@ -89,6 +100,7 @@ export function MembersTableWithSearch({
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">회원권 시작</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">회원권 종료</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">상태</th>
+              <th className="hidden p-1.5 md:table-cell md:p-2 font-medium text-[var(--chalk)]">잔여일수</th>
               <th className="hidden p-1.5 sm:table-cell sm:p-2 font-medium text-[var(--chalk)]">정지일수</th>
               <th className="p-1.5 sm:p-2 text-center font-medium text-[var(--chalk)]">회원권</th>
             </tr>
@@ -109,6 +121,14 @@ export function MembersTableWithSearch({
                       정상
                     </span>
                   )}
+                </td>
+                <td className="hidden p-1.5 md:table-cell md:p-2 text-[var(--chalk-muted)]">
+                  {(() => {
+                    const days = getRemainingDays(p.membership_end);
+                    if (days == null) return "-";
+                    if (days < 0) return <span className="text-red-600 dark:text-red-400">만료</span>;
+                    return `${days}일`;
+                  })()}
                 </td>
                 <td className="hidden p-1.5 sm:table-cell sm:p-2 text-[var(--chalk-muted)]">
                   {(() => {

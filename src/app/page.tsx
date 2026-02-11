@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { HomeMotion } from "@/components/HomeMotion";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import type { CompleterDisplay } from "@/lib/completers";
+import { formatDateKST } from "@/lib/date";
 
 const SWIPE_THRESHOLD = 50;
 
@@ -13,7 +16,7 @@ function CompleterCard({ c, rank }: { c: CompleterDisplay; rank: number }) {
       <span className="text-[var(--chalk-muted)]">{c.wallTypeLabel}</span>
       <span className="mx-2 text-[var(--border)]">|</span>
       <span className="font-medium text-[var(--chalk)]">{c.routeName}</span>
-      <span className="mx-2 text-[var(--chalk-muted)]">난이도 {c.grade}</span>
+      <span className="mx-2 text-[var(--chalk-muted)]">{c.grade}</span>
       <span className="text-[var(--chalk-muted)]">· {c.memberName}</span>
     </div>
   );
@@ -67,6 +70,18 @@ export default function Home() {
   const [monthly, setMonthly] = useState<CompleterDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [attendanceKingName, setAttendanceKingName] = useState<string | null>(null);
+  const [attendanceKingCount, setAttendanceKingCount] = useState<number>(0);
+  const [holdKingName, setHoldKingName] = useState<string | null>(null);
+  const [holdKingCount, setHoldKingCount] = useState<number>(0);
+  const [loadingAttendanceKing, setLoadingAttendanceKing] = useState(true);
+  const [loadingHoldKing, setLoadingHoldKing] = useState(true);
+  const [latestNotice, setLatestNotice] = useState<{
+    id: string;
+    title: string;
+    created_at: string;
+  } | null>(null);
+  const [loadingNotice, setLoadingNotice] = useState(true);
   const touchStartX = useRef<number | null>(null);
   const justSwiped = useRef(false);
 
@@ -123,14 +138,141 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/attendance-king")
+      .then((res) => (res.ok ? res.json() : { name: null, count: 0 }))
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.name != null) setAttendanceKingName(data.name);
+        setAttendanceKingCount(typeof data?.count === "number" ? data.count : 0);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingAttendanceKing(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/hold-king")
+      .then((res) => (res.ok ? res.json() : { name: null, count: 0 }))
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.name != null) setHoldKingName(data.name);
+        setHoldKingCount(typeof data?.count === "number" ? data.count : 0);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingHoldKing(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/notice/latest")
+      .then((res) => (res.ok ? res.json() : { notice: null }))
+      .then((data) => {
+        if (!cancelled && data?.notice != null) setLatestNotice(data.notice);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingNotice(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const currentMonthLabel = new Date().toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "long",
+  });
+
   return (
     <HomeMotion>
       <div className="pt-4 md:pt-6">
+        <section className="mb-6" aria-label="공지사항">
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
+              공지사항
+            </h2>
+            <Link
+              href="/notice"
+              className="shrink-0 text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
+            >
+              전체 보기
+            </Link>
+          </div>
+          <div className="card rounded-2xl p-4 md:p-5">
+            {loadingNotice ? (
+              <div className="flex items-center justify-center py-6">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : latestNotice ? (
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <Link
+                  href={`/notice/${latestNotice.id}`}
+                  className="font-medium text-[var(--chalk)] hover:underline"
+                >
+                  {latestNotice.title}
+                </Link>
+                <span className="shrink-0 text-sm text-[var(--chalk-muted)]">
+                  {formatDateKST(latestNotice.created_at)}
+                </span>
+              </div>
+            ) : (
+              <p className="py-2 text-[var(--chalk-muted)]">공지가 없습니다.</p>
+            )}
+          </div>
+        </section>
+
         {error && (
           <p className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
             {error}
           </p>
         )}
+
+        <section className="mb-6 grid grid-cols-2 gap-3 md:gap-4" aria-label={`${currentMonthLabel}의 출석왕·홀드왕`}>
+          <div className="card flex min-h-[72px] flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 출석왕`}>
+            <h2 className="mb-1 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
+              {currentMonthLabel}의 출석왕
+            </h2>
+            {loadingAttendanceKing ? (
+              <div className="flex flex-1 items-center justify-center py-2">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : (
+              <p className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
+                {attendanceKingName != null
+                  ? `${attendanceKingName} (${attendanceKingCount}회)`
+                  : "없음"}
+              </p>
+            )}
+          </div>
+          <div className="card flex min-h-[72px] flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 홀드왕`}>
+            <h2 className="mb-1 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
+              {currentMonthLabel}의 홀드왕
+            </h2>
+            {loadingHoldKing ? (
+              <div className="flex flex-1 items-center justify-center py-2">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : (
+              <p className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
+                {holdKingName != null
+                  ? `${holdKingName} (${holdKingCount}개)`
+                  : "없음"}
+              </p>
+            )}
+          </div>
+        </section>
 
         <section
           className="card rounded-2xl overflow-hidden touch-pan-y"

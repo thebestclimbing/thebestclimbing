@@ -143,7 +143,7 @@ export default function ExerciseLogList({
                     <span className="font-medium text-[var(--chalk)]">
                       {log.route.name}
                     </span>
-                    <span className="text-[var(--chalk-muted)]">난이도 {grade}</span>
+                    <span className="text-[var(--chalk-muted)]">{grade}</span>
                     {showCompletedBadge && (
                       <span className="rounded border border-[var(--border)] bg-white px-1.5 py-0.5 text-xs font-medium text-green-700 dark:bg-[var(--surface)] dark:border-[var(--border)] dark:text-green-400">
                         ✓ 완등 인증됨

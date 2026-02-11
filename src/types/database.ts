@@ -94,6 +94,14 @@ export interface Notice {
   updated_at: string;
 }
 
+export interface NoticeComment {
+  id: string;
+  notice_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+}
+
 export interface PhotoAlbumPost {
   id: string;
   author_id: string;
@@ -115,6 +123,7 @@ export interface Database {
       daily_reservations: { Row: DailyReservation; Insert: Omit<DailyReservation, "id" | "created_at" | "updated_at">; Update: Partial<DailyReservation> };
       free_board_posts: { Row: FreeBoardPost; Insert: Omit<FreeBoardPost, "id" | "created_at" | "updated_at">; Update: Partial<FreeBoardPost> };
       notices: { Row: Notice; Insert: Omit<Notice, "id" | "created_at" | "updated_at">; Update: Partial<Notice> };
+      notice_comments: { Row: NoticeComment; Insert: Omit<NoticeComment, "id" | "created_at">; Update: Partial<NoticeComment> };
       photo_album_posts: { Row: PhotoAlbumPost; Insert: Omit<PhotoAlbumPost, "id" | "created_at" | "updated_at">; Update: Partial<PhotoAlbumPost> };
     };
   };

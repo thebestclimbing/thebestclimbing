@@ -51,14 +51,19 @@ export default function ExerciseMonthStats({
     ...currentWeekData.map((d) => d.holds),
   );
 
+  const monthLabel = new Date().toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "long",
+  });
+
   return (
     <section
       className="card rounded-2xl p-4 md:p-5"
-      aria-label="이달의 운동량"
+      aria-label={`${monthLabel}의 운동량`}
     >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-base font-semibold text-[var(--chalk)] md:text-lg">
-          이달의 운동량
+          {monthLabel}의 운동량
         </h2>
         {weekSummaries.length > 0 && (
           <button
@@ -70,7 +75,7 @@ export default function ExerciseMonthStats({
           </button>
         )}
       </div>
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {items.map(({ label, value, unit }) => (
           <div
             key={label}
