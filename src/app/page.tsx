@@ -82,6 +82,8 @@ export default function Home() {
     created_at: string;
   } | null>(null);
   const [loadingNotice, setLoadingNotice] = useState(true);
+  const [rankPointLeaders, setRankPointLeaders] = useState<{ rank: number; name: string; point: number }[]>([]);
+  const [loadingRankPoint, setLoadingRankPoint] = useState(true);
   const touchStartX = useRef<number | null>(null);
   const justSwiped = useRef(false);
 
@@ -190,6 +192,22 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/rank-point-leaders")
+      .then((res) => (res.ok ? res.json() : { leaders: [] }))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.leaders)) setRankPointLeaders(data.leaders);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingRankPoint(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const currentMonthLabel = new Date().toLocaleString("ko-KR", {
     timeZone: "Asia/Seoul",
     month: "long",
@@ -239,7 +257,38 @@ export default function Home() {
           </p>
         )}
 
-        <section className="mb-6 grid grid-cols-2 gap-3 md:gap-4" aria-label={`${currentMonthLabel}의 출석왕·홀드왕`}>
+        <section
+          className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 md:mb-8"
+          aria-label="랭킹 순위 및 출석왕·홀드왕"
+        >
+          <div
+            className="card flex flex-col rounded-2xl p-4 md:p-5 md:row-span-2"
+            aria-label="랭킹 순위"
+          >
+            <h2 className="mb-3 text-base font-semibold text-[var(--chalk)] md:text-lg">
+              랭킹 순위
+            </h2>
+            {loadingRankPoint ? (
+              <div className="flex flex-1 justify-center py-6">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : rankPointLeaders.length === 0 ? (
+              <p className="py-2 text-[var(--chalk-muted)]">완등 랭크포인트 기록이 없습니다.</p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {rankPointLeaders.map((l) => (
+                  <li
+                    key={l.rank}
+                    className="flex items-center justify-between rounded-lg bg-[var(--surface-muted)]/50 px-3 py-2 md:px-4 md:py-2.5"
+                  >
+                    <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
+                    <span className="font-medium text-[var(--chalk)]">{l.name}</span>
+                    <span className="text-sm text-[var(--chalk-muted)]">{l.point}점</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div className="card flex min-h-[72px] flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 출석왕`}>
             <h2 className="mb-1 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
               {currentMonthLabel}의 출석왕
