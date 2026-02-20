@@ -20,7 +20,7 @@ export default async function AdminRoutesPage() {
 
   const { data: routes, error } = await supabase
     .from("routes")
-    .select("id, wall_type, grade_value, grade_detail, name, hold_count, created_at")
+    .select("id, wall_type, grade_value, grade_detail, name, hold_count, rank_point, created_at")
     .order("name");
 
   if (error) {
@@ -46,6 +46,7 @@ export default async function AdminRoutesPage() {
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">난이도</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">루트명</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">홀드수</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">랭크포인트</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">작업</th>
             </tr>
           </thead>
@@ -67,8 +68,17 @@ export default async function AdminRoutesPage() {
                   <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{grade}</td>
                   <td className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">{r.name}</td>
                   <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{r.hold_count}</td>
+                  <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{r.rank_point ?? "-"}</td>
                   <td className="p-1.5 sm:p-2">
-                    <RouteDeleteButton routeId={r.id} routeName={r.name} />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/admin/routes/${r.id}/edit`}
+                        className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--chalk)] transition hover:bg-[var(--surface-muted)]"
+                      >
+                        수정
+                      </Link>
+                      <RouteDeleteButton routeId={r.id} routeName={r.name} />
+                    </div>
                   </td>
                 </tr>
               );

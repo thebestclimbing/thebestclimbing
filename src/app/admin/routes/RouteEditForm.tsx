@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
 import {
@@ -18,14 +19,30 @@ const WALL_TYPES: WallType[] = [
   "extreme_overhang",
 ];
 
-export default function RouteForm() {
+type RouteInitial = {
+  id: string;
+  wall_type: string;
+  grade_value: string;
+  grade_detail: string;
+  name: string;
+  hold_count: number;
+  rank_point: number | null;
+};
+
+export default function RouteEditForm({ route }: { route: RouteInitial }) {
   const router = useRouter();
-  const [wallType, setWallType] = useState<WallType>("vertical");
-  const [gradeValue, setGradeValue] = useState<(typeof GRADE_VALUES)[number]>("10");
-  const [gradeDetail, setGradeDetail] = useState<(typeof GRADE_DETAILS)[number]>("a");
-  const [name, setName] = useState("");
-  const [holdCount, setHoldCount] = useState(10);
-  const [rankPoint, setRankPoint] = useState<number | "">("");
+  const [wallType, setWallType] = useState<WallType>(route.wall_type as WallType);
+  const [gradeValue, setGradeValue] = useState<(typeof GRADE_VALUES)[number]>(
+    route.grade_value as (typeof GRADE_VALUES)[number]
+  );
+  const [gradeDetail, setGradeDetail] = useState<(typeof GRADE_DETAILS)[number]>(
+    route.grade_detail as (typeof GRADE_DETAILS)[number]
+  );
+  const [name, setName] = useState(route.name);
+  const [holdCount, setHoldCount] = useState(route.hold_count);
+  const [rankPoint, setRankPoint] = useState<number | "">(
+    route.rank_point != null ? route.rank_point : ""
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,28 +55,29 @@ export default function RouteForm() {
     setError("");
     setLoading(true);
     const supabase = createClient();
-    const { error: err } = await supabase.from("routes").insert({
-      wall_type: wallType,
-      grade_value: gradeValue,
-      grade_detail: gradeDetail,
-      name: name.trim(),
-      hold_count: holdCount,
-      rank_point: rankPoint === "" ? null : rankPoint,
-    });
+    const { error: err } = await supabase
+      .from("routes")
+      .update({
+        wall_type: wallType,
+        grade_value: gradeValue,
+        grade_detail: gradeDetail,
+        name: name.trim(),
+        hold_count: holdCount,
+        rank_point: rankPoint === "" ? null : rankPoint,
+      })
+      .eq("id", route.id);
     setLoading(false);
     if (err) {
       setError(err.message);
       return;
     }
+    router.push("/admin/routes");
     router.refresh();
-    setName("");
-    setHoldCount(10);
-    setRankPoint("");
   }
 
   return (
     <form onSubmit={handleSubmit} className="card rounded-2xl p-6">
-      <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)]">루트 추가</h2>
+      <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)]">루트 수정</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">암벽구분</label>
@@ -112,13 +130,19 @@ export default function RouteForm() {
         </div>
       </div>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      <div className="mt-4">
+      <div className="mt-4 flex gap-2">
+        <Link
+          href="/admin/routes"
+          className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2.5 text-sm font-medium text-[var(--chalk)] transition hover:bg-[var(--surface)]"
+        >
+          목록
+        </Link>
         <SubmitButton
           loading={loading}
-          loadingLabel="추가 중..."
+          loadingLabel="저장 중..."
           className="btn-primary disabled:pointer-events-none"
         >
-          추가
+          저장
         </SubmitButton>
       </div>
     </form>

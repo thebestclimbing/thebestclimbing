@@ -32,14 +32,20 @@ export default function ExerciseLogList({
   logs,
   profileId,
   completedRouteIdToDate = {},
+  readOnly = false,
 }: {
   logs: LogItem[];
   profileId: string;
   /** 루트별 완등 인증일 — 이 날짜 이후 기록에만 '완등 인증됨' 표시 */
   completedRouteIdToDate?: Record<string, string>;
+  /** true면 메모·완등인증 버튼 숨김 (다른 회원 조회 시) */
+  readOnly?: boolean;
 }) {
+  const PAGE_SIZE = 20;
+
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [requestingId, setRequestingId] = useState<string | null>(null);
   const [memoLogId, setMemoLogId] = useState<string | null>(null);
   const [memoDraft, setMemoDraft] = useState("");
@@ -54,6 +60,13 @@ export default function ExerciseLogList({
         log.logged_at.includes(lower)
     );
   }, [logs, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, currentPage]);
 
   async function requestCompletion(logId: string) {
     setRequestingId(logId);
@@ -110,13 +123,16 @@ export default function ExerciseLogList({
           id="log-search"
           type="search"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           placeholder="검색어 입력"
           className="input-base max-w-sm"
         />
       </div>
       <ul className="flex flex-col gap-2">
-        {filtered.map((log) => {
+        {paginated.map((log) => {
           const wallLabel =
             WALL_TYPE_LABELS[log.route.wall_type as keyof typeof WALL_TYPE_LABELS] ??
             log.route.wall_type;
@@ -166,30 +182,32 @@ export default function ExerciseLogList({
                     {log.is_round_trip && ` · 왕복 ${log.round_trip_count}회`}
                   </div>
                 </Link>
-                <div className="flex shrink-0 items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openMemoModal(log)}
-                    className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] active:scale-[0.98] dark:bg-[var(--surface)]"
-                    title="메모"
-                  >
-                    메모{log.memo ? " ✓" : ""}
-                  </button>
-                  {canRequest && (
+                {!readOnly && (
+                  <div className="flex shrink-0 items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => requestCompletion(log.id)}
-                      disabled={!!requestingId}
-                      className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] active:scale-[0.98] disabled:opacity-50 dark:bg-[var(--surface)]"
+                      onClick={() => openMemoModal(log)}
+                      className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] active:scale-[0.98] dark:bg-[var(--surface)]"
+                      title="메모"
                     >
-                      {requestingId === log.id ? (
-                        <LoadingSpinner size="sm" />
-                      ) : (
-                        "완등인증요청"
-                      )}
+                      메모{log.memo ? " ✓" : ""}
                     </button>
-                  )}
-                </div>
+                    {canRequest && (
+                      <button
+                        type="button"
+                        onClick={() => requestCompletion(log.id)}
+                        disabled={!!requestingId}
+                        className="rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] active:scale-[0.98] disabled:opacity-50 dark:bg-[var(--surface)]"
+                      >
+                        {requestingId === log.id ? (
+                          <LoadingSpinner size="sm" />
+                        ) : (
+                          "완등인증요청"
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </li>
           );
@@ -197,6 +215,34 @@ export default function ExerciseLogList({
       </ul>
       {filtered.length === 0 && (
         <p className="text-[var(--chalk-muted)]">검색 결과가 없습니다.</p>
+      )}
+      {filtered.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-4">
+          <p className="text-sm text-[var(--chalk-muted)]">
+            {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} / 총 {filtered.length}건
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage <= 1}
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--chalk)] disabled:opacity-40 disabled:pointer-events-none hover:bg-[var(--surface-muted)]"
+            >
+              이전
+            </button>
+            <span className="text-sm text-[var(--chalk-muted)]">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage >= totalPages}
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--chalk)] disabled:opacity-40 disabled:pointer-events-none hover:bg-[var(--surface-muted)]"
+            >
+              다음
+            </button>
+          </div>
+        </div>
       )}
 
       {memoLogId && (

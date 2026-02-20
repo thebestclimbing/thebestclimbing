@@ -38,7 +38,7 @@ export default function ExerciseLogUpdateForm({
   const [progressHoldCountStr, setProgressHoldCountStr] = useState(
     String(initial.progress_hold_count)
   );
-  const [attemptCount, setAttemptCount] = useState(initial.attempt_count);
+  const [attemptCountStr, setAttemptCountStr] = useState(String(Math.max(1, initial.attempt_count)));
   const [isRoundTrip, setIsRoundTrip] = useState(initial.is_round_trip);
   const [roundTripCount, setRoundTripCount] = useState(initial.round_trip_count);
   const [loggedAt, setLoggedAt] = useState(initial.logged_at);
@@ -57,7 +57,7 @@ export default function ExerciseLogUpdateForm({
       .update({
         route_id: routeId,
         progress_hold_count: progressHoldCount,
-        attempt_count: attemptCount,
+        attempt_count: Math.max(1, parseInt(attemptCountStr, 10) || 1),
         is_round_trip: isRoundTrip,
         round_trip_count: roundTripCount,
         logged_at: loggedAt,
@@ -106,7 +106,7 @@ export default function ExerciseLogUpdateForm({
         </div>
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">등반횟수</label>
-          <input type="number" min={1} value={attemptCount} onChange={(e) => setAttemptCount(Number(e.target.value))} className="input-base" />
+          <input type="number" min={1} value={attemptCountStr} onChange={(e) => setAttemptCountStr(e.target.value)} className="input-base" />
         </div>
         <div className="flex items-center gap-2 sm:col-span-2">
           <input type="checkbox" id="isRoundTrip" checked={isRoundTrip} onChange={(e) => setIsRoundTrip(e.target.checked)} className="rounded border-[var(--border)]" />

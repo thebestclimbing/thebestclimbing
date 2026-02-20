@@ -34,9 +34,15 @@ export default async function ExerciseDetailPage({
     .eq("id", id)
     .single();
 
-  if (error || !log || (log as { profile_id: string }).profile_id !== user.id) {
-    notFound();
-  }
+  const profileId = (log as { profile_id: string })?.profile_id;
+  if (error || !log) notFound();
+  const { data: myProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const isAdmin = myProfile?.role === "admin";
+  if (profileId !== user.id && !isAdmin) notFound();
 
   const raw = log as unknown as {
     id: string;
@@ -117,25 +123,27 @@ export default async function ExerciseDetailPage({
             </dd>
           </div>
         </dl>
-        <div className="mt-6">
-          <ExerciseLogEdit
-            logId={row.id}
-            profileId={row.profile_id}
-            initial={{
-              route_id: row.route_id,
-              progress_hold_count: row.progress_hold_count,
-              attempt_count: row.attempt_count,
-              is_completed: row.is_completed,
-              is_round_trip: row.is_round_trip,
-              round_trip_count: row.round_trip_count,
-              logged_at: row.logged_at,
-            }}
-          />
-        </div>
+        {profileId === user.id && (
+          <div className="mt-6">
+            <ExerciseLogEdit
+              logId={row.id}
+              profileId={row.profile_id}
+              initial={{
+                route_id: row.route_id,
+                progress_hold_count: row.progress_hold_count,
+                attempt_count: row.attempt_count,
+                is_completed: row.is_completed,
+                is_round_trip: row.is_round_trip,
+                round_trip_count: row.round_trip_count,
+                logged_at: row.logged_at,
+              }}
+            />
+          </div>
+        )}
       </div>
       <p className="mt-6">
         <Link
-          href="/exercise"
+          href={profileId === user.id ? "/exercise" : `/exercise/members?profileId=${encodeURIComponent(profileId)}`}
           className="text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
         >
           목록으로

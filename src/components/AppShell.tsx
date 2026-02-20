@@ -147,6 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [exerciseOpen, setExerciseOpen] = useState(false);
 
   const isAuthPage = pathname === "/login" || pathname === "/member/register";
   const hideTabBar =
@@ -188,12 +189,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         메인
       </Link>
-      <Link
-        href="/exercise"
-        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/exercise") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
-      >
-        운동일지
-      </Link>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setExerciseOpen((o) => !o)}
+          className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/exercise") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        >
+          운동일지 ▾
+        </button>
+        <AnimatePresence>
+          {exerciseOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                aria-hidden
+                onClick={() => setExerciseOpen(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="absolute left-0 top-full z-50 mt-1 min-w-[160px] rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2 shadow-lg"
+              >
+                <Link
+                  href="/exercise"
+                  onClick={() => setExerciseOpen(false)}
+                  className={`block px-4 py-2 text-sm ${pathname === "/exercise" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk)]"} hover:bg-[var(--surface-muted)]`}
+                >
+                  나의 운동일지
+                </Link>
+                <Link
+                  href="/exercise/members"
+                  onClick={() => setExerciseOpen(false)}
+                  className={`block px-4 py-2 text-sm ${pathname.startsWith("/exercise/members") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk)]"} hover:bg-[var(--surface-muted)]`}
+                >
+                  회원 운동일지
+                </Link>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
       <Link
         href="/attendance"
         className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/attendance" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
@@ -401,9 +437,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link href="/" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   메인
                 </Link>
-                <Link href="/exercise" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  운동일지
+                <div className="my-2 border-t border-[var(--border)] pt-2">
+                <span className="px-4 py-2 block text-xs font-medium text-[var(--chalk-muted)]">운동일지</span>
+                <Link href="/exercise" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                  나의 운동일지
                 </Link>
+                <Link href="/exercise/members" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                  회원 운동일지
+                </Link>
+              </div>
                 <Link href="/attendance" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   출석
                 </Link>

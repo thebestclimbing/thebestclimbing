@@ -24,6 +24,26 @@ export default async function MemberPage() {
     );
   }
 
+  // 완등한 루트의 랭크포인트 합산 (루트당 1회만 카운트 — 최초 완등 기준)
+  const { data: completedLogs } = await supabase
+    .from("exercise_logs")
+    .select("route_id, route:routes(rank_point)")
+    .eq("profile_id", user.id)
+    .eq("is_completed", true);
+
+  const completedRouteIds = new Set<string>();
+  let rankPointSum = 0;
+  for (const row of completedLogs ?? []) {
+    const r = row as { route_id: string; route: { rank_point: number | null } | { rank_point: number | null }[] };
+    const route = Array.isArray(r.route) ? r.route[0] : r.route;
+    const point = route?.rank_point;
+    if (point == null || typeof point !== "number") continue;
+    if (!completedRouteIds.has(r.route_id)) {
+      completedRouteIds.add(r.route_id);
+      rankPointSum += point;
+    }
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-[var(--chalk)]">
@@ -55,6 +75,12 @@ export default async function MemberPage() {
               {profile.membership_start && profile.membership_end
                 ? `${profile.membership_start} ~ ${profile.membership_end}`
                 : "-"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-[var(--chalk-muted)]">랭크</dt>
+            <dd className="font-medium text-[var(--chalk)]">
+              {rankPointSum > 0 ? `${rankPointSum} pt` : "0 pt"}
             </dd>
           </div>
         </dl>

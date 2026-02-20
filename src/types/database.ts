@@ -37,6 +37,7 @@ export interface Route {
   grade_detail: GradeDetail;
   name: string;
   hold_count: number;
+  rank_point: number | null;
   created_at: string;
   updated_at: string;
 }

@@ -29,7 +29,7 @@ export default function ExerciseLogForm({
   const router = useRouter();
   const [routeId, setRouteId] = useState("");
   const [progressHoldCountStr, setProgressHoldCountStr] = useState("");
-  const [attemptCount, setAttemptCount] = useState(1);
+  const [attemptCountStr, setAttemptCountStr] = useState("1");
   const [isRoundTrip, setIsRoundTrip] = useState(false);
   const [roundTripCount, setRoundTripCount] = useState(0);
   const [loggedAt, setLoggedAt] = useState(
@@ -52,7 +52,7 @@ export default function ExerciseLogForm({
       profile_id: profileId,
       route_id: routeId,
       progress_hold_count: progressHoldCount,
-      attempt_count: attemptCount,
+      attempt_count: Math.max(1, parseInt(attemptCountStr, 10) || 1),
       is_completed: false,
       completion_requested: false,
       is_round_trip: isRoundTrip,
@@ -67,7 +67,7 @@ export default function ExerciseLogForm({
     router.refresh();
     setRouteId("");
     setProgressHoldCountStr("");
-    setAttemptCount(1);
+    setAttemptCountStr("1");
     setIsRoundTrip(false);
     setRoundTripCount(0);
     setLoggedAt(new Date().toISOString().slice(0, 10));
@@ -116,7 +116,7 @@ export default function ExerciseLogForm({
         </div>
         <div>
           <label className="mb-1 block text-sm text-[var(--chalk-muted)]">등반횟수</label>
-          <input type="number" min={1} value={attemptCount} onChange={(e) => setAttemptCount(Number(e.target.value))} className="input-base" />
+          <input type="number" min={1} value={attemptCountStr} onChange={(e) => setAttemptCountStr(e.target.value)} className="input-base" />
         </div>
         <div className="flex items-center gap-2 sm:col-span-2">
           <input type="checkbox" id="isRoundTrip" checked={isRoundTrip} onChange={(e) => setIsRoundTrip(e.target.checked)} className="rounded border-[var(--border)]" />

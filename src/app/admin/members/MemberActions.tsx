@@ -37,6 +37,23 @@ function addDays(isoDate: string | null, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** 회원권이 이미 만료되었는지 (종료일 없거나 오늘 > 종료일) */
+function isMembershipExpired(membershipEnd: string | null): boolean {
+  if (!membershipEnd) return true;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = new Date(membershipEnd + "T12:00:00");
+  end.setHours(0, 0, 0, 0);
+  return today > end;
+}
+
+/** 연장 모달용 종료일 계산: 미만료면 기존 종료일+연장개월, 만료됐으면 오늘+연장개월 */
+function getExtendedEndDate(membershipEnd: string | null, extendMonths: number): string {
+  const today = todayISO();
+  if (isMembershipExpired(membershipEnd)) return addMonths(today, extendMonths);
+  return addMonths(membershipEnd, extendMonths);
+}
+
 function daysBetween(fromDate: string, toDate: string): number {
   const from = new Date(fromDate + "T12:00:00").getTime();
   const to = new Date(toDate + "T12:00:00").getTime();
@@ -83,11 +100,10 @@ export function MemberActions({
   useEffect(() => {
     if (extendModalOpen) {
       setExtendMonths(1);
-      setModalStart(profile.membership_start ?? todayISO());
-      const endPlus1 = addMonths(profile.membership_end, 1);
-      setModalEnd(addDays(endPlus1, -1));
+      setModalStart(todayISO());
+      setModalEnd(getExtendedEndDate(profile.membership_end, 1));
     }
-  }, [extendModalOpen, profile.membership_start, profile.membership_end]);
+  }, [extendModalOpen, profile.membership_end]);
 
   async function saveMembershipDates() {
     setError("");
@@ -113,9 +129,8 @@ export function MemberActions({
 
   function applyExtendMonths(months: 1 | 3) {
     setExtendMonths(months);
-    setModalStart(profile.membership_start ?? todayISO());
-    const endPlusMonths = addMonths(profile.membership_end, months);
-    setModalEnd(addDays(endPlusMonths, -1));
+    setModalStart(todayISO());
+    setModalEnd(getExtendedEndDate(profile.membership_end, months));
   }
 
   async function setPaused(paused: boolean) {
@@ -307,6 +322,16 @@ export function MemberActions({
           <div className="fixed left-1/2 top-1/2 z-50 w-[min(90vw,360px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-xl">
             <h3 className="mb-4 text-base font-semibold text-[var(--chalk)]">회원권 연장</h3>
 
+            <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2.5">
+              <p className="mb-1.5 text-xs font-medium text-[var(--chalk-muted)]">기존 저장된 회원권</p>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                <dt className="text-[var(--chalk-muted)]">시작일</dt>
+                <dd className="text-[var(--chalk)]">{profile.membership_start ?? "-"}</dd>
+                <dt className="text-[var(--chalk-muted)]">종료일</dt>
+                <dd className="text-[var(--chalk)]">{profile.membership_end ?? "-"}</dd>
+              </dl>
+            </div>
+
             <div className="mb-4 space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-[var(--chalk-muted)]">
@@ -356,8 +381,8 @@ export function MemberActions({
               <button
                 type="button"
                 onClick={() => {
-                  setModalStart(profile.membership_start ?? todayISO());
-                  setModalEnd(profile.membership_end ?? todayISO());
+                  setModalStart(todayISO());
+                  setModalEnd(getExtendedEndDate(profile.membership_end, extendMonths));
                 }}
                 disabled={!!loading}
                 className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--chalk)] transition hover:bg-[var(--surface-muted)] disabled:opacity-50"

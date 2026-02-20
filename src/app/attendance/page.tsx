@@ -89,12 +89,30 @@ export default function AttendancePage() {
     }
   }
 
+  function isMembershipExpired(membershipEnd: string | null): boolean {
+    if (!membershipEnd) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(membershipEnd + "T12:00:00");
+    end.setHours(0, 0, 0, 0);
+    return today > end;
+  }
+
   async function submitAttendance(
     tail4: string,
     profileId: string,
     _profileName: string,
-    _membershipEnd: string | null
+    membershipEnd: string | null
   ) {
+    if (isMembershipExpired(membershipEnd)) {
+      setMessage({
+        type: "error",
+        text: "회원권이 종료되었습니다. 출석체크가 불가능합니다. 회원권 갱신 후 이용해 주세요.",
+      });
+      setSelectModal(null);
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
     const res = await fetch("/api/attendance", {
