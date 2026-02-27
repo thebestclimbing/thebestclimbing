@@ -22,6 +22,29 @@ const TabIcons = {
       </svg>
     ),
   },
+  trophy: {
+    outline: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-6 h-6"
+      >
+        <path d="M8 21h8M9 17h6M9 5V3h6v2" />
+        <path d="M7 5h10v3a5 5 0 0 1-10 0z" />
+        <path d="M5 5H4a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4" />
+        <path d="M19 5h1a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4" />
+      </svg>
+    ),
+    filled: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path d="M18 4V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v1H3a1 1 0 0 0-1 1v2a5 5 0 0 0 5 5 6 6 0 0 0 4 4.9V18H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.1A6 6 0 0 0 17 12a5 5 0 0 0 5-5V5a1 1 0 0 0-1-1zm-2 5a4 4 0 0 1-8 0V5h8zm3-2a3 3 0 0 1-2.83 3A6 6 0 0 0 16 7V5h3zM4 5h3v2a6 6 0 0 0-2.17 3A3 3 0 0 1 4 7z" />
+      </svg>
+    ),
+  },
   list: {
     outline: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
@@ -83,6 +106,7 @@ const TAB_ITEMS = [
   { href: "/", label: "메인", icon: "home" as keyof typeof TabIcons },
   { href: "/exercise", label: "운동일지", icon: "list" as keyof typeof TabIcons },
   { href: "/attendance", label: "출석", icon: "check" as keyof typeof TabIcons },
+  { href: "/statistics/ranking", label: "랭킹", icon: "trophy" as keyof typeof TabIcons },
   { href: "/board", label: "게시판", icon: "bubble" as keyof typeof TabIcons },
   { href: "/member", label: "마이", icon: "person" as keyof typeof TabIcons },
 ] as const;
