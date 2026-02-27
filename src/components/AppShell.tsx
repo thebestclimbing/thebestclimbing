@@ -254,6 +254,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         공지
       </Link>
+      <Link
+        href="/statistics/ranking"
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/statistics/ranking" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+      >
+        랭킹 순위
+      </Link>
       <div className="relative">
         <button
           type="button"
@@ -457,6 +463,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
                 <Link href="/notice" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   공지
+                </Link>
+                <Link href="/statistics/ranking" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                  랭킹 순위
                 </Link>
                 <div className="my-2 border-t border-[var(--border)]" />
                 <span className="px-4 py-2 text-xs font-medium text-[var(--chalk-muted)]">통계</span>

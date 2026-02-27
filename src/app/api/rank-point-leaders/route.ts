@@ -1,72 +1,26 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
-
-export type RankPointLeader = { rank: number; name: string; point: number };
+import { getRankPointLeaders, getRankPointLeadersPaginated } from "@/lib/rank-point-leaders";
 
 /**
  * GET /api/rank-point-leaders
- * 완등한 루트의 랭크포인트 합계(루트당 1회만) 상위 3명 반환
- * 반환: { leaders: RankPointLeader[] }
+ * - ?limit=N : 상위 N명 (메인 위젯용), 응답 { leaders }
+ * - ?page=N&size=M : 페이지네이션, 응답 { leaders, total }
  */
-export async function GET() {
-  let supabase;
-  try {
-    supabase = createAdminClient();
-  } catch {
-    return NextResponse.json(
-      { error: "설정이 되어 있지 않습니다. (SUPABASE_SERVICE_ROLE_KEY)" },
-      { status: 500 }
-    );
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const pageParam = searchParams.get("page");
+  const sizeParam = searchParams.get("size");
+  const limitParam = searchParams.get("limit");
+
+  if (pageParam != null && sizeParam != null) {
+    const page = Math.max(1, parseInt(pageParam, 10) || 1);
+    const size = Math.min(100, Math.max(1, parseInt(sizeParam, 10) || 20));
+    const q = searchParams.get("q")?.trim() || undefined;
+    const { leaders, total } = await getRankPointLeadersPaginated(page, size, q);
+    return NextResponse.json({ leaders, total });
   }
 
-  const { data: logs } = await supabase
-    .from("exercise_logs")
-    .select("profile_id, route_id, logged_at, route:routes(rank_point)")
-    .eq("is_completed", true)
-    .order("logged_at", { ascending: true });
-
-  if (!logs?.length) {
-    return NextResponse.json({ leaders: [] });
-  }
-
-  // 프로필별로 루트당 최초 1회만 랭크포인트 합산
-  const routeSeenByProfile: Record<string, Set<string>> = {};
-  const sumByProfile: Record<string, number> = {};
-
-  for (const row of logs) {
-    const profileId = row.profile_id as string;
-    const routeId = row.route_id as string;
-    const route = Array.isArray(row.route) ? row.route[0] : row.route;
-    const point = route?.rank_point;
-    if (point == null || typeof point !== "number") continue;
-
-    if (!routeSeenByProfile[profileId]) routeSeenByProfile[profileId] = new Set();
-    if (routeSeenByProfile[profileId].has(routeId)) continue;
-    routeSeenByProfile[profileId].add(routeId);
-    sumByProfile[profileId] = (sumByProfile[profileId] ?? 0) + point;
-  }
-
-  const sorted = Object.entries(sumByProfile)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3);
-
-  if (sorted.length === 0) {
-    return NextResponse.json({ leaders: [] });
-  }
-
-  const profileIds = sorted.map(([id]) => id);
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, name")
-    .in("id", profileIds);
-
-  const idToName = new Map((profiles ?? []).map((p) => [p.id, p.name]));
-
-  const leaders: RankPointLeader[] = sorted.map(([id, point], i) => ({
-    rank: i + 1,
-    name: idToName.get(id) ?? "(알 수 없음)",
-    point,
-  }));
-
+  const limit = Math.min(500, Math.max(1, parseInt(limitParam ?? "3", 10) || 3));
+  const leaders = await getRankPointLeaders(limit);
   return NextResponse.json({ leaders });
 }

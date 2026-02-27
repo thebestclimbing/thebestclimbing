@@ -265,9 +265,17 @@ export default function Home() {
             className="card flex flex-col rounded-2xl p-4 md:p-5 md:row-span-2"
             aria-label="랭킹 순위"
           >
-            <h2 className="mb-3 text-base font-semibold text-[var(--chalk)] md:text-lg">
-              랭킹 순위
-            </h2>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="text-base font-semibold text-[var(--chalk)] md:text-lg">
+                랭킹 순위
+              </h2>
+              <Link
+                href="/statistics/ranking"
+                className="shrink-0 text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
+              >
+                더보기
+              </Link>
+            </div>
             {loadingRankPoint ? (
               <div className="flex flex-1 justify-center py-6">
                 <LoadingSpinner size="md" />
