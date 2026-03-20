@@ -15,10 +15,9 @@ export default async function AdminMembersPage() {
     .single();
   if (myProfile?.role !== "admin") redirect("/");
 
-  const { data: profiles, error } = await supabase
-    .from("profiles")
-    .select("id, name, email, phone, phone_tail4, membership_start, membership_end, membership_paused, membership_paused_at, role, created_at")
-    .order("name", { ascending: true });
+  const { data: profiles, error } = await supabase.rpc(
+    "get_admin_members_with_latest_attendance"
+  );
 
   if (error) {
     return (
