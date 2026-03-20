@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     );
   }
 
-  let supabase;
+  let supabase: ReturnType<typeof createAdminClient>;
   try {
     supabase = createAdminClient();
   } catch {
@@ -45,43 +45,83 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data: profiles } = await supabase.rpc("get_profiles_for_attendance", {
-    p_tail4: tail4,
-  });
+  // 가능하면 DB 함수로 한 번에 처리 (네트워크 왕복/중복 조회 최소화)
+  async function fallbackOldLogic() {
+    const { data: profiles } = await supabase.rpc("get_profiles_for_attendance", {
+      p_tail4: tail4,
+    });
 
-  if (!profiles?.length) {
-    return NextResponse.json(
-      { error: "등록된 회원이 없습니다." },
-      { status: 404 }
-    );
-  }
-
-  const found = (profiles as { id: string; name: string; membership_end: string | null }[]).find(
-    (p) => p.id === profileId
-  );
-  if (!found) {
-    return NextResponse.json(
-      { error: "해당 전화뒷4자리와 일치하는 회원이 아닙니다." },
-      { status: 400 }
-    );
-  }
-
-  const todayKST = getTodayKST();
-  const { error: insertError } = await supabase.from("attendances").insert({
-    profile_id: profileId,
-    attended_at: todayKST,
-  });
-
-  if (insertError) {
-    if (insertError.code === "23505") {
-      return NextResponse.json({ already: true });
+    if (!profiles?.length) {
+      return NextResponse.json({ error: "등록된 회원이 없습니다." }, { status: 404 });
     }
-    return NextResponse.json({ error: insertError.message }, { status: 500 });
+
+    const found = (profiles as {
+      id: string;
+      name: string;
+      membership_end: string | null;
+    }[]).find((p) => p.id === profileId);
+
+    if (!found) {
+      return NextResponse.json(
+        { error: "해당 전화뒷4자리와 일치하는 회원이 아닙니다." },
+        { status: 400 }
+      );
+    }
+
+    const todayKST = getTodayKST();
+    const { error: insertError } = await supabase.from("attendances").insert({
+      profile_id: profileId,
+      attended_at: todayKST,
+    });
+
+    if (insertError) {
+      if (insertError.code === "23505") {
+        return NextResponse.json({ already: true });
+      }
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      profileName: found.name,
+      membershipEnd: found.membership_end ?? null,
+    });
   }
 
-  return NextResponse.json({
-    ok: true,
-    profileName: found.name,
-    membershipEnd: found.membership_end ?? null,
-  });
+  try {
+    // migration 013: insert_attendance_for_tail4(p_profile_id, p_tail4) -> 'ok' | 'already'
+    const { data: rpcData, error } = await supabase.rpc("insert_attendance_for_tail4", {
+      p_profile_id: profileId,
+      p_tail4: tail4,
+    });
+
+    if (error) {
+      return await fallbackOldLogic();
+    }
+
+    const result = typeof rpcData === "string" ? rpcData : null;
+    if (result === "already") return NextResponse.json({ already: true });
+    if (result !== "ok") return await fallbackOldLogic();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("name, membership_end")
+      .eq("id", profileId)
+      .single();
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: "회원 정보를 불러올 수 없습니다." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      profileName: profile.name,
+      membershipEnd: profile.membership_end ?? null,
+    });
+  } catch {
+    return await fallbackOldLogic();
+  }
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { formatPhone } from "@/lib/format";
@@ -11,7 +10,6 @@ const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "지우기", "0", "�
 type ProfileRow = { id: string; name: string; phone: string; membership_end: string | null };
 
 export default function AttendancePage() {
-  const router = useRouter();
   const [digits, setDigits] = useState("");
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,10 +27,9 @@ export default function AttendancePage() {
     if (!message) return;
     const t = setTimeout(() => {
       setMessage(null);
-      router.refresh();
     }, 3000);
     return () => clearTimeout(t);
-  }, [message, router]);
+  }, [message]);
 
   // PC: 키보드로 숫자/지우기/확인 입력
   useEffect(() => {
@@ -45,7 +42,6 @@ export default function AttendancePage() {
       if (message && key === "Enter") {
         e.preventDefault();
         setMessage(null);
-        router.refresh();
         return;
       }
       if (key >= "0" && key <= "9") {
@@ -188,7 +184,6 @@ export default function AttendancePage() {
 
   function closeResultModal() {
     setMessage(null);
-    router.refresh();
   }
 
   return (
