@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { deleteMember } from "./actions";
-import { formatDateKST } from "@/lib/date";
+import { formatDateKST, formatDateTimeKST } from "@/lib/date";
 
 type ProfileRow = {
   id: string;
@@ -96,6 +96,8 @@ export function MemberActions({
   const [extendMonths, setExtendMonths] = useState<1 | 3>(1);
   const [modalStart, setModalStart] = useState("");
   const [modalEnd, setModalEnd] = useState("");
+  const [latestAttendanceLoading, setLatestAttendanceLoading] = useState(false);
+  const [latestAttendanceCheckedAt, setLatestAttendanceCheckedAt] = useState<string | null>(null);
 
   useEffect(() => {
     if (extendModalOpen) {
@@ -104,6 +106,36 @@ export function MemberActions({
       setModalEnd(getExtendedEndDate(profile.membership_end, 1));
     }
   }, [extendModalOpen, profile.membership_end]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadLatestAttendance() {
+      setLatestAttendanceLoading(true);
+      setLatestAttendanceCheckedAt(null);
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("attendances")
+        .select("checked_at")
+        .eq("profile_id", profile.id)
+        .order("checked_at", { ascending: false })
+        .limit(1);
+      if (cancelled) return;
+      const row = Array.isArray(data) ? data[0] : null;
+      setLatestAttendanceCheckedAt(row?.checked_at ?? null);
+      setLatestAttendanceLoading(false);
+    }
+
+    if (detailModalOpen) {
+      loadLatestAttendance().catch(() => {
+        if (cancelled) return;
+        setLatestAttendanceCheckedAt(null);
+        setLatestAttendanceLoading(false);
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [detailModalOpen, profile.id]);
 
   async function saveMembershipDates() {
     setError("");
@@ -283,6 +315,21 @@ export function MemberActions({
               <div>
                 <dt className="text-xs font-medium text-[var(--chalk-muted)]">가입일</dt>
                 <dd className="mt-0.5 text-[var(--chalk)]">{formatDateKST(profile.created_at)}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium text-[var(--chalk-muted)]">최근 출석 일시</dt>
+                <dd className="mt-0.5 text-[var(--chalk)]">
+                  {latestAttendanceLoading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
+                      조회 중...
+                    </span>
+                  ) : latestAttendanceCheckedAt ? (
+                    formatDateTimeKST(latestAttendanceCheckedAt)
+                  ) : (
+                    "-"
+                  )}
+                </dd>
               </div>
             </dl>
             <div className="mt-6 flex gap-2 border-t border-[var(--border)] pt-4">
