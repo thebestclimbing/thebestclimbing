@@ -120,8 +120,6 @@ const TAB_ITEMS = [
   { href: "/exercise", label: "운동일지", icon: "list" as keyof typeof TabIcons },
   { href: "/attendance", label: "출석", icon: "check" as keyof typeof TabIcons },
   { href: "/feed", label: "피드", icon: "camera" as keyof typeof TabIcons },
-  { href: "/board", label: "게시판", icon: "bubble" as keyof typeof TabIcons },
-  { href: "/member", label: "마이", icon: "person" as keyof typeof TabIcons },
 ] as const;
 
 const ADMIN_LINKS = [
