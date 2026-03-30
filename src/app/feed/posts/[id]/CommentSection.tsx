@@ -44,8 +44,13 @@ export function CommentSection({
   }
 
   async function handleDelete(commentId: string) {
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
     const supabase = createClient();
-    await supabase.from("feed_comments").delete().eq("id", commentId);
+    const { error: deleteError } = await supabase.from("feed_comments").delete().eq("id", commentId);
+    if (deleteError) {
+      setError(deleteError.message);
+      return;
+    }
     router.refresh();
   }
 
