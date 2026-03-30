@@ -1,18 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FeedPost } from "./types";
 import { formatDateTimeKST } from "@/lib/date";
+import { MediaCarousel } from "./MediaCarousel";
 
 function getInitials(name: string) {
   return name.trim().slice(0, 2);
 }
 
-function cldUrl(url: string, width: number): string {
-  if (!url) return url;
-  return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
-}
-
 export function FeedPostCard({ post }: { post: FeedPost }) {
-  const firstMedia = post.media[0];
+  const router = useRouter();
 
   return (
     <div className="card rounded-2xl overflow-hidden">
@@ -37,43 +36,12 @@ export function FeedPostCard({ post }: { post: FeedPost }) {
       </div>
 
       {/* 미디어 */}
-      {firstMedia && (
-        <Link href={`/feed/posts/${post.id}`}>
-          {firstMedia.type === "video" ? (
-            <div className="relative">
-              <img
-                src={cldUrl(firstMedia.thumbnail_url, 800)}
-                alt="동영상 썸네일"
-                className="w-full aspect-square object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="rounded-full bg-black/50 p-3">
-                  <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-              </div>
-              {post.media.length > 1 && (
-                <span className="absolute top-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
-                  +{post.media.length - 1}
-                </span>
-              )}
-            </div>
-          ) : (
-            <div className="relative">
-              <img
-                src={cldUrl(firstMedia.url, 800)}
-                alt=""
-                className="w-full aspect-square object-cover"
-              />
-              {post.media.length > 1 && (
-                <span className="absolute top-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
-                  +{post.media.length - 1}
-                </span>
-              )}
-            </div>
-          )}
-        </Link>
+      {post.media.length > 0 && (
+        <MediaCarousel
+          urls={post.media.map((m) => m.url)}
+          size={600}
+          onTap={() => router.push(`/feed/posts/${post.id}`)}
+        />
       )}
 
       {/* 캡션 + 좋아요/댓글 수 */}

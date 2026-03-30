@@ -11,28 +11,53 @@ const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 const MAX_FILES = 10;
 
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const MAX_W = 1280;
+      let { width, height } = img;
+      if (width > MAX_W) {
+        height = Math.round((height * MAX_W) / width);
+        width = MAX_W;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return resolve(file);
+          resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        0.82
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+    img.src = objectUrl;
+  });
+}
+
 async function uploadToCloudinary(file: File): Promise<FeedMedia> {
+  const compressed = await compressImage(file);
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", compressed);
   formData.append("upload_preset", UPLOAD_PRESET);
 
   const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
     { method: "POST", body: formData }
   );
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error?.message ?? "Cloudinary 업로드 실패");
 
-  const isVideo = data.resource_type === "video";
-  const url: string = data.secure_url;
-  const thumbnail_url = isVideo
-    ? url.replace(/\.[^/.]+$/, ".jpg")
-    : url;
-
   return {
-    url,
-    type: isVideo ? "video" : "image",
-    thumbnail_url,
+    url: data.secure_url,
+    type: "image",
+    thumbnail_url: data.secure_url,
     public_id: data.public_id,
   };
 }
@@ -79,7 +104,7 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (previews.length === 0) {
-      setError("사진 또는 동영상을 추가해 주세요.");
+      setError("사진을 추가해 주세요.");
       return;
     }
     setError("");
@@ -120,12 +145,12 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
         </svg>
         <p className="text-sm text-[var(--chalk-muted)]">
-          사진/동영상 선택 (최대 {MAX_FILES}개)
+          사진 선택 (최대 {MAX_FILES}개)
         </p>
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*,video/*"
+          accept="image/*"
           multiple
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           onChange={handleFileChange}
@@ -137,11 +162,7 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
         <div className="mb-4 grid grid-cols-3 gap-2">
           {previews.map((p, i) => (
             <div key={p.objectUrl} className="relative aspect-square overflow-hidden rounded-lg">
-              {p.file.type.startsWith("video/") ? (
-                <video src={p.objectUrl} className="h-full w-full object-cover" muted playsInline />
-              ) : (
-                <img src={p.objectUrl} alt="" className="h-full w-full object-cover" />
-              )}
+              <img src={p.objectUrl} alt="" className="h-full w-full object-cover" />
               <button
                 type="button"
                 onClick={() => removeFile(i)}

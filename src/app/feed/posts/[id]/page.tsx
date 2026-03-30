@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FeedMedia, FeedComment } from "../../types";
 import { LikeButton } from "./LikeButton";
 import { CommentSection } from "./CommentSection";
+import { MediaSlider } from "./MediaSlider";
 import { formatDateTimeKST } from "@/lib/date";
 
 export default async function FeedPostDetailPage({
@@ -83,6 +84,7 @@ export default async function FeedPostDetailPage({
       {/* 미디어 슬라이드 */}
       {media.length > 0 && <MediaSlider media={media} />}
 
+
       {/* 캡션 */}
       {raw.caption && (
         <p className="mt-4 text-[var(--chalk)]">{raw.caption}</p>
@@ -105,37 +107,3 @@ export default async function FeedPostDetailPage({
   );
 }
 
-function cldUrl(url: string, width: number): string {
-  if (!url) return url;
-  return url.replace("/upload/", `/upload/w_${width},q_auto,f_auto/`);
-}
-
-function MediaSlider({ media }: { media: FeedMedia[] }) {
-  if (media.length === 1) {
-    const m = media[0];
-    return m.type === "video" ? (
-      <video
-        src={m.url}
-        controls
-        playsInline
-        className="w-full rounded-xl"
-        style={{ maxHeight: "70vh" }}
-      />
-    ) : (
-      <img src={cldUrl(m.url, 1200)} alt="" className="w-full rounded-xl object-contain" style={{ maxHeight: "70vh" }} />
-    );
-  }
-  return (
-    <div className="grid grid-cols-2 gap-1 rounded-xl overflow-hidden">
-      {media.map((m, i) => (
-        <div key={i} className="aspect-square overflow-hidden">
-          {m.type === "video" ? (
-            <video src={m.url} controls playsInline className="h-full w-full object-cover" />
-          ) : (
-            <img src={cldUrl(m.url, 600)} alt="" className="h-full w-full object-cover" />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}

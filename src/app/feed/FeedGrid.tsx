@@ -3,7 +3,7 @@ import { FeedPost } from "./types";
 
 function cldUrl(url: string, width: number): string {
   if (!url) return url;
-  return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
+  return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto:low,f_auto/`);
 }
 
 export function FeedGrid({ posts }: { posts: FeedPost[] }) {
@@ -16,9 +16,10 @@ export function FeedGrid({ posts }: { posts: FeedPost[] }) {
             {firstMedia ? (
               <>
                 <img
-                  src={cldUrl(firstMedia.thumbnail_url, 400)}
+                  src={cldUrl(firstMedia.thumbnail_url, 300)}
                   alt=""
                   className="h-full w-full object-cover transition hover:opacity-90"
+                  loading="lazy"
                 />
                 {firstMedia.type === "video" && (
                   <div className="absolute top-1.5 right-1.5">
