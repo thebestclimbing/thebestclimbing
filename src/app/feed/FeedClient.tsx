@@ -94,7 +94,7 @@ export function FeedClient({
       {view === "card" && (
         <div className="flex flex-col gap-4">
           {posts.map((post) => (
-            <FeedPostCard key={post.id} post={post} />
+            <FeedPostCard key={post.id} post={post} currentUserId={currentUserId} />
           ))}
         </div>
       )}

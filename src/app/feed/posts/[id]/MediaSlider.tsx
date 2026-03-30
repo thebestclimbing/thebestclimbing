@@ -46,6 +46,9 @@ export function MediaSlider({ media }: { media: FeedMedia[] }) {
           </div>
         ))}
       </div>
+      <span className="absolute right-2 top-2 rounded-full bg-black/50 px-2 py-0.5 text-xs font-medium text-white pointer-events-none">
+        {idx + 1}/{media.length}
+      </span>
       <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
         {media.map((_, i) => (
           <span
