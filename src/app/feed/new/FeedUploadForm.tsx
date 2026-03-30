@@ -115,10 +115,7 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
   return (
     <form onSubmit={handleSubmit} className="card rounded-2xl p-6">
       {/* 파일 선택 영역 */}
-      <div
-        className="mb-4 flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface-muted)] transition hover:border-[var(--primary)]"
-        onClick={() => fileInputRef.current?.click()}
-      >
+      <div className="relative mb-4 flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface-muted)] transition hover:border-[var(--primary)]">
         <svg className="mb-2 h-10 w-10 text-[var(--chalk-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
         </svg>
@@ -130,7 +127,7 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
           type="file"
           accept="image/*,video/*"
           multiple
-          className="hidden"
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           onChange={handleFileChange}
         />
       </div>
@@ -141,7 +138,7 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
           {previews.map((p, i) => (
             <div key={p.objectUrl} className="relative aspect-square overflow-hidden rounded-lg">
               {p.file.type.startsWith("video/") ? (
-                <video src={p.objectUrl} className="h-full w-full object-cover" muted />
+                <video src={p.objectUrl} className="h-full w-full object-cover" muted playsInline />
               ) : (
                 <img src={p.objectUrl} alt="" className="h-full w-full object-cover" />
               )}
