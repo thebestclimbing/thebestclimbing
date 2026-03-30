@@ -100,13 +100,26 @@ const TabIcons = {
       </svg>
     ),
   },
+  camera: {
+    outline: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+        <circle cx="12" cy="13" r="4" />
+      </svg>
+    ),
+    filled: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path d="M12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9-1h-3.17l-1.24-1.35A2 2 0 0 0 15.12 6H8.88a2 2 0 0 0-1.47.65L6.17 8H3a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM12 19a6 6 0 1 1 0-12 6 6 0 0 1 0 12z" />
+      </svg>
+    ),
+  },
 };
 
 const TAB_ITEMS = [
   { href: "/", label: "메인", icon: "home" as keyof typeof TabIcons },
   { href: "/exercise", label: "운동일지", icon: "list" as keyof typeof TabIcons },
   { href: "/attendance", label: "출석", icon: "check" as keyof typeof TabIcons },
-  { href: "/statistics/ranking", label: "랭킹", icon: "trophy" as keyof typeof TabIcons },
+  { href: "/feed", label: "피드", icon: "camera" as keyof typeof TabIcons },
   { href: "/board", label: "게시판", icon: "bubble" as keyof typeof TabIcons },
   { href: "/member", label: "마이", icon: "person" as keyof typeof TabIcons },
 ] as const;
@@ -180,7 +193,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/board/") ||
     pathname.startsWith("/notice/") ||
     pathname.startsWith("/gallery/") ||
-    pathname.startsWith("/exercise/");
+    pathname.startsWith("/exercise/") ||
+    pathname.startsWith("/feed/posts/") ||
+    pathname.startsWith("/feed/users/") ||
+    pathname === "/feed/new";
 
   useEffect(() => {
     const supabase = createClient();
@@ -271,6 +287,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/board") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
         게시판
+      </Link>
+      <Link
+        href="/feed"
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/feed") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+      >
+        피드
       </Link>
       <Link
         href="/notice"
@@ -484,6 +506,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
                 <Link href="/board" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   게시판
+                </Link>
+                <Link href="/feed" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                  피드
                 </Link>
                 <Link href="/notice" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   공지
