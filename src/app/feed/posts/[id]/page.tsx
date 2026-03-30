@@ -5,6 +5,7 @@ import { FeedMedia, FeedComment } from "../../types";
 import { LikeButton } from "./LikeButton";
 import { CommentSection } from "./CommentSection";
 import { MediaSlider } from "./MediaSlider";
+import { DeletePostButton } from "./DeletePostButton";
 import { formatDateTimeKST } from "@/lib/date";
 
 export default async function FeedPostDetailPage({
@@ -76,9 +77,12 @@ export default async function FeedPostDetailPage({
           </Link>
           <p className="text-xs text-[var(--chalk-muted)]">{formatDateTimeKST(raw.created_at)}</p>
         </div>
-        <Link href="/feed" className="ml-auto text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]">
-          목록
-        </Link>
+        <div className="ml-auto flex items-center gap-3">
+          {user?.id === raw.author_id && <DeletePostButton postId={raw.id} />}
+          <Link href="/feed" className="text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]">
+            목록
+          </Link>
+        </div>
       </div>
 
       {/* 미디어 슬라이드 */}
