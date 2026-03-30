@@ -583,7 +583,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {TAB_ITEMS.map((item) => {
               const active =
                 pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
-              const isMyTab = item.href === "/member";
               return (
                 <Link
                   key={item.href}
@@ -591,11 +590,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition ${active ? "text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
                 >
                   <span className="flex items-center justify-center">
-                    {isMyTab ? (
-                      <MyAvatar name={profileName} size="md" active={active} />
-                    ) : (
-                      active ? TabIcons[item.icon].filled : TabIcons[item.icon].outline
-                    )}
+                    {active ? TabIcons[item.icon].filled : TabIcons[item.icon].outline}
                   </span>
                   <span className={`text-xs ${active ? "font-semibold" : ""}`}>{item.label}</span>
                 </Link>
