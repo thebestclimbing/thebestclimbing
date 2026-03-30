@@ -20,8 +20,8 @@ async function uploadToCloudinary(file: File): Promise<FeedMedia> {
     `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
     { method: "POST", body: formData }
   );
-  if (!res.ok) throw new Error("Cloudinary 업로드 실패");
   const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message ?? "Cloudinary 업로드 실패");
 
   const isVideo = data.resource_type === "video";
   const url: string = data.secure_url;

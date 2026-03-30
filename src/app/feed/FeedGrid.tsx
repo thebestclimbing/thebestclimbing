@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { FeedPost } from "./types";
 
+function cldUrl(url: string, width: number): string {
+  if (!url) return url;
+  return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
+}
+
 export function FeedGrid({ posts }: { posts: FeedPost[] }) {
   return (
     <div className="grid grid-cols-3 gap-0.5">
@@ -11,7 +16,7 @@ export function FeedGrid({ posts }: { posts: FeedPost[] }) {
             {firstMedia ? (
               <>
                 <img
-                  src={firstMedia.thumbnail_url}
+                  src={cldUrl(firstMedia.thumbnail_url, 400)}
                   alt=""
                   className="h-full w-full object-cover transition hover:opacity-90"
                 />

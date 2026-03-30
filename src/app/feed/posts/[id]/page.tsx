@@ -105,6 +105,11 @@ export default async function FeedPostDetailPage({
   );
 }
 
+function cldUrl(url: string, width: number): string {
+  if (!url) return url;
+  return url.replace("/upload/", `/upload/w_${width},q_auto,f_auto/`);
+}
+
 function MediaSlider({ media }: { media: FeedMedia[] }) {
   if (media.length === 1) {
     const m = media[0];
@@ -112,11 +117,12 @@ function MediaSlider({ media }: { media: FeedMedia[] }) {
       <video
         src={m.url}
         controls
+        playsInline
         className="w-full rounded-xl"
         style={{ maxHeight: "70vh" }}
       />
     ) : (
-      <img src={m.url} alt="" className="w-full rounded-xl object-contain" style={{ maxHeight: "70vh" }} />
+      <img src={cldUrl(m.url, 1200)} alt="" className="w-full rounded-xl object-contain" style={{ maxHeight: "70vh" }} />
     );
   }
   return (
@@ -124,9 +130,9 @@ function MediaSlider({ media }: { media: FeedMedia[] }) {
       {media.map((m, i) => (
         <div key={i} className="aspect-square overflow-hidden">
           {m.type === "video" ? (
-            <video src={m.url} controls className="h-full w-full object-cover" />
+            <video src={m.url} controls playsInline className="h-full w-full object-cover" />
           ) : (
-            <img src={m.url} alt="" className="h-full w-full object-cover" />
+            <img src={cldUrl(m.url, 600)} alt="" className="h-full w-full object-cover" />
           )}
         </div>
       ))}

@@ -6,6 +6,11 @@ function getInitials(name: string) {
   return name.trim().slice(0, 2);
 }
 
+function cldUrl(url: string, width: number): string {
+  if (!url) return url;
+  return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
+}
+
 export function FeedPostCard({ post }: { post: FeedPost }) {
   const firstMedia = post.media[0];
 
@@ -37,7 +42,7 @@ export function FeedPostCard({ post }: { post: FeedPost }) {
           {firstMedia.type === "video" ? (
             <div className="relative">
               <img
-                src={firstMedia.thumbnail_url}
+                src={cldUrl(firstMedia.thumbnail_url, 800)}
                 alt="동영상 썸네일"
                 className="w-full aspect-square object-cover"
               />
@@ -57,7 +62,7 @@ export function FeedPostCard({ post }: { post: FeedPost }) {
           ) : (
             <div className="relative">
               <img
-                src={firstMedia.url}
+                src={cldUrl(firstMedia.url, 800)}
                 alt=""
                 className="w-full aspect-square object-cover"
               />
