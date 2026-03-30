@@ -47,6 +47,7 @@ ALTER TABLE public.feed_comments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "피드 읽기" ON public.feed_posts FOR SELECT TO authenticated USING (true);
 CREATE POLICY "피드 작성" ON public.feed_posts FOR INSERT WITH CHECK (auth.uid() = author_id);
 CREATE POLICY "피드 삭제" ON public.feed_posts FOR DELETE USING (auth.uid() = author_id);
+CREATE POLICY "피드 수정" ON public.feed_posts FOR UPDATE USING (auth.uid() = author_id) WITH CHECK (auth.uid() = author_id);
 
 -- feed_likes RLS
 CREATE POLICY "좋아요 읽기" ON public.feed_likes FOR SELECT TO authenticated USING (true);
