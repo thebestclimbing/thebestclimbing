@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -45,6 +45,13 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    return () => {
+      previews.forEach((p) => URL.revokeObjectURL(p.objectUrl));
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -132,7 +139,7 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
       {previews.length > 0 && (
         <div className="mb-4 grid grid-cols-3 gap-2">
           {previews.map((p, i) => (
-            <div key={i} className="relative aspect-square overflow-hidden rounded-lg">
+            <div key={p.objectUrl} className="relative aspect-square overflow-hidden rounded-lg">
               {p.file.type.startsWith("video/") ? (
                 <video src={p.objectUrl} className="h-full w-full object-cover" muted />
               ) : (
