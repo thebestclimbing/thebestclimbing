@@ -70,10 +70,8 @@ export default function Home() {
   const [monthly, setMonthly] = useState<CompleterDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [attendanceKingName, setAttendanceKingName] = useState<string | null>(null);
-  const [attendanceKingCount, setAttendanceKingCount] = useState<number>(0);
-  const [holdKingName, setHoldKingName] = useState<string | null>(null);
-  const [holdKingCount, setHoldKingCount] = useState<number>(0);
+  const [attendanceKingLeaders, setAttendanceKingLeaders] = useState<{ rank: number; name: string; count: number }[]>([]);
+  const [holdKingLeaders, setHoldKingLeaders] = useState<{ rank: number; name: string; count: number }[]>([]);
   const [loadingAttendanceKing, setLoadingAttendanceKing] = useState(true);
   const [loadingHoldKing, setLoadingHoldKing] = useState(true);
   const [latestNotices, setLatestNotices] = useState<{
@@ -143,11 +141,9 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     fetch("/api/attendance-king")
-      .then((res) => (res.ok ? res.json() : { name: null, count: 0 }))
+      .then((res) => (res.ok ? res.json() : { leaders: [] }))
       .then((data) => {
-        if (cancelled) return;
-        if (data?.name != null) setAttendanceKingName(data.name);
-        setAttendanceKingCount(typeof data?.count === "number" ? data.count : 0);
+        if (!cancelled && Array.isArray(data?.leaders)) setAttendanceKingLeaders(data.leaders);
       })
       .catch(() => {})
       .finally(() => {
@@ -161,11 +157,9 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     fetch("/api/hold-king")
-      .then((res) => (res.ok ? res.json() : { name: null, count: 0 }))
+      .then((res) => (res.ok ? res.json() : { leaders: [] }))
       .then((data) => {
-        if (cancelled) return;
-        if (data?.name != null) setHoldKingName(data.name);
-        setHoldKingCount(typeof data?.count === "number" ? data.count : 0);
+        if (!cancelled && Array.isArray(data?.leaders)) setHoldKingLeaders(data.leaders);
       })
       .catch(() => {})
       .finally(() => {
@@ -264,7 +258,7 @@ export default function Home() {
           aria-label="랭킹 순위 및 출석왕·홀드왕"
         >
           <div
-            className="card flex flex-col rounded-2xl p-4 md:p-5 md:row-span-2"
+            className="card flex flex-col rounded-2xl p-4 md:p-5"
             aria-label="랭킹 순위"
           >
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -299,37 +293,51 @@ export default function Home() {
               </ul>
             )}
           </div>
-          <div className="card flex min-h-[72px] flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 출석왕`}>
-            <h2 className="mb-1 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
-              {currentMonthLabel}의 출석왕
-            </h2>
-            {loadingAttendanceKing ? (
-              <div className="flex flex-1 items-center justify-center py-2">
-                <LoadingSpinner size="md" />
-              </div>
-            ) : (
-              <p className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
-                {attendanceKingName != null
-                  ? `${attendanceKingName} (${attendanceKingCount}회)`
-                  : "없음"}
-              </p>
-            )}
-          </div>
-          <div className="card flex min-h-[72px] flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 홀드왕`}>
-            <h2 className="mb-1 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
-              {currentMonthLabel}의 홀드왕
-            </h2>
-            {loadingHoldKing ? (
-              <div className="flex flex-1 items-center justify-center py-2">
-                <LoadingSpinner size="md" />
-              </div>
-            ) : (
-              <p className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
-                {holdKingName != null
-                  ? `${holdKingName} (${holdKingCount}개)`
-                  : "없음"}
-              </p>
-            )}
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
+            <div className="card flex flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 출석왕`}>
+              <h2 className="mb-3 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
+                {currentMonthLabel}의 출석왕
+              </h2>
+              {loadingAttendanceKing ? (
+                <div className="flex flex-1 items-center justify-center py-2">
+                  <LoadingSpinner size="md" />
+                </div>
+              ) : attendanceKingLeaders.length === 0 ? (
+                <p className="py-1 text-[var(--chalk-muted)]">없음</p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {attendanceKingLeaders.map((l) => (
+                    <li key={l.name} className="flex items-center justify-between rounded-lg bg-[var(--surface-muted)]/50 px-2 py-2 md:px-3">
+                      <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
+                      <span className="truncate px-1 font-medium text-[var(--chalk)]">{l.name}</span>
+                      <span className="shrink-0 text-sm text-[var(--chalk-muted)]">{l.count}회</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="card flex flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 홀드왕`}>
+              <h2 className="mb-3 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
+                {currentMonthLabel}의 홀드왕
+              </h2>
+              {loadingHoldKing ? (
+                <div className="flex flex-1 items-center justify-center py-2">
+                  <LoadingSpinner size="md" />
+                </div>
+              ) : holdKingLeaders.length === 0 ? (
+                <p className="py-1 text-[var(--chalk-muted)]">없음</p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {holdKingLeaders.map((l) => (
+                    <li key={l.name} className="flex items-center justify-between rounded-lg bg-[var(--surface-muted)]/50 px-2 py-2 md:px-3">
+                      <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
+                      <span className="truncate px-1 font-medium text-[var(--chalk)]">{l.name}</span>
+                      <span className="shrink-0 text-sm text-[var(--chalk-muted)]">{l.count}개</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </section>
 

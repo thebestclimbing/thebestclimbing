@@ -4,8 +4,8 @@ import { getMonthStartEndKST } from "@/lib/date";
 
 /**
  * GET /api/hold-king
- * 이달(한국 시간 기준) 진행한 홀드 수(progress_hold_count 합계)가 가장 많은 회원의 성명·홀드 총 개수 반환
- * 반환: { name: string | null, count: number }
+ * 이달(한국 시간 기준) 진행한 홀드 수(progress_hold_count 합계) 상위 3명 반환
+ * 반환: { leaders: { rank: number; name: string; count: number }[] }
  */
 export async function GET() {
   let supabase;
@@ -27,7 +27,7 @@ export async function GET() {
     .lte("logged_at", monthEnd);
 
   if (!rows?.length) {
-    return NextResponse.json({ name: null, count: 0 });
+    return NextResponse.json({ leaders: [] });
   }
 
   const sumByProfile: Record<string, number> = {};
@@ -37,27 +37,25 @@ export async function GET() {
     sumByProfile[id] = (sumByProfile[id] ?? 0) + count;
   }
 
-  let topProfileId: string | null = null;
-  let maxSum = 0;
-  for (const [id, sum] of Object.entries(sumByProfile)) {
-    if (sum > maxSum) {
-      maxSum = sum;
-      topProfileId = id;
-    }
-  }
+  const sorted = Object.entries(sumByProfile).sort((a, b) => b[1] - a[1]);
+  const top3 = sorted.slice(0, 3);
 
-  if (!topProfileId) {
-    return NextResponse.json({ name: null, count: 0 });
-  }
-
-  const { data: profile } = await supabase
+  const profileIds = top3.map(([id]) => id);
+  const { data: profiles } = await supabase
     .from("profiles")
-    .select("name")
-    .eq("id", topProfileId)
-    .single();
+    .select("id, name")
+    .in("id", profileIds);
 
-  return NextResponse.json({
-    name: profile?.name ?? null,
-    count: maxSum,
-  });
+  const nameById: Record<string, string> = {};
+  for (const p of profiles ?? []) {
+    nameById[p.id] = p.name ?? "";
+  }
+
+  const leaders = top3.map(([id, count]) => ({
+    rank: sorted.findIndex(([, c]) => c === count) + 1,
+    name: nameById[id] ?? "",
+    count,
+  }));
+
+  return NextResponse.json({ leaders });
 }
