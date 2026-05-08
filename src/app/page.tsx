@@ -217,9 +217,9 @@ export default function Home() {
             </h2>
             <Link
               href="/notice"
-              className="shrink-0 text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
+              className="shrink-0 mr-2 text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
             >
-              전체 보기
+              더보기
             </Link>
           </div>
           <div className="card rounded-2xl divide-y divide-[var(--border)]">
@@ -283,11 +283,11 @@ export default function Home() {
                 {rankPointLeaders.map((l) => (
                   <li
                     key={l.rank}
-                    className="flex items-center justify-between rounded-lg bg-[var(--surface-muted)]/50 px-3 py-2 md:px-4 md:py-2.5"
+                    className="grid grid-cols-[2rem_1fr_4.5rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-3 py-2 md:px-4 md:py-2.5"
                   >
                     <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
-                    <span className="font-medium text-[var(--chalk)]">{l.name}</span>
-                    <span className="text-sm text-[var(--chalk-muted)]">{l.point}점</span>
+                    <span className="truncate text-center font-medium text-[var(--chalk)]">{l.name}</span>
+                    <span className="whitespace-nowrap text-right text-sm text-[var(--chalk-muted)]">{l.point}점</span>
                   </li>
                 ))}
               </ul>
@@ -307,10 +307,10 @@ export default function Home() {
               ) : (
                 <ul className="flex flex-col gap-2">
                   {attendanceKingLeaders.map((l) => (
-                    <li key={l.name} className="flex items-center justify-between rounded-lg bg-[var(--surface-muted)]/50 px-2 py-2 md:px-3">
+                    <li key={l.name} className="grid grid-cols-[2rem_1fr_4rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-2 py-2 md:px-3">
                       <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
-                      <span className="truncate px-1 font-medium text-[var(--chalk)]">{l.name}</span>
-                      <span className="shrink-0 text-sm text-[var(--chalk-muted)]">{l.count}회</span>
+                      <span className="truncate text-center font-medium text-[var(--chalk)]">{l.name}</span>
+                      <span className="whitespace-nowrap text-right text-sm text-[var(--chalk-muted)]">{l.count}회</span>
                     </li>
                   ))}
                 </ul>
@@ -329,10 +329,10 @@ export default function Home() {
               ) : (
                 <ul className="flex flex-col gap-2">
                   {holdKingLeaders.map((l) => (
-                    <li key={l.name} className="flex items-center justify-between rounded-lg bg-[var(--surface-muted)]/50 px-2 py-2 md:px-3">
+                    <li key={l.name} className="grid grid-cols-[2rem_1fr_4rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-2 py-2 md:px-3">
                       <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
-                      <span className="truncate px-1 font-medium text-[var(--chalk)]">{l.name}</span>
-                      <span className="shrink-0 text-sm text-[var(--chalk-muted)]">{l.count}개</span>
+                      <span className="truncate text-center font-medium text-[var(--chalk)]">{l.name}</span>
+                      <span className="whitespace-nowrap text-right text-sm text-[var(--chalk-muted)]">{l.count}개</span>
                     </li>
                   ))}
                 </ul>
