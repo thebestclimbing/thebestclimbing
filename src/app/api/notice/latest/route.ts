@@ -21,7 +21,7 @@ export async function GET() {
     .from("notices")
     .select("id, title, created_at")
     .order("created_at", { ascending: false })
-    .limit(3);
+    .limit(2);
 
   return NextResponse.json({
     notices: (rows ?? []).map((r) => ({
