@@ -295,7 +295,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-3 md:contents">
             <div className="card flex flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 출석왕`}>
-              <h2 className="mb-3 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
+              <h2 className="mb-3 text-base font-semibold text-[var(--chalk)] md:text-lg">
                 {currentMonthLabel}의 출석왕
               </h2>
               {loadingAttendanceKing ? (
@@ -317,7 +317,7 @@ export default function Home() {
               )}
             </div>
             <div className="card flex flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 홀드왕`}>
-              <h2 className="mb-3 text-sm font-medium text-[var(--chalk-muted)] md:text-base">
+              <h2 className="mb-3 text-base font-semibold text-[var(--chalk)] md:text-lg">
                 {currentMonthLabel}의 홀드왕
               </h2>
               {loadingHoldKing ? (
