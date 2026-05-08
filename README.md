@@ -3,7 +3,7 @@
 Next.js + Supabase 기반 클라이밍장 웹사이트입니다.
 
 ## 기술 스택
-
+ 
 - **Framework**: Next.js 16 (App Router)
 - **Database / Auth**: Supabase
 - **Styling**: Tailwind CSS
