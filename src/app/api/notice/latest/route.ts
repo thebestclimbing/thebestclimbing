@@ -3,8 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * GET /api/notice/latest
- * 가장 최신 공지 1건 반환 (id, title, created_at)
- * 반환: { id: string; title: string; created_at: string } | null
+ * 가장 최신 공지 3건 반환 (id, title, created_at)
+ * 반환: { notices: { id: string; title: string; created_at: string }[] }
  */
 export async function GET() {
   let supabase;
@@ -17,22 +17,17 @@ export async function GET() {
     );
   }
 
-  const { data: row } = await supabase
+  const { data: rows } = await supabase
     .from("notices")
     .select("id, title, created_at")
     .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  if (!row) {
-    return NextResponse.json({ notice: null });
-  }
+    .limit(3);
 
   return NextResponse.json({
-    notice: {
-      id: row.id,
-      title: row.title,
-      created_at: row.created_at,
-    },
+    notices: (rows ?? []).map((r) => ({
+      id: r.id,
+      title: r.title,
+      created_at: r.created_at,
+    })),
   });
 }

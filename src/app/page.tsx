@@ -76,11 +76,11 @@ export default function Home() {
   const [holdKingCount, setHoldKingCount] = useState<number>(0);
   const [loadingAttendanceKing, setLoadingAttendanceKing] = useState(true);
   const [loadingHoldKing, setLoadingHoldKing] = useState(true);
-  const [latestNotice, setLatestNotice] = useState<{
+  const [latestNotices, setLatestNotices] = useState<{
     id: string;
     title: string;
     created_at: string;
-  } | null>(null);
+  }[]>([]);
   const [loadingNotice, setLoadingNotice] = useState(true);
   const [rankPointLeaders, setRankPointLeaders] = useState<{ rank: number; name: string; point: number }[]>([]);
   const [loadingRankPoint, setLoadingRankPoint] = useState(true);
@@ -179,9 +179,9 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     fetch("/api/notice/latest")
-      .then((res) => (res.ok ? res.json() : { notice: null }))
+      .then((res) => (res.ok ? res.json() : { notices: [] }))
       .then((data) => {
-        if (!cancelled && data?.notice != null) setLatestNotice(data.notice);
+        if (!cancelled && Array.isArray(data?.notices)) setLatestNotices(data.notices);
       })
       .catch(() => {})
       .finally(() => {
@@ -228,25 +228,27 @@ export default function Home() {
               전체 보기
             </Link>
           </div>
-          <div className="card rounded-2xl p-4 md:p-5">
+          <div className="card rounded-2xl divide-y divide-[var(--border)]">
             {loadingNotice ? (
               <div className="flex items-center justify-center py-6">
                 <LoadingSpinner size="md" />
               </div>
-            ) : latestNotice ? (
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                <Link
-                  href={`/notice/${latestNotice.id}`}
-                  className="font-medium text-[var(--chalk)] hover:underline"
-                >
-                  {latestNotice.title}
-                </Link>
-                <span className="shrink-0 text-sm text-[var(--chalk-muted)]">
-                  {formatDateKST(latestNotice.created_at)}
-                </span>
-              </div>
+            ) : latestNotices.length === 0 ? (
+              <p className="p-4 py-2 text-[var(--chalk-muted)]">공지가 없습니다.</p>
             ) : (
-              <p className="py-2 text-[var(--chalk-muted)]">공지가 없습니다.</p>
+              latestNotices.map((notice) => (
+                <div key={notice.id} className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:p-5">
+                  <Link
+                    href={`/notice/${notice.id}`}
+                    className="font-medium text-[var(--chalk)] hover:underline"
+                  >
+                    {notice.title}
+                  </Link>
+                  <span className="shrink-0 text-sm text-[var(--chalk-muted)]">
+                    {formatDateKST(notice.created_at)}
+                  </span>
+                </div>
+              ))
             )}
           </div>
         </section>
