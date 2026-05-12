@@ -211,7 +211,8 @@ export default function Home() {
   return (
     <HomeMotion>
       <div className="pt-4 md:pt-6">
-        <section className="mb-6" aria-label="센터공지">
+        <div className="mb-6 md:grid md:grid-cols-2 md:gap-6">
+        <section className="mb-6 md:mb-0" aria-label="센터공지">
           <div className="mb-3 flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
               센터공지
@@ -248,7 +249,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mb-6" aria-label="등반공지">
+        <section className="mb-6 md:mb-0" aria-label="등반공지">
           <div className="mb-3 flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
               등반공지
@@ -284,6 +285,7 @@ export default function Home() {
             )}
           </div>
         </section>
+        </div>
 
         {error && (
           <p className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
