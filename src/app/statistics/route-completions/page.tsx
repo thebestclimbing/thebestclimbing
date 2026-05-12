@@ -1,29 +1,70 @@
 import Link from "next/link";
 import { getExerciseLogsForStatistics } from "@/lib/statistics-logs";
+import { GRADE_VALUES, GRADE_DETAILS } from "@/types/database";
+import { RouteCompletionsClient } from "./RouteCompletionsClient";
+import type { RouteStat } from "./RouteCompletionsClient";
+
+type RouteAccum = {
+  routeId: string;
+  routeName: string;
+  grade: string;
+  gradeValue: string;
+  gradeDetail: string;
+  total: number;
+  memberMap: Map<string, { memberName: string; completedAt: string }>;
+};
 
 export default async function RouteCompletionsStatsPage() {
   const logsList = await getExerciseLogsForStatistics();
 
-  const byRouteCompleted = new Map<string, { name: string; completed: number; total: number }>();
+  const byRoute = new Map<string, RouteAccum>();
   for (const log of logsList) {
     const rid = log.route_id;
-    if (!byRouteCompleted.has(rid)) {
-      byRouteCompleted.set(rid, {
-        name: log.route.name,
-        completed: 0,
+    if (!byRoute.has(rid)) {
+      byRoute.set(rid, {
+        routeId: rid,
+        routeName: log.route?.name ?? "-",
+        grade: `${log.route?.grade_value ?? ""}${log.route?.grade_detail ?? ""}`,
+        gradeValue: log.route?.grade_value ?? "",
+        gradeDetail: log.route?.grade_detail ?? "",
         total: 0,
+        memberMap: new Map(),
       });
     }
-    const r = byRouteCompleted.get(rid)!;
+    const r = byRoute.get(rid)!;
     r.total += 1;
-    if (log.is_completed) r.completed += 1;
+    if (log.is_completed) {
+      const existing = r.memberMap.get(log.profile_id);
+      if (!existing || log.logged_at > existing.completedAt) {
+        r.memberMap.set(log.profile_id, {
+          memberName: log.profile?.name ?? "-",
+          completedAt: log.logged_at,
+        });
+      }
+    }
   }
-  const stats = Array.from(byRouteCompleted.entries()).map(([id, v]) => ({
-    routeId: id,
-    routeName: v.name,
-    completed: v.completed,
-    total: v.total,
-  }));
+
+  const stats: RouteStat[] = Array.from(byRoute.values())
+    .map((r) => {
+      const completedMembers = Array.from(r.memberMap.entries())
+        .map(([memberId, v]) => ({ memberId, ...v }))
+        .sort((a, b) => b.completedAt.localeCompare(a.completedAt));
+      return {
+        routeId: r.routeId,
+        routeName: r.routeName,
+        grade: r.grade,
+        gradeValue: r.gradeValue,
+        gradeDetail: r.gradeDetail,
+        completed: completedMembers.length,
+        total: r.total,
+        completedMembers,
+      };
+    })
+    .sort((a, b) => {
+      const gvDiff = GRADE_VALUES.indexOf(b.gradeValue as never) - GRADE_VALUES.indexOf(a.gradeValue as never);
+      if (gvDiff !== 0) return gvDiff;
+      return GRADE_DETAILS.indexOf(b.gradeDetail as never) - GRADE_DETAILS.indexOf(a.gradeDetail as never);
+    });
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -31,29 +72,11 @@ export default async function RouteCompletionsStatsPage() {
         루트별 완등 통계
       </h1>
       <p className="mb-6 text-sm text-[var(--chalk-muted)]">
-        루트별 완등 수 및 전체 기록 수
+        루트별 완등 수 및 일지등록수 (높은 난이도 순) · 완등 수 클릭 시 회원 목록 확인
       </p>
 
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
-        <table className="w-full min-w-[280px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-[var(--border)]">
-              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">루트명</th>
-              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">완등 수</th>
-              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">전체 기록 수</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stats.map((s) => (
-              <tr key={s.routeId} className="border-b border-[var(--border)]">
-                <td className="p-1.5 sm:p-2 text-[var(--chalk)]">{s.routeName}</td>
-                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.completed}</td>
-                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.total}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <RouteCompletionsClient stats={stats} />
+
       {stats.length === 0 && (
         <p className="mt-2 text-[var(--chalk-muted)]">데이터 없음</p>
       )}
