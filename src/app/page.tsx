@@ -74,11 +74,9 @@ export default function Home() {
   const [holdKingLeaders, setHoldKingLeaders] = useState<{ rank: number; name: string; count: number }[]>([]);
   const [loadingAttendanceKing, setLoadingAttendanceKing] = useState(true);
   const [loadingHoldKing, setLoadingHoldKing] = useState(true);
-  const [latestNotices, setLatestNotices] = useState<{
-    id: string;
-    title: string;
-    created_at: string;
-  }[]>([]);
+  type NoticeItem = { id: string; title: string; created_at: string };
+  const [centerNotices, setCenterNotices] = useState<NoticeItem[]>([]);
+  const [climbingNotices, setClimbingNotices] = useState<NoticeItem[]>([]);
   const [loadingNotice, setLoadingNotice] = useState(true);
   const [rankPointLeaders, setRankPointLeaders] = useState<{ rank: number; name: string; point: number }[]>([]);
   const [loadingRankPoint, setLoadingRankPoint] = useState(true);
@@ -173,9 +171,12 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     fetch("/api/notice/latest")
-      .then((res) => (res.ok ? res.json() : { notices: [] }))
+      .then((res) => (res.ok ? res.json() : { center: [], climbing: [] }))
       .then((data) => {
-        if (!cancelled && Array.isArray(data?.notices)) setLatestNotices(data.notices);
+        if (!cancelled) {
+          if (Array.isArray(data?.center)) setCenterNotices(data.center);
+          if (Array.isArray(data?.climbing)) setClimbingNotices(data.climbing);
+        }
       })
       .catch(() => {})
       .finally(() => {
@@ -210,10 +211,10 @@ export default function Home() {
   return (
     <HomeMotion>
       <div className="pt-4 md:pt-6">
-        <section className="mb-6" aria-label="공지사항">
+        <section className="mb-6" aria-label="센터공지">
           <div className="mb-3 flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
-              공지사항
+              센터공지
             </h2>
             <Link
               href="/notice"
@@ -227,10 +228,47 @@ export default function Home() {
               <div className="flex items-center justify-center py-6">
                 <LoadingSpinner size="md" />
               </div>
-            ) : latestNotices.length === 0 ? (
+            ) : centerNotices.length === 0 ? (
               <p className="p-4 py-2 text-[var(--chalk-muted)]">공지가 없습니다.</p>
             ) : (
-              latestNotices.map((notice) => (
+              centerNotices.map((notice) => (
+                <div key={notice.id} className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:p-5">
+                  <Link
+                    href={`/notice/${notice.id}`}
+                    className="font-medium text-[var(--chalk)] hover:underline"
+                  >
+                    {notice.title}
+                  </Link>
+                  <span className="shrink-0 text-sm text-[var(--chalk-muted)]">
+                    {formatDateKST(notice.created_at)}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="mb-6" aria-label="등반공지">
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-[var(--chalk)] md:text-xl">
+              등반공지
+            </h2>
+            <Link
+              href="/notice"
+              className="shrink-0 mr-2 text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
+            >
+              더보기
+            </Link>
+          </div>
+          <div className="card rounded-2xl divide-y divide-[var(--border)]">
+            {loadingNotice ? (
+              <div className="flex items-center justify-center py-6">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : climbingNotices.length === 0 ? (
+              <p className="p-4 py-2 text-[var(--chalk-muted)]">공지가 없습니다.</p>
+            ) : (
+              climbingNotices.map((notice) => (
                 <div key={notice.id} className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:p-5">
                   <Link
                     href={`/notice/${notice.id}`}
