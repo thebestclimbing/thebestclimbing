@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * GET /api/notice/latest
- * 센터공지 최신 2건 + 등반공지 최신 2건 반환
+ * 센터공지 최신 3건 + 등반공지 최신 3건 반환
  * 반환: { center: [...], climbing: [...] }
  */
 export async function GET() {
@@ -23,13 +23,13 @@ export async function GET() {
       .select("id, title, created_at")
       .eq("notice_type", "센터공지")
       .order("created_at", { ascending: false })
-      .limit(2),
+      .limit(3),
     supabase
       .from("notices")
       .select("id, title, created_at")
       .eq("notice_type", "등반공지")
       .order("created_at", { ascending: false })
-      .limit(2),
+      .limit(3),
   ]);
 
   return NextResponse.json({
