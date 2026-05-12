@@ -70,8 +70,8 @@ export default async function AdminNoticesPage() {
                   <span
                     className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
                       (n as { notice_type?: string }).notice_type === "등반공지"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        ? "bg-violet-500 text-white"
+                        : "bg-emerald-500 text-white"
                     }`}
                   >
                     {(n as { notice_type?: string }).notice_type ?? "센터공지"}
