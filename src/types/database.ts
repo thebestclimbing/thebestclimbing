@@ -91,6 +91,7 @@ export interface Notice {
   title: string;
   body: string;
   popup_yn?: "Y" | "N";
+  notice_type: "센터공지" | "등반공지";
   created_at: string;
   updated_at: string;
 }
