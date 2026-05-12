@@ -2,12 +2,9 @@ import Link from "next/link";
 
 const STATISTICS_LINKS = [
   { href: "/statistics/ranking", label: "랭킹 순위" },
-  { href: "/statistics/member-routes", label: "회원별 운동일지에 등록한 루트 통계" },
   { href: "/statistics/member-completions", label: "회원별 루트 완등 통계" },
   { href: "/statistics/route-holds", label: "루트별 평균 진행한 홀드수 통계" },
   { href: "/statistics/route-completions", label: "루트별 완등 통계" },
-  { href: "/statistics/month-logs", label: "기간별 운동일지에 등록한 루트 통계 (월별)" },
-  { href: "/statistics/month-completions", label: "기간별 완등 통계 (월별)" },
 ] as const;
 
 export default function StatisticsPage() {

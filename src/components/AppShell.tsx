@@ -133,13 +133,9 @@ const ADMIN_LINKS = [
 ] as const;
 
 const STATS_LINKS = [
-  { href: "/statistics", label: "통계 목록" },
-  { href: "/statistics/member-routes", label: "회원별 등록 루트" },
   { href: "/statistics/member-completions", label: "회원별 루트 완등" },
   { href: "/statistics/route-holds", label: "루트별 평균 홀드수" },
   { href: "/statistics/route-completions", label: "루트별 완등" },
-  { href: "/statistics/month-logs", label: "기간별 등록 (월별)" },
-  { href: "/statistics/month-completions", label: "기간별 완등 (월별)" },
 ] as const;
 
 /** 이름에서 아바타용 이니셜 추출 (최대 2자) */
