@@ -34,17 +34,17 @@ function CompleterSection({
   loading: boolean;
 }) {
   return (
-    <section className="mb-10 md:mb-12 lg:mb-14">
-      <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)] md:text-xl lg:text-2xl">
+    <section className="mb-6 md:mb-8">
+      <h2 className="mb-3 text-base font-semibold text-[var(--chalk)] md:text-lg">
         {title}
       </h2>
-      <div className="flex flex-col gap-3 md:gap-4">
+      <div className="flex flex-col gap-2 md:gap-3">
         {loading ? (
-          <p className="card rounded-2xl p-6 text-center text-[var(--chalk-muted)] md:p-8 lg:p-10">
+          <p className="card rounded-2xl p-4 text-center text-[var(--chalk-muted)] md:p-6">
             조회 중...
           </p>
         ) : list.length === 0 ? (
-          <p className="card rounded-2xl p-6 text-center text-[var(--chalk-muted)] md:p-8 lg:p-10">
+          <p className="card rounded-2xl p-4 text-center text-[var(--chalk-muted)] md:p-6">
             {emptyText}
           </p>
         ) : (
@@ -298,11 +298,11 @@ export default function Home() {
           aria-label="랭킹 순위 및 출석왕·홀드왕"
         >
           <div
-            className="card flex flex-col rounded-2xl p-4 md:p-5"
+            className="card flex flex-col rounded-2xl p-3 md:p-4"
             aria-label="랭킹 순위"
           >
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="text-base font-semibold text-[var(--chalk)] md:text-lg">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-[var(--chalk)] md:text-base">
                 랭킹 순위
               </h2>
               <Link
@@ -319,11 +319,11 @@ export default function Home() {
             ) : rankPointLeaders.length === 0 ? (
               <p className="py-2 text-[var(--chalk-muted)]">완등 랭크포인트 기록이 없습니다.</p>
             ) : (
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col gap-1.5">
                 {rankPointLeaders.map((l) => (
                   <li
                     key={l.rank}
-                    className="grid grid-cols-[2rem_1fr_4.5rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-3 py-2 md:px-4 md:py-2.5"
+                    className="grid grid-cols-[2rem_1fr_4.5rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-2 py-1.5 md:px-3"
                   >
                     <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
                     <span className="truncate text-center font-medium text-[var(--chalk)]">{l.name}</span>
@@ -334,8 +334,8 @@ export default function Home() {
             )}
           </div>
           <div className="grid grid-cols-1 gap-3 md:contents">
-            <div className="card flex flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 출석왕`}>
-              <h2 className="mb-3 text-base font-semibold text-[var(--chalk)] md:text-lg">
+            <div className="card flex flex-col rounded-2xl p-3 md:p-4" aria-label={`${currentMonthLabel}의 출석왕`}>
+              <h2 className="mb-2 text-sm font-semibold text-[var(--chalk)] md:text-base">
                 {currentMonthLabel}의 출석왕
               </h2>
               {loadingAttendanceKing ? (
@@ -345,9 +345,9 @@ export default function Home() {
               ) : attendanceKingLeaders.length === 0 ? (
                 <p className="py-1 text-[var(--chalk-muted)]">없음</p>
               ) : (
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-1.5">
                   {attendanceKingLeaders.map((l) => (
-                    <li key={l.name} className="grid grid-cols-[2rem_1fr_4rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-2 py-2 md:px-3">
+                    <li key={l.name} className="grid grid-cols-[2rem_1fr_4rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-2 py-1.5 md:px-3">
                       <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
                       <span className="truncate text-center font-medium text-[var(--chalk)]">{l.name}</span>
                       <span className="whitespace-nowrap text-right text-sm text-[var(--chalk-muted)]">{l.count}회</span>
@@ -356,8 +356,8 @@ export default function Home() {
                 </ul>
               )}
             </div>
-            <div className="card flex flex-col rounded-2xl p-4 md:p-5" aria-label={`${currentMonthLabel}의 홀드왕`}>
-              <h2 className="mb-3 text-base font-semibold text-[var(--chalk)] md:text-lg">
+            <div className="card flex flex-col rounded-2xl p-3 md:p-4" aria-label={`${currentMonthLabel}의 홀드왕`}>
+              <h2 className="mb-2 text-sm font-semibold text-[var(--chalk)] md:text-base">
                 {currentMonthLabel}의 홀드왕
               </h2>
               {loadingHoldKing ? (
@@ -367,9 +367,9 @@ export default function Home() {
               ) : holdKingLeaders.length === 0 ? (
                 <p className="py-1 text-[var(--chalk-muted)]">없음</p>
               ) : (
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-1.5">
                   {holdKingLeaders.map((l) => (
-                    <li key={l.name} className="grid grid-cols-[2rem_1fr_4rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-2 py-2 md:px-3">
+                    <li key={l.name} className="grid grid-cols-[2rem_1fr_4rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-2 py-1.5 md:px-3">
                       <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
                       <span className="truncate text-center font-medium text-[var(--chalk)]">{l.name}</span>
                       <span className="whitespace-nowrap text-right text-sm text-[var(--chalk-muted)]">{l.count}개</span>
@@ -409,7 +409,7 @@ export default function Home() {
                   role="tab"
                   aria-selected={segment === key}
                   onClick={() => handleSegmentClick(key)}
-                  className={`relative flex flex-1 items-center justify-center py-3 text-sm font-medium transition md:py-4 md:text-base ${
+                  className={`relative flex flex-1 items-center justify-center py-2 text-sm font-medium transition md:py-3 ${
                     segment === key
                       ? "text-[var(--chalk)]"
                       : "text-[var(--chalk-muted)] hover:text-[var(--chalk)]"
@@ -426,7 +426,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="px-4 py-4 md:px-5 md:py-5">
+          <div className="px-3 py-3 md:px-4 md:py-4">
             {segment === "today" && (
               <CompleterSection
                 title="오늘의 완등자"
