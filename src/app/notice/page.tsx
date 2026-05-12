@@ -10,6 +10,7 @@ export default async function NoticePage() {
       `
       id,
       title,
+      notice_type,
       popup_yn,
       created_at,
       author:profiles(id, name)
@@ -30,6 +31,7 @@ export default async function NoticePage() {
   type Row = {
     id: string;
     title: string;
+    notice_type?: string;
     created_at: string;
     author: { id: string; name: string } | { id: string; name: string }[] | null;
   };
@@ -46,6 +48,9 @@ export default async function NoticePage() {
             <tr className="border-b border-[var(--border)]">
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">
                 제목
+              </th>
+              <th className="hidden p-1.5 sm:p-2 font-medium text-[var(--chalk)] sm:table-cell whitespace-nowrap">
+                타입
               </th>
               <th className="hidden p-1.5 sm:p-2 font-medium text-[var(--chalk)] sm:table-cell">
                 작성자
@@ -71,6 +76,17 @@ export default async function NoticePage() {
                     >
                       {row.title}
                     </Link>
+                  </td>
+                  <td className="hidden p-1.5 sm:p-2 sm:table-cell whitespace-nowrap">
+                    <span
+                      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                        row.notice_type === "등반공지"
+                          ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                      }`}
+                    >
+                      {row.notice_type ?? "센터공지"}
+                    </span>
                   </td>
                   <td className="hidden p-1.5 sm:p-2 text-[var(--chalk-muted)] sm:table-cell">
                     {author?.name ?? "-"}

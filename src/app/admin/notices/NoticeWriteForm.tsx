@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
 
-type NoticeInitial = { id: string; title: string; body: string; popup_yn?: "Y" | "N" };
+type NoticeInitial = {
+  id: string;
+  title: string;
+  body: string;
+  popup_yn?: "Y" | "N";
+  notice_type?: "센터공지" | "등반공지";
+};
 
 export function NoticeWriteForm({
   authorId,
@@ -18,6 +24,9 @@ export function NoticeWriteForm({
   const [title, setTitle] = useState(notice?.title ?? "");
   const [body, setBody] = useState(notice?.body ?? "");
   const [popupYn, setPopupYn] = useState<"Y" | "N">(notice?.popup_yn ?? "N");
+  const [noticeType, setNoticeType] = useState<"센터공지" | "등반공지">(
+    notice?.notice_type ?? "센터공지"
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const isEdit = Boolean(notice?.id);
@@ -34,6 +43,7 @@ export function NoticeWriteForm({
           title: title.trim(),
           body: body.trim() || "",
           popup_yn: popupYn,
+          notice_type: noticeType,
         })
         .eq("id", notice!.id);
       setLoading(false);
@@ -47,6 +57,7 @@ export function NoticeWriteForm({
         title: title.trim(),
         body: body.trim() || "",
         popup_yn: popupYn,
+        notice_type: noticeType,
       });
       setLoading(false);
       if (err) {
@@ -61,6 +72,26 @@ export function NoticeWriteForm({
   return (
     <form onSubmit={handleSubmit} className="card rounded-2xl p-6">
       <div className="grid gap-4">
+        <div>
+          <label className="mb-1 block text-sm text-[var(--chalk-muted)]">
+            공지 타입 *
+          </label>
+          <div className="flex gap-4">
+            {(["센터공지", "등반공지"] as const).map((type) => (
+              <label key={type} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="notice_type"
+                  value={type}
+                  checked={noticeType === type}
+                  onChange={() => setNoticeType(type)}
+                  className="accent-[var(--primary)]"
+                />
+                <span className="text-sm text-[var(--chalk)]">{type}</span>
+              </label>
+            ))}
+          </div>
+        </div>
         <div>
           <label htmlFor="title" className="mb-1 block text-sm text-[var(--chalk-muted)]">
             제목 *

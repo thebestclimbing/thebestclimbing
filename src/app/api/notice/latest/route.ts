@@ -3,8 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * GET /api/notice/latest
- * 가장 최신 공지 3건 반환 (id, title, created_at)
- * 반환: { notices: { id: string; title: string; created_at: string }[] }
+ * 센터공지 최신 2건 + 등반공지 최신 2건 반환
+ * 반환: { center: [...], climbing: [...] }
  */
 export async function GET() {
   let supabase;
@@ -17,14 +17,28 @@ export async function GET() {
     );
   }
 
-  const { data: rows } = await supabase
-    .from("notices")
-    .select("id, title, created_at")
-    .order("created_at", { ascending: false })
-    .limit(2);
+  const [centerRes, climbingRes] = await Promise.all([
+    supabase
+      .from("notices")
+      .select("id, title, created_at")
+      .eq("notice_type", "센터공지")
+      .order("created_at", { ascending: false })
+      .limit(2),
+    supabase
+      .from("notices")
+      .select("id, title, created_at")
+      .eq("notice_type", "등반공지")
+      .order("created_at", { ascending: false })
+      .limit(2),
+  ]);
 
   return NextResponse.json({
-    notices: (rows ?? []).map((r) => ({
+    center: (centerRes.data ?? []).map((r) => ({
+      id: r.id,
+      title: r.title,
+      created_at: r.created_at,
+    })),
+    climbing: (climbingRes.data ?? []).map((r) => ({
       id: r.id,
       title: r.title,
       created_at: r.created_at,
