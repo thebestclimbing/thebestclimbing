@@ -18,7 +18,7 @@ export default async function AdminNoticesPage() {
 
   const { data: notices, error } = await supabase
     .from("notices")
-    .select("id, title, popup_yn, created_at")
+    .select("id, title, popup_yn, notice_type, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -49,6 +49,7 @@ export default async function AdminNoticesPage() {
           <thead>
             <tr className="border-b border-[var(--border)]">
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">제목</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">타입</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">팝업</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">작성일</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)] whitespace-nowrap">액션</th>
@@ -64,6 +65,17 @@ export default async function AdminNoticesPage() {
                   >
                     {n.title}
                   </Link>
+                </td>
+                <td className="p-1.5 sm:p-2 whitespace-nowrap">
+                  <span
+                    className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                      (n as { notice_type?: string }).notice_type === "등반공지"
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                    }`}
+                  >
+                    {(n as { notice_type?: string }).notice_type ?? "센터공지"}
+                  </span>
                 </td>
                 <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">
                   {(n as { popup_yn?: string }).popup_yn === "Y" ? "Y" : "N"}
