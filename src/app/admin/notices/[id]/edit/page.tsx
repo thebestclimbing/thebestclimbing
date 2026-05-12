@@ -22,7 +22,7 @@ export default async function AdminNoticeEditPage({
 
   const { data: notice, error } = await supabase
     .from("notices")
-    .select("id, title, body, popup_yn")
+    .select("id, title, body, popup_yn, notice_type")
     .eq("id", id)
     .single();
 
