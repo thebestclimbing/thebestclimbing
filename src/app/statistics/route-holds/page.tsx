@@ -6,18 +6,26 @@ export default async function RouteHoldsStatsPage() {
 
   const byRouteHold = new Map<
     string,
-    { name: string; holds: number[] }
+    { name: string; gradeValue: string; gradeDetail: string; holdCount: number; holds: number[] }
   >();
   for (const log of logsList) {
     const rid = log.route_id;
     if (!byRouteHold.has(rid)) {
-      byRouteHold.set(rid, { name: log.route.name, holds: [] });
+      byRouteHold.set(rid, {
+        name: log.route.name,
+        gradeValue: log.route.grade_value ?? "",
+        gradeDetail: log.route.grade_detail ?? "",
+        holdCount: log.route.hold_count ?? 0,
+        holds: [],
+      });
     }
     byRouteHold.get(rid)!.holds.push(log.progress_hold_count);
   }
   const stats = Array.from(byRouteHold.entries()).map(([id, v]) => ({
     routeId: id,
     routeName: v.name,
+    grade: `${v.gradeValue}${v.gradeDetail}`,
+    holdCount: v.holdCount,
     avgHold:
       v.holds.length > 0
         ? (v.holds.reduce((a, b) => a + b, 0) / v.holds.length).toFixed(1)
@@ -35,20 +43,22 @@ export default async function RouteHoldsStatsPage() {
       </p>
 
       <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
-        <table className="w-full min-w-[280px] text-left text-sm">
+        <table className="w-full min-w-[320px] text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">루트명</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">난이도</th>
+              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">총 홀드수</th>
               <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">평균 진행 홀드수</th>
-              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">기록 수</th>
             </tr>
           </thead>
           <tbody>
             {stats.map((s) => (
               <tr key={s.routeId} className="border-b border-[var(--border)]">
                 <td className="p-1.5 sm:p-2 text-[var(--chalk)]">{s.routeName}</td>
+                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.grade}</td>
+                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.holdCount}</td>
                 <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.avgHold}</td>
-                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.count}</td>
               </tr>
             ))}
           </tbody>

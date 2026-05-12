@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { getExerciseLogsForStatistics } from "@/lib/statistics-logs";
+import { MemberCompletionsClient } from "./MemberCompletionsClient";
+import type { MemberStat } from "./MemberCompletionsClient";
 
 export default async function MemberCompletionsStatsPage() {
   const logsList = await getExerciseLogsForStatistics();
 
-  const byMember = new Map<string, { memberId: string; memberName: string; completed: number }>();
+  const byMember = new Map<string, MemberStat>();
   for (const log of logsList) {
     if (!log.is_completed) continue;
     const key = log.profile_id;
@@ -13,13 +15,21 @@ export default async function MemberCompletionsStatsPage() {
         memberId: log.profile_id,
         memberName: log.profile?.name ?? "-",
         completed: 0,
+        completedRoutes: [],
       });
     }
-    byMember.get(key)!.completed += 1;
+    const entry = byMember.get(key)!;
+    entry.completed += 1;
+    entry.completedRoutes.push({
+      routeId: log.route_id,
+      routeName: log.route?.name ?? "-",
+      wallType: log.route?.wall_type ?? "-",
+      gradeValue: log.route?.grade_value ?? "",
+      gradeDetail: log.route?.grade_detail ?? "",
+    });
   }
-  const stats = Array.from(byMember.values()).sort((a, b) =>
-    a.memberName.localeCompare(b.memberName)
-  );
+
+  const stats = Array.from(byMember.values()).sort((a, b) => b.completed - a.completed);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -27,27 +37,11 @@ export default async function MemberCompletionsStatsPage() {
         회원별 루트 완등 통계
       </h1>
       <p className="mb-6 text-sm text-[var(--chalk-muted)]">
-        회원별 완등 횟수
+        회원별 완등 횟수 (높은 순) · 완등 횟수 클릭 시 목록 확인
       </p>
 
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden -mx-4 sm:mx-0">
-        <table className="w-full min-w-[280px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-[var(--border)]">
-              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">회원명</th>
-              <th className="p-1.5 sm:p-2 font-medium text-[var(--chalk)]">완등 횟수</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stats.map((s) => (
-              <tr key={s.memberId} className="border-b border-[var(--border)]">
-                <td className="p-1.5 sm:p-2 text-[var(--chalk)]">{s.memberName}</td>
-                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.completed}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <MemberCompletionsClient stats={stats} />
+
       {stats.length === 0 && (
         <p className="mt-2 text-[var(--chalk-muted)]">데이터 없음</p>
       )}
