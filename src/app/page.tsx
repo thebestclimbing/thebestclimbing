@@ -233,10 +233,10 @@ export default function Home() {
               <p className="p-4 py-2 text-[var(--chalk-muted)]">공지가 없습니다.</p>
             ) : (
               centerNotices.map((notice) => (
-                <div key={notice.id} className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:p-5">
+                <div key={notice.id} className="flex flex-col gap-0.5 px-3 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:py-2">
                   <Link
                     href={`/notice/${notice.id}`}
-                    className="font-medium text-[var(--chalk)] hover:underline"
+                    className="text-sm font-medium text-[var(--chalk)] hover:underline"
                   >
                     {notice.title}
                   </Link>
@@ -270,10 +270,10 @@ export default function Home() {
               <p className="p-4 py-2 text-[var(--chalk-muted)]">공지가 없습니다.</p>
             ) : (
               climbingNotices.map((notice) => (
-                <div key={notice.id} className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:p-5">
+                <div key={notice.id} className="flex flex-col gap-0.5 px-3 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:py-2">
                   <Link
                     href={`/notice/${notice.id}`}
-                    className="font-medium text-[var(--chalk)] hover:underline"
+                    className="text-sm font-medium text-[var(--chalk)] hover:underline"
                   >
                     {notice.title}
                   </Link>
