@@ -9,15 +9,36 @@ export default function CartIcon() {
   const router = useRouter()
 
   useEffect(() => {
+    let mounted = true
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
-      supabase
-        .from('cart_items')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .then(({ count: c }) => setCount(c ?? 0))
-    })
+
+    const fetchCartCount = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user || !mounted) return
+
+        const { count: c } = await supabase
+          .from('cart_items')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+
+        if (mounted) {
+          setCount(c ?? 0)
+        }
+      } catch {
+        // Error fetching cart or user - keep badge at 0
+        if (mounted) {
+          setCount(0)
+        }
+      }
+    }
+
+    fetchCartCount()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   return (
