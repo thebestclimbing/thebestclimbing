@@ -85,6 +85,22 @@ export async function addPurchaseIntent(productId: string) {
   return { error: null }
 }
 
+export async function cancelPurchaseIntent(productId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const { error } = await supabase
+    .from('purchase_intents')
+    .delete()
+    .eq('product_id', productId)
+    .eq('user_id', user.id)
+  if (error) return { error: error.message }
+
+  revalidatePath('/shop/intents')
+  return { error: null }
+}
+
 export async function removePurchaseIntent(intentId: string, _formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
