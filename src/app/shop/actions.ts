@@ -67,3 +67,53 @@ export async function updateCartQuantity(cartItemId: string, quantity: number) {
   revalidatePath('/shop/cart')
   return { error: null }
 }
+
+export async function addPurchaseIntent(productId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const { error } = await supabase
+    .from('purchase_intents')
+    .upsert(
+      { user_id: user.id, product_id: productId },
+      { onConflict: 'user_id,product_id', ignoreDuplicates: true }
+    )
+  if (error) return { error: error.message }
+
+  revalidatePath('/shop/intents')
+  return { error: null }
+}
+
+export async function removePurchaseIntent(intentId: string, _formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const { error } = await supabase
+    .from('purchase_intents')
+    .delete()
+    .eq('id', intentId)
+    .eq('user_id', user.id)
+  if (error) return { error: error.message }
+
+  revalidatePath('/shop/intents')
+  return { error: null }
+}
+
+export async function updateIntentMemo(intentId: string, formData: FormData) {
+  const memo = (formData.get('memo') as string) ?? ''
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const { error } = await supabase
+    .from('purchase_intents')
+    .update({ memo })
+    .eq('id', intentId)
+    .eq('user_id', user.id)
+  if (error) return { error: error.message }
+
+  revalidatePath('/shop/intents')
+  return { error: null }
+}
