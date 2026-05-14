@@ -48,6 +48,7 @@ export default function AddToCartButton({ productId, stock }: Props) {
     }
 
     setAdded(true)
+    window.dispatchEvent(new CustomEvent('cart-updated'))
   }
 
   return (

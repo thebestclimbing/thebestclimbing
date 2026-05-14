@@ -37,11 +37,13 @@ export async function removeFromCart(cartItemId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'unauthenticated' as const }
 
-  await supabase
+  const { error } = await supabase
     .from('cart_items')
     .delete()
     .eq('id', cartItemId)
     .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
 
   revalidatePath('/shop/cart')
   return { error: null }
@@ -54,11 +56,13 @@ export async function updateCartQuantity(cartItemId: string, quantity: number) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'unauthenticated' as const }
 
-  await supabase
+  const { error } = await supabase
     .from('cart_items')
     .update({ quantity })
     .eq('id', cartItemId)
     .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
 
   revalidatePath('/shop/cart')
   return { error: null }

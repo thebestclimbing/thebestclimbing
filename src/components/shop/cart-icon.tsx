@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -8,38 +8,32 @@ export default function CartIcon() {
   const [count, setCount] = useState(0)
   const router = useRouter()
 
-  useEffect(() => {
+  const fetchCount = useCallback(async () => {
     let mounted = true
-    const supabase = createClient()
-
-    const fetchCartCount = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user || !mounted) return
-
-        const { count: c } = await supabase
-          .from('cart_items')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-
-        if (mounted) {
-          setCount(c ?? 0)
-        }
-      } catch {
-        // Error fetching cart or user - keep badge at 0
-        if (mounted) {
-          setCount(0)
-        }
-      }
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !mounted) return
+      const { count: c } = await supabase
+        .from('cart_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+      if (mounted) setCount(c ?? 0)
+    } catch {
+      // 에러 시 뱃지 0 유지
     }
-
-    fetchCartCount()
-
-    return () => {
-      mounted = false
-    }
+    return () => { mounted = false }
   }, [])
+
+  useEffect(() => {
+    fetchCount()
+  }, [fetchCount])
+
+  useEffect(() => {
+    const handler = () => fetchCount()
+    window.addEventListener('cart-updated', handler)
+    return () => window.removeEventListener('cart-updated', handler)
+  }, [fetchCount])
 
   return (
     <button
