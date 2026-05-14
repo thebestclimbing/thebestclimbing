@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import type { ProductImage } from '@/lib/shop/types'
 import AddToCartButton from '@/components/shop/add-to-cart-button'
+import PurchaseIntentButton from '@/components/shop/purchase-intent-button'
 
 export default async function ProductDetailPage({
   params,
@@ -25,6 +26,18 @@ export default async function ProductDetailPage({
     .single()
 
   if (!product) notFound()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  let intent: { id: string } | null = null
+  if (user) {
+    const { data } = await supabase
+      .from('purchase_intents')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('product_id', id)
+      .maybeSingle()
+    intent = data
+  }
 
   const images = ((product.product_images as ProductImage[]) ?? []).sort(
     (a, b) => a.sort_order - b.sort_order
@@ -71,18 +84,13 @@ export default async function ProductDetailPage({
               <Badge className="bg-blue-600 text-white">공식 스토어</Badge>
             )}
             {(product as any).categories && (
-              <Badge
-                variant="outline"
-                className="border-slate-600 text-slate-400"
-              >
+              <Badge variant="outline" className="border-slate-600 text-slate-400">
                 {(product as any).categories.name}
               </Badge>
             )}
           </div>
 
-          <h1 className="mb-3 text-2xl font-bold text-white">
-            {product.title}
-          </h1>
+          <h1 className="mb-3 text-2xl font-bold text-white">{product.title}</h1>
           <p className="mb-6 text-3xl font-bold text-emerald-400">
             {Number(product.price).toLocaleString()}원
           </p>
@@ -92,9 +100,7 @@ export default async function ProductDetailPage({
               <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
                 상품 설명
               </h3>
-              <p className="whitespace-pre-wrap text-slate-300">
-                {product.description}
-              </p>
+              <p className="whitespace-pre-wrap text-slate-300">{product.description}</p>
             </div>
           )}
 
@@ -107,10 +113,7 @@ export default async function ProductDetailPage({
                 {(product as any).profiles?.name ?? '알 수 없음'}
               </span>
               {product.is_official && (
-                <Badge
-                  variant="outline"
-                  className="border-blue-700 bg-blue-900 text-xs text-blue-300"
-                >
+                <Badge variant="outline" className="border-blue-700 bg-blue-900 text-xs text-blue-300">
                   공식
                 </Badge>
               )}
@@ -118,10 +121,11 @@ export default async function ProductDetailPage({
           </div>
 
           <p className="mt-2 text-sm text-slate-500">재고: {product.stock}개</p>
-          <div className="h-24" />
+          <div className="h-44" />
         </div>
       </div>
 
+      <PurchaseIntentButton productId={product.id} initialIntent={intent} />
       <AddToCartButton productId={product.id} stock={product.stock} />
     </div>
   )
