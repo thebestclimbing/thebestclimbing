@@ -16,14 +16,16 @@ export async function addToCart(productId: string, quantity: number = 1) {
     .maybeSingle()
 
   if (existing) {
-    await supabase
+    const { error } = await supabase
       .from('cart_items')
       .update({ quantity: existing.quantity + quantity })
       .eq('id', existing.id)
+    if (error) return { error: error.message }
   } else {
-    await supabase
+    const { error } = await supabase
       .from('cart_items')
       .insert({ user_id: user.id, product_id: productId, quantity })
+    if (error) return { error: error.message }
   }
 
   revalidatePath('/shop/cart')

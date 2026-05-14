@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { addToCart } from '@/app/shop/actions'
 
@@ -13,6 +13,12 @@ export default function AddToCartButton({ productId, stock }: Props) {
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    if (!added) return
+    const timer = setTimeout(() => setAdded(false), 1500)
+    return () => clearTimeout(timer)
+  }, [added])
 
   if (stock === 0) {
     return (
@@ -37,8 +43,11 @@ export default function AddToCartButton({ productId, stock }: Props) {
       return
     }
 
+    if (result?.error) {
+      return
+    }
+
     setAdded(true)
-    setTimeout(() => setAdded(false), 1500)
   }
 
   return (
