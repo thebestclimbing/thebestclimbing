@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import CancelIntentButton from '@/components/shop/cancel-intent-button'
 
 export default async function SellerDashboard() {
   const supabase = await createClient()
@@ -32,12 +33,12 @@ export default async function SellerDashboard() {
       .limit(100),
   ])
 
-  type IntentGroup = { productTitle: string; buyers: { name: string | null; memo: string | null }[] }
+  type IntentGroup = { productTitle: string; buyers: { id: string; name: string | null; memo: string | null }[] }
   const intentGroups = (intents ?? []).reduce<Record<string, IntentGroup>>((acc, intent) => {
     const product = (intent as any).products
     if (!product) return acc
     if (!acc[product.id]) acc[product.id] = { productTitle: product.title, buyers: [] }
-    acc[product.id].buyers.push({ name: (intent as any).profiles?.name ?? null, memo: intent.memo })
+    acc[product.id].buyers.push({ id: intent.id, name: (intent as any).profiles?.name ?? null, memo: intent.memo })
     return acc
   }, {})
 
@@ -98,19 +99,16 @@ export default async function SellerDashboard() {
         ) : (
           <div className="space-y-3">
             {Object.values(intentGroups).map((group, i) => (
-              <div key={i} className="rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
-                <div className="mb-2 flex items-center gap-2">
-                  <p className="font-medium text-white">{group.productTitle}</p>
-                  <span className="rounded-full bg-purple-900 px-2 py-0.5 text-xs text-purple-300">
+              <div key={i} className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2">
+                <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                  <p className="truncate text-sm font-medium text-white">{group.productTitle}</p>
+                  <span className="shrink-0 rounded-full bg-purple-900 px-2 py-0.5 text-xs text-purple-300">
                     {group.buyers.length}명
                   </span>
                 </div>
-                <div className="space-y-1">
+                <div className="flex shrink-0 gap-0.5">
                   {group.buyers.map((buyer, j) => (
-                    <div key={j} className="flex gap-2 text-sm">
-                      <span className="text-slate-300">{buyer.name ?? '이름 없음'}</span>
-                      {buyer.memo && <span className="text-slate-500">· {buyer.memo}</span>}
-                    </div>
+                    <CancelIntentButton key={j} intentId={buyer.id} />
                   ))}
                 </div>
               </div>

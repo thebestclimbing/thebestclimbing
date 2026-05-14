@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import type { ProductImage } from '@/lib/shop/types'
 import AddToCartButton from '@/components/shop/add-to-cart-button'
 import PurchaseIntentButton from '@/components/shop/purchase-intent-button'
+import NoImagePlaceholder from '@/components/shop/no-image-placeholder'
 
 export default async function ProductDetailPage({
   params,
@@ -28,6 +29,7 @@ export default async function ProductDetailPage({
   if (!product) notFound()
 
   const { data: { user } } = await supabase.auth.getUser()
+  const isOwner = !!user && user.id === product.seller_id
   let intent: { id: string } | null = null
   if (user) {
     const { data } = await supabase
@@ -58,9 +60,7 @@ export default async function ProductDetailPage({
                 className="object-cover"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-6xl text-slate-600">
-                🧗
-              </div>
+              <NoImagePlaceholder />
             )}
           </div>
           {images.length > 1 && (
@@ -120,13 +120,15 @@ export default async function ProductDetailPage({
             </div>
           </div>
 
-          <p className="mt-2 text-sm text-slate-500">재고: {product.stock}개</p>
-          <div className="h-44" />
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-sm text-slate-500">재고: {product.stock}개</p>
+            <div className="flex gap-2">
+              <PurchaseIntentButton productId={product.id} initialIntent={intent} isOwner={isOwner} />
+              <AddToCartButton productId={product.id} stock={product.stock} isOwner={isOwner} />
+            </div>
+          </div>
         </div>
       </div>
-
-      <PurchaseIntentButton productId={product.id} initialIntent={intent} />
-      <AddToCartButton productId={product.id} stock={product.stock} />
     </div>
   )
 }

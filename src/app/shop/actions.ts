@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function addToCart(productId: string, quantity: number = 1) {
@@ -41,6 +42,22 @@ export async function removeFromCart(cartItemId: string) {
     .from('cart_items')
     .delete()
     .eq('id', cartItemId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/shop/cart')
+  return { error: null }
+}
+
+export async function clearCart() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const { error } = await supabase
+    .from('cart_items')
+    .delete()
     .eq('user_id', user.id)
 
   if (error) return { error: error.message }
@@ -114,6 +131,30 @@ export async function removePurchaseIntent(intentId: string, _formData: FormData
   if (error) return { error: error.message }
 
   revalidatePath('/shop/intents')
+  return { error: null }
+}
+
+export async function cancelIntentBySeller(intentId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin, seller_status')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.seller_status !== 'approved' && !profile?.is_admin) {
+    return { error: 'unauthorized' as const }
+  }
+
+  const admin = createAdminClient()
+  const { error } = await admin.from('purchase_intents').delete().eq('id', intentId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/shop/seller')
+  revalidatePath('/shop/admin')
   return { error: null }
 }
 

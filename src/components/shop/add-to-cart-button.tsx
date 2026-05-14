@@ -7,9 +7,10 @@ import { addToCart } from '@/app/shop/actions'
 interface Props {
   productId: string
   stock: number
+  isOwner?: boolean
 }
 
-export default function AddToCartButton({ productId, stock }: Props) {
+export default function AddToCartButton({ productId, stock, isOwner }: Props) {
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
   const router = useRouter()
@@ -20,16 +21,22 @@ export default function AddToCartButton({ productId, stock }: Props) {
     return () => clearTimeout(timer)
   }, [added])
 
+  if (isOwner) {
+    return (
+      <button disabled className="rounded-full bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-500 shadow-lg cursor-not-allowed">
+        내 상품
+      </button>
+    )
+  }
+
   if (stock === 0) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-800 bg-slate-950 px-4 py-4">
-        <button
-          disabled
-          className="w-full rounded-xl bg-slate-700 py-4 text-sm font-semibold text-slate-400"
-        >
-          품절
-        </button>
-      </div>
+      <button
+        disabled
+        className="rounded-full bg-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-400 shadow-lg"
+      >
+        품절
+      </button>
     )
   }
 
@@ -52,14 +59,12 @@ export default function AddToCartButton({ productId, stock }: Props) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-800 bg-slate-950 px-4 py-4">
-      <button
-        onClick={handleClick}
-        disabled={loading || added}
-        className="w-full rounded-xl bg-emerald-600 py-4 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-70"
-      >
-        {added ? '담겼습니다 ✓' : loading ? '처리 중...' : '장바구니 담기'}
-      </button>
-    </div>
+    <button
+      onClick={handleClick}
+      disabled={loading || added}
+      className="rounded-full bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-violet-500 disabled:opacity-70"
+    >
+      {added ? '✓ 담김' : loading ? '...' : '🛒 담기'}
+    </button>
   )
 }
