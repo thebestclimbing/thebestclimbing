@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import CancelIntentButton from '@/components/shop/cancel-intent-button'
+import ConfirmPurchaseButton from '@/components/shop/confirm-purchase-button'
 import NoImagePlaceholder from '@/components/shop/no-image-placeholder'
 import { updateIntentMemo, cancelPurchaseIntent } from '@/app/shop/actions'
 
@@ -24,23 +24,29 @@ type MyIntent = {
   product: { id: string; title: string; price: number; imageUrl: string | null }
 }
 
+type PurchaseHistoryItem = {
+  id: string
+  title: string
+  price: number
+  imageUrl: string | null
+  confirmedAt: string
+  productId: string | null
+}
+
 interface Props {
   mergedProducts: MergedProduct[]
   myIntents: MyIntent[]
+  purchaseHistory: PurchaseHistoryItem[]
 }
 
-function BuyerRow({ buyer }: { buyer: { id: string; name: string | null; memo: string | null } }) {
+function BuyerRow({ buyer, isSold }: { buyer: { id: string; name: string | null; memo: string | null }; isSold: boolean }) {
   return (
-    <div className="px-4 py-3">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm font-medium text-slate-300">{buyer.name ?? '(이름 없음)'}</p>
-        <CancelIntentButton intentId={buyer.id} />
+    <div className="px-4 py-2.5">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-slate-300">{buyer.name ?? '(이름 없음)'}</span>
+        {!isSold && <ConfirmPurchaseButton intentId={buyer.id} />}
       </div>
-      {buyer.memo ? (
-        <p className="whitespace-pre-wrap rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-sm text-slate-300">{buyer.memo}</p>
-      ) : (
-        <p className="text-xs text-slate-600">메모 없음</p>
-      )}
+      <p className="mt-0.5 pl-3 whitespace-pre-wrap text-sm text-slate-400">{buyer.memo || '메모 없음'}</p>
     </div>
   )
 }
@@ -113,7 +119,7 @@ function MyIntentRow({ intent, onCancel }: { intent: MyIntent; onCancel: (produc
   )
 }
 
-export default function SellerDashboardTabs({ mergedProducts, myIntents: initialMyIntents }: Props) {
+export default function SellerDashboardTabs({ mergedProducts, myIntents: initialMyIntents, purchaseHistory }: Props) {
   const [tab, setTab] = useState(0)
   const [myIntents, setMyIntents] = useState(initialMyIntents)
 
@@ -144,6 +150,17 @@ export default function SellerDashboardTabs({ mergedProducts, myIntents: initial
           구매중
           <span className="ml-1.5 rounded-full bg-slate-800 px-1.5 py-0.5 text-xs text-slate-400">
             {myIntents.length}
+          </span>
+        </button>
+        <button
+          onClick={() => setTab(2)}
+          className={`px-4 py-2.5 text-sm font-semibold transition-colors ${
+            tab === 2 ? 'border-b-2 border-emerald-400 text-emerald-400' : 'text-slate-500 hover:text-slate-300'
+          }`}
+        >
+          구매이력
+          <span className="ml-1.5 rounded-full bg-slate-800 px-1.5 py-0.5 text-xs text-slate-400">
+            {purchaseHistory.length}
           </span>
         </button>
       </div>
@@ -177,14 +194,18 @@ export default function SellerDashboardTabs({ mergedProducts, myIntents: initial
                             ? 'border-emerald-700 text-emerald-400'
                             : product.status === 'draft'
                             ? 'border-slate-600 text-slate-400'
+                            : product.status === 'sold'
+                            ? 'border-blue-700 text-blue-400'
                             : 'border-red-700 text-red-400'
                         }
                       >
-                        {product.status === 'active' ? '판매중' : product.status === 'draft' ? '임시저장' : '비활성'}
+                        {product.status === 'active' ? '판매중' : product.status === 'draft' ? '임시저장' : product.status === 'sold' ? '판매완료' : '비활성'}
                       </Badge>
-                      <Link href={`/shop/seller/products/${product.id}/edit`}>
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">수정</Button>
-                      </Link>
+                      {product.status !== 'sold' && (
+                        <Link href={`/shop/seller/products/${product.id}/edit`}>
+                          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">수정</Button>
+                        </Link>
+                      )}
                       {product.buyers.length > 0 && (
                         <span className="rounded-full bg-purple-900 px-2 py-0.5 text-xs text-purple-300">
                           {product.buyers.length}명
@@ -195,7 +216,7 @@ export default function SellerDashboardTabs({ mergedProducts, myIntents: initial
                   {product.buyers.length > 0 && (
                     <div className="divide-y divide-slate-800">
                       {product.buyers.map((buyer) => (
-                        <BuyerRow key={buyer.id} buyer={buyer} />
+                        <BuyerRow key={buyer.id} buyer={buyer} isSold={product.status === 'sold'} />
                       ))}
                     </div>
                   )}
@@ -220,6 +241,34 @@ export default function SellerDashboardTabs({ mergedProducts, myIntents: initial
             <div className="space-y-3">
               {myIntents.map((intent) => (
                 <MyIntentRow key={intent.id} intent={intent} onCancel={handleCancelMyIntent} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 패널 2: 구매이력 */}
+      {tab === 2 && (
+        <div>
+          {purchaseHistory.length === 0 ? (
+            <p className="py-10 text-center text-slate-500">구매한 상품이 없습니다.</p>
+          ) : (
+            <div className="space-y-3">
+              {purchaseHistory.map((item) => (
+                <div key={item.id} className="flex gap-3 rounded-lg border border-slate-800 bg-slate-900 p-4">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-800">
+                    {item.imageUrl ? (
+                      <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />
+                    ) : (
+                      <NoImagePlaceholder />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-white">{item.title}</p>
+                    <p className="text-sm text-slate-400">{Number(item.price).toLocaleString()}원</p>
+                    <p className="mt-1 text-xs text-slate-600">{item.confirmedAt.slice(0, 10).replace(/-/g, '.')}</p>
+                  </div>
+                </div>
               ))}
             </div>
           )}

@@ -1,7 +1,6 @@
 "use client";
 
 export default function GlobalError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
@@ -33,6 +32,7 @@ export default function GlobalError({
           >
             다시 시도
           </button>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/" style={{ display: "block", marginTop: 12, fontSize: 14, color: "#64748b" }}>
             메인으로
           </a>

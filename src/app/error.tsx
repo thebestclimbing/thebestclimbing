@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function Error({
   error,
@@ -30,12 +31,12 @@ export default function Error({
         >
           다시 시도
         </button>
-        <a
+        <Link
           href="/"
           className="mt-3 block text-sm text-[var(--chalk-muted)] underline"
         >
           메인으로
-        </a>
+        </Link>
       </div>
     </div>
   );

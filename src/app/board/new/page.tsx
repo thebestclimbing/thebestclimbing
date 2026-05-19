@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BoardWriteForm from "../BoardWriteForm";
 
@@ -14,12 +15,12 @@ export default async function BoardNewPage() {
       </h1>
       <BoardWriteForm authorId={user.id} />
       <p className="mt-6">
-        <a
+        <Link
           href="/board"
           className="text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]"
         >
           목록으로
-        </a>
+        </Link>
       </p>
     </div>
   );

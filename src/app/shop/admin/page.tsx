@@ -60,11 +60,13 @@ export default async function ShopAdminPage() {
   ])
 
   type IntentGroup = { productTitle: string; buyers: { name: string | null; memo: string | null }[] }
+  type IntentRow = { products: { id: string; title: string } | null; profiles: { name: string } | null }
   const intentGroups = (allIntents ?? []).reduce<Record<string, IntentGroup>>((acc, intent) => {
-    const product = (intent as any).products
+    const row = intent as unknown as IntentRow
+    const product = row.products
     if (!product) return acc
     if (!acc[product.id]) acc[product.id] = { productTitle: product.title, buyers: [] }
-    acc[product.id].buyers.push({ name: (intent as any).profiles?.name ?? null, memo: intent.memo })
+    acc[product.id].buyers.push({ name: row.profiles?.name ?? null, memo: intent.memo })
     return acc
   }, {})
 
@@ -139,7 +141,7 @@ export default async function ShopAdminPage() {
                   )}
                 </div>
                 <p className="text-xs text-slate-500">
-                  {(product as any).profiles?.name} · {Number(product.price).toLocaleString()}원
+                  {(product as unknown as { profiles: { name: string } | null }).profiles?.name} · {Number(product.price).toLocaleString()}원
                 </p>
               </div>
               <div className="flex items-center gap-2">

@@ -61,6 +61,7 @@ export default async function GalleryPage() {
               className="card overflow-hidden rounded-2xl"
             >
               {thumb ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={thumb}
                   alt=""

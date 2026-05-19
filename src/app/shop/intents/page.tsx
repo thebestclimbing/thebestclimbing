@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { removePurchaseIntent, updateIntentMemo } from '@/app/shop/actions'
 import type { ProductImage } from '@/lib/shop/types'
 
-async function removeIntent(intentId: string, formData: FormData): Promise<void> {
+async function removeIntent(intentId: string): Promise<void> {
   'use server'
-  await removePurchaseIntent(intentId, formData)
+  await removePurchaseIntent(intentId)
 }
 
 async function updateMemo(intentId: string, formData: FormData): Promise<void> {
@@ -46,7 +46,8 @@ export default async function IntentsPage() {
       ) : (
         <div className="space-y-3">
           {intents.map((intent) => {
-            const product = (intent as any).products
+            type IntentRow = { products: { id: string; title: string; price: number; product_images: ProductImage[] } | null }
+            const product = (intent as unknown as IntentRow).products
             if (!product) return null
             const images = ((product.product_images as ProductImage[]) ?? []).sort(
               (a: ProductImage, b: ProductImage) => a.sort_order - b.sort_order

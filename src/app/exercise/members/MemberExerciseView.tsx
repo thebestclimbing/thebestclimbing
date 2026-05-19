@@ -95,6 +95,7 @@ export function MemberExerciseView({ profiles }: { profiles: Profile[] }) {
                 <li
                   key={p.id}
                   role="option"
+                  aria-selected={p.id === selectedId}
                   onClick={() => selectMember(p)}
                   className="cursor-pointer px-4 py-2 text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
                 >

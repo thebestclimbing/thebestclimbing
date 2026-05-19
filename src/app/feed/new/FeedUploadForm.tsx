@@ -162,6 +162,7 @@ export default function FeedUploadForm({ authorId }: { authorId: string }) {
         <div className="mb-4 grid grid-cols-3 gap-2">
           {previews.map((p, i) => (
             <div key={p.objectUrl} className="relative aspect-square overflow-hidden rounded-lg">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.objectUrl} alt="" className="h-full w-full object-cover" />
               <button
                 type="button"

@@ -21,8 +21,9 @@ export default async function CartPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
 
+  type CartItemRow = { products: { id: string; title: string; price: number; stock: number; product_images: ProductImage[] } | null }
   const cartItems = (items ?? []).map((item) => {
-    const product = (item as any).products
+    const product = (item as unknown as CartItemRow).products
     const images = ((product?.product_images as ProductImage[]) ?? []).sort(
       (a: ProductImage, b: ProductImage) => a.sort_order - b.sort_order
     )
@@ -31,7 +32,7 @@ export default async function CartPage() {
       id: item.id,
       quantity: item.quantity,
       product: {
-        id: product?.id,
+        id: product?.id ?? '',
         title: product?.title ?? '',
         price: product?.price ?? 0,
         stock: product?.stock ?? 0,

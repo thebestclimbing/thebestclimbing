@@ -19,7 +19,6 @@ interface Initial {
 export default function ExerciseLogEdit({
   logId,
   profileId,
-  initial,
 }: {
   logId: string;
   profileId: string;
