@@ -6,7 +6,7 @@ import CartItemList from '@/components/shop/cart-item-list'
 export default async function CartPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) redirect('/login?next=/shop/cart')
 
   const { data: items } = await supabase
     .from('cart_items')

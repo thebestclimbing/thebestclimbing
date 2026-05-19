@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
@@ -8,7 +9,6 @@ import { createClient } from '@/lib/supabase/client'
 import CartIcon from '@/components/shop/cart-icon'
 
 interface Profile {
-  seller_status: string | null
   is_admin: boolean | null
 }
 
@@ -26,7 +26,7 @@ export default function ShopNavbar() {
       if (user) {
         supabase
           .from('profiles')
-          .select('seller_status, is_admin')
+          .select('is_admin')
           .eq('id', user.id)
           .single()
           .then(({ data }) => setProfile(data))
@@ -50,10 +50,6 @@ export default function ShopNavbar() {
     router.refresh()
   }
 
-  const showSeller = profile?.seller_status === 'approved' || !!profile?.is_admin
-  const showApply = profile?.seller_status === 'none'
-  const showPending = profile?.seller_status === 'pending'
-
   return (
     <>
       <nav className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950">
@@ -61,7 +57,7 @@ export default function ShopNavbar() {
           {/* 로고 + 데스크톱 링크 */}
           <div className="flex items-center gap-6">
             <Link href="/shop" className="text-lg font-bold text-white">
-              🧗 BestShop
+              BestShop
             </Link>
             <div className="hidden items-center gap-5 sm:flex">
               <Link href="/shop/products?filter=official" className="text-sm text-slate-400 transition-colors hover:text-white">
@@ -75,25 +71,16 @@ export default function ShopNavbar() {
 
           {/* 데스크톱 우측 */}
           <div className="hidden items-center gap-4 sm:flex">
-            <CartIcon />
-            <Link href="/" className="text-sm text-slate-500 transition-colors hover:text-slate-300">
-              ← 베스트클라이밍
+            <Link href="/" className="flex items-center gap-1.5 rounded-full border border-slate-700 px-3 py-1.5 text-sm font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:text-white">
+              <Image src="/favicon.png" alt="BestClimbing" width={16} height={16} className="rounded-sm" />
+              GO
             </Link>
+            <CartIcon />
             {user ? (
               <>
-                {showApply && (
-                  <Link href="/shop/seller/apply" className="text-sm text-slate-400 transition-colors hover:text-white">
-                    판매자 신청
-                  </Link>
-                )}
-                {showPending && (
-                  <span className="text-sm text-yellow-500">승인 대기 중</span>
-                )}
-                {showSeller && (
-                  <Link href="/shop/seller" className="text-sm text-slate-400 transition-colors hover:text-white">
-                    판매자
-                  </Link>
-                )}
+                <Link href="/shop/seller" className="text-sm text-slate-400 transition-colors hover:text-white">
+                  MYBOARD
+                </Link>
                 {profile?.is_admin && (
                   <Link href="/shop/admin" className="text-sm text-slate-400 transition-colors hover:text-white">
                     관리자
@@ -104,7 +91,7 @@ export default function ShopNavbar() {
                 </button>
               </>
             ) : (
-              <Link href="/login" className="text-sm text-slate-400 transition-colors hover:text-white">
+              <Link href={`/login?next=${encodeURIComponent(pathname)}`} className="text-sm text-slate-400 transition-colors hover:text-white">
                 로그인
               </Link>
             )}
@@ -133,7 +120,7 @@ export default function ShopNavbar() {
           />
           <div className="fixed right-0 top-0 z-[70] flex h-full w-72 max-w-[85vw] flex-col border-l border-slate-800 bg-slate-950 sm:hidden">
             <div className="flex items-center justify-between border-b border-slate-800 px-4 py-4">
-              <span className="font-bold text-white">🧗 BestShop</span>
+              <span className="font-bold text-white">BestShop</span>
               <button
                 type="button"
                 onClick={() => setMenuOpen(false)}
@@ -152,17 +139,6 @@ export default function ShopNavbar() {
                 </svg>
                 장바구니
               </Link>
-              {user && (
-                <Link
-                  href="/shop/intents"
-                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-slate-200 hover:bg-slate-800"
-                >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                  내 구매 희망
-                </Link>
-              )}
               <Link href="/shop/products" className="rounded-xl px-4 py-3 text-slate-200 hover:bg-slate-800">
                 전체 상품
               </Link>
@@ -175,19 +151,9 @@ export default function ShopNavbar() {
               <div className="my-2 border-t border-slate-800" />
               {user ? (
                 <>
-                  {showApply && (
-                    <Link href="/shop/seller/apply" className="rounded-xl px-4 py-3 text-slate-200 hover:bg-slate-800">
-                      판매자 신청
-                    </Link>
-                  )}
-                  {showPending && (
-                    <span className="px-4 py-3 text-sm text-yellow-500">승인 대기 중</span>
-                  )}
-                  {showSeller && (
-                    <Link href="/shop/seller" className="rounded-xl px-4 py-3 text-slate-200 hover:bg-slate-800">
-                      판매자 대시보드
-                    </Link>
-                  )}
+                  <Link href="/shop/seller" className="rounded-xl px-4 py-3 text-slate-200 hover:bg-slate-800">
+                    MYBOARD
+                  </Link>
                   {profile?.is_admin && (
                     <Link href="/shop/admin" className="rounded-xl px-4 py-3 text-slate-200 hover:bg-slate-800">
                       관리자
@@ -202,13 +168,14 @@ export default function ShopNavbar() {
                   </button>
                 </>
               ) : (
-                <Link href="/login" className="rounded-xl px-4 py-3 text-slate-200 hover:bg-slate-800">
+                <Link href={`/login?next=${encodeURIComponent(pathname)}`} className="rounded-xl px-4 py-3 text-slate-200 hover:bg-slate-800">
                   로그인
                 </Link>
               )}
               <div className="my-2 border-t border-slate-800" />
-              <Link href="/" className="rounded-xl px-4 py-3 text-sm text-slate-500 hover:bg-slate-800 hover:text-slate-300">
-                ← 베스트클라이밍으로
+              <Link href="/" className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm text-slate-400 hover:bg-slate-800 hover:text-white">
+                <Image src="/favicon.png" alt="BestClimbing" width={20} height={20} className="rounded-sm" />
+                베스트클라이밍으로 GO
               </Link>
             </nav>
           </div>

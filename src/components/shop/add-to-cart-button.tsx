@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { addToCart } from '@/app/shop/actions'
 
 interface Props {
@@ -14,6 +14,7 @@ export default function AddToCartButton({ productId, stock, isOwner }: Props) {
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     if (!added) return
@@ -46,7 +47,7 @@ export default function AddToCartButton({ productId, stock, isOwner }: Props) {
     setLoading(false)
 
     if (result?.error === 'unauthenticated') {
-      router.push('/login')
+      router.push(`/login?next=${encodeURIComponent(pathname)}`)
       return
     }
 

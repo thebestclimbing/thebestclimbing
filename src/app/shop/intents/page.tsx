@@ -18,7 +18,7 @@ async function updateMemo(intentId: string, formData: FormData): Promise<void> {
 export default async function IntentsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) redirect('/login?next=/shop/intents')
 
   const { data: intents } = await supabase
     .from('purchase_intents')
