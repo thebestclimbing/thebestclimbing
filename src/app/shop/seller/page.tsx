@@ -33,15 +33,17 @@ export default async function SellerDashboard() {
   ])
 
   type Buyer = { id: string; name: string | null; memo: string | null }
+  type IntentWithBuyer = { product_id: string; profiles: { name: string } | null }
   const buyerMap = (intents ?? []).reduce<Record<string, Buyer[]>>((acc, intent) => {
-    const pid = (intent as any).product_id as string
+    const i = intent as unknown as IntentWithBuyer
+    const pid = i.product_id
     if (!acc[pid]) acc[pid] = []
-    acc[pid].push({ id: intent.id, name: (intent as any).profiles?.name ?? null, memo: intent.memo as string | null })
+    acc[pid].push({ id: intent.id, name: i.profiles?.name ?? null, memo: intent.memo as string | null })
     return acc
   }, {})
 
   const mergedProducts = (products ?? []).map((product) => {
-    const images = ((product as any).product_images as ProductImage[] ?? []).sort(
+    const images = ((product.product_images as unknown as ProductImage[]) ?? []).sort(
       (a: ProductImage, b: ProductImage) => a.sort_order - b.sort_order
     )
     const primaryImage = images.find((img: ProductImage) => img.is_primary) ?? images[0]
@@ -55,8 +57,9 @@ export default async function SellerDashboard() {
     }
   })
 
+  type MyIntentRow = { products: { id: string; title: string; price: number; product_images: ProductImage[] } | null }
   const myIntents = (myIntentsRaw ?? []).map((intent) => {
-    const product = (intent as any).products
+    const product = (intent as unknown as MyIntentRow).products
     const images = ((product?.product_images as ProductImage[]) ?? []).sort(
       (a: ProductImage, b: ProductImage) => a.sort_order - b.sort_order
     )
@@ -73,10 +76,33 @@ export default async function SellerDashboard() {
     }
   })
 
+  type PurchaseHistoryRow = {
+    id: string
+    title: string
+    price: number
+    image_url: string | null
+    confirmed_at: string
+    product_id: string | null
+  }
+  const { data: purchaseHistoryRaw } = await supabase
+    .from('purchase_history')
+    .select('id, title, price, image_url, confirmed_at, product_id')
+    .eq('buyer_id', user.id)
+    .order('confirmed_at', { ascending: false })
+
+  const purchaseHistory = ((purchaseHistoryRaw ?? []) as unknown as PurchaseHistoryRow[]).map((h) => ({
+    id: h.id,
+    title: h.title,
+    price: h.price,
+    imageUrl: h.image_url,
+    confirmedAt: h.confirmed_at,
+    productId: h.product_id,
+  }))
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-5 md:py-8">
       <div className="mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-bold text-white md:text-2xl">판매자 대시보드</h1>
+        <h1 className="text-xl font-bold text-white md:text-2xl">MYBOARD</h1>
         <Link href="/shop/seller/products/new">
           <Button className="w-full sm:w-auto">+ 새 상품 등록</Button>
         </Link>
@@ -85,6 +111,7 @@ export default async function SellerDashboard() {
       <SellerDashboardTabs
         mergedProducts={mergedProducts}
         myIntents={myIntents}
+        purchaseHistory={purchaseHistory}
       />
     </div>
   )

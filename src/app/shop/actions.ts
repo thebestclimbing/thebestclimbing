@@ -118,7 +118,7 @@ export async function cancelPurchaseIntent(productId: string) {
   return { error: null }
 }
 
-export async function removePurchaseIntent(intentId: string, _formData: FormData) {
+export async function removePurchaseIntent(intentId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'unauthenticated' as const }
@@ -203,6 +203,62 @@ export async function updateIntentMemoAsSeller(intentId: string, memo: string) {
     .update({ memo })
     .eq('id', intentId)
   if (error) return { error: error.message }
+
+  revalidatePath('/shop/seller')
+  return { error: null }
+}
+
+export async function confirmPurchase(intentId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const admin = createAdminClient()
+
+  const { data: intent } = await admin
+    .from('purchase_intents')
+    .select('product_id, user_id')
+    .eq('id', intentId)
+    .single()
+  if (!intent) return { error: 'not found' as const }
+
+  const { data: product } = await admin
+    .from('products')
+    .select('id, title, price, seller_id, product_images(id, url, is_primary, sort_order)')
+    .eq('id', intent.product_id)
+    .single()
+  if (!product) return { error: 'not found' as const }
+  if (product.seller_id !== user.id) return { error: 'unauthorized' as const }
+
+  type PImg = { id: string; url: string; is_primary: boolean; sort_order: number }
+  const images = ((product.product_images as unknown as PImg[]) ?? []).sort(
+    (a, b) => a.sort_order - b.sort_order
+  )
+  const primaryImage = images.find((img) => img.is_primary) ?? images[0]
+
+  const { error: historyError } = await admin
+    .from('purchase_history')
+    .insert({
+      product_id: intent.product_id,
+      buyer_id: intent.user_id,
+      seller_id: user.id,
+      title: product.title,
+      price: product.price,
+      image_url: primaryImage?.url ?? null,
+    })
+  if (historyError) return { error: historyError.message }
+
+  const { error: deleteError } = await admin
+    .from('purchase_intents')
+    .delete()
+    .eq('product_id', intent.product_id)
+  if (deleteError) return { error: deleteError.message }
+
+  const { error: updateError } = await admin
+    .from('products')
+    .update({ status: 'sold' })
+    .eq('id', intent.product_id)
+  if (updateError) return { error: updateError.message }
 
   revalidatePath('/shop/seller')
   return { error: null }
