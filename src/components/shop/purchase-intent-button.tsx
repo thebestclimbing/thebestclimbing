@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { addPurchaseIntent, cancelPurchaseIntent } from '@/app/shop/actions'
 
 interface Props {
@@ -14,12 +14,13 @@ export default function PurchaseIntentButton({ productId, initialIntent, isOwner
   const [hasIntent, setHasIntent] = useState(initialIntent !== null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
 
   const handleAdd = async () => {
     setLoading(true)
     const result = await addPurchaseIntent(productId)
     setLoading(false)
-    if (result?.error === 'unauthenticated') { router.push('/login'); return }
+    if (result?.error === 'unauthenticated') { router.push(`/login?next=${encodeURIComponent(pathname)}`); return }
     if (result?.error) return
     setHasIntent(true)
   }

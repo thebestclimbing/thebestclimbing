@@ -174,3 +174,36 @@ export async function updateIntentMemo(intentId: string, formData: FormData) {
   revalidatePath('/shop/intents')
   return { error: null }
 }
+
+export async function updateIntentMemoAsSeller(intentId: string, memo: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const admin = createAdminClient()
+
+  const { data: intent } = await admin
+    .from('purchase_intents')
+    .select('product_id')
+    .eq('id', intentId)
+    .single()
+
+  if (!intent) return { error: 'not found' as const }
+
+  const { data: product } = await admin
+    .from('products')
+    .select('seller_id')
+    .eq('id', intent.product_id)
+    .single()
+
+  if (!product || product.seller_id !== user.id) return { error: 'unauthorized' as const }
+
+  const { error } = await admin
+    .from('purchase_intents')
+    .update({ memo })
+    .eq('id', intentId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/shop/seller')
+  return { error: null }
+}

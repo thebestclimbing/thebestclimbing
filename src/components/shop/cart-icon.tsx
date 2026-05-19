@@ -38,10 +38,10 @@ export default function CartIcon() {
   return (
     <button
       onClick={() => router.push('/shop/cart')}
-      className="relative p-2 text-slate-400 transition-colors hover:text-white"
+      className="relative p-1 text-slate-400 transition-colors hover:text-white"
       aria-label="장바구니"
     >
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 9H4l1-9z" />
       </svg>
       {count > 0 && (
