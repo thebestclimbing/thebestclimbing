@@ -35,6 +35,7 @@ export function MediaCarousel({
   if (urls.length === 1) {
     return (
       <div onPointerDown={handlePointerDown} onPointerUp={handlePointerUp}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={cldUrl(urls[0], size)}
           alt=""
@@ -57,6 +58,7 @@ export function MediaCarousel({
       >
         {urls.map((url, i) => (
           <div key={i} className="snap-center flex-none w-full aspect-square overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cldUrl(url, size)}
               alt=""

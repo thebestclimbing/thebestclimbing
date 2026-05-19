@@ -15,12 +15,15 @@ export function MediaSlider({ media }: { media: FeedMedia[] }) {
 
   if (media.length === 1) {
     return (
-      <img
-        src={cldUrl(media[0].url, 1200)}
-        alt=""
-        className="w-full rounded-xl object-contain"
-        style={{ maxHeight: "70vh" }}
-      />
+      <>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={cldUrl(media[0].url, 1200)}
+          alt=""
+          className="w-full rounded-xl object-contain"
+          style={{ maxHeight: "70vh" }}
+        />
+      </>
     );
   }
 
@@ -36,6 +39,7 @@ export function MediaSlider({ media }: { media: FeedMedia[] }) {
       >
         {media.map((m, i) => (
           <div key={i} className="snap-center flex-none w-full">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cldUrl(m.url, 1200)}
               alt=""

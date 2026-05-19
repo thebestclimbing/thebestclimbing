@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import ProductSlider from '@/components/shop/product-slider'
 import ShopSearch from '@/components/shop/shop-search'
-import type { ProductImage } from '@/lib/shop/types'
 
-function toSlides(rawProducts: any[]) {
+type RawProduct = { id: string; title: string; price: number; product_images: { id: string; url: string; is_primary: boolean; sort_order: number }[] | null }
+
+function toSlides(rawProducts: RawProduct[]) {
   return rawProducts.map((p) => {
-    const images = ((p.product_images as ProductImage[]) ?? []).sort(
+    const images = (p.product_images ?? []).sort(
       (a, b) => a.sort_order - b.sort_order
     )
     const primary = images.find((img) => img.is_primary) ?? images[0]

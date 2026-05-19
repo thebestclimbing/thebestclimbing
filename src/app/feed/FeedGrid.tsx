@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { FeedPost } from "./types";
 
 function cldUrl(url: string, width: number): string {
@@ -15,11 +16,12 @@ export function FeedGrid({ posts }: { posts: FeedPost[] }) {
           <Link key={post.id} href={`/feed/posts/${post.id}`} className="relative block aspect-square overflow-hidden bg-[var(--surface-muted)]">
             {firstMedia ? (
               <>
-                <img
+                <Image
                   src={cldUrl(firstMedia.thumbnail_url, 300)}
                   alt=""
-                  className="h-full w-full object-cover transition hover:opacity-90"
-                  loading="lazy"
+                  fill
+                  sizes="33vw"
+                  className="object-cover transition hover:opacity-90"
                 />
                 {firstMedia.type === "video" && (
                   <div className="absolute top-1.5 right-1.5">

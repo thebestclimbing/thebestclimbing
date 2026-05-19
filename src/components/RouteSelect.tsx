@@ -13,7 +13,6 @@ export function RouteSelect({
   value,
   onChange,
   onSelectRoute,
-  required,
   className = "",
 }: {
   routes: RouteOption[];

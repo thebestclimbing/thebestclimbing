@@ -28,6 +28,12 @@ export default async function ProductDetailPage({
 
   if (!product) notFound()
 
+  type ProductRelations = {
+    categories: { id: string; name: string; slug: string } | null
+    profiles: { id: string; name: string } | null
+  }
+  const typedProduct = product as unknown as typeof product & ProductRelations
+
   const { data: { user } } = await supabase.auth.getUser()
   const isOwner = !!user && user.id === product.seller_id
   let intent: { id: string } | null = null
@@ -83,9 +89,9 @@ export default async function ProductDetailPage({
             {product.is_official && (
               <Badge className="bg-blue-600 text-white">공식 스토어</Badge>
             )}
-            {(product as any).categories && (
+            {typedProduct.categories && (
               <Badge variant="outline" className="border-slate-600 text-slate-400">
-                {(product as any).categories.name}
+                {typedProduct.categories.name}
               </Badge>
             )}
           </div>
@@ -110,7 +116,7 @@ export default async function ProductDetailPage({
             </h3>
             <div className="flex items-center gap-2">
               <span className="text-white">
-                {(product as any).profiles?.name ?? '알 수 없음'}
+                {typedProduct.profiles?.name ?? '알 수 없음'}
               </span>
               {product.is_official && (
                 <Badge variant="outline" className="border-blue-700 bg-blue-900 text-xs text-blue-300">

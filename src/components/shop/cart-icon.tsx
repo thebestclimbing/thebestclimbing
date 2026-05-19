@@ -26,6 +26,7 @@ export default function CartIcon() {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCount()
   }, [fetchCount])
 

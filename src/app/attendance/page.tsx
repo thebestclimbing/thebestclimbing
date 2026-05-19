@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { formatPhone } from "@/lib/format";
@@ -30,6 +31,28 @@ export default function AttendancePage() {
     }, 3000);
     return () => clearTimeout(t);
   }, [message]);
+
+  function handleKey(key: string) {
+    if (key === "지우기") {
+      setDigits((d) => d.slice(0, -1));
+      setMessage(null);
+      setSelectModal(null);
+      return;
+    }
+    if (key === "확인") {
+      if (digits.length !== 4) {
+        setMessage({ type: "error", text: "전화번호 뒤 4자리를 입력해 주세요." });
+        return;
+      }
+      doCheck();
+      return;
+    }
+    if (digits.length < 4) {
+      setDigits((d) => d + key);
+      setMessage(null);
+      setSelectModal(null);
+    }
+  }
 
   // PC: 키보드로 숫자/지우기/확인 입력
   useEffect(() => {
@@ -61,29 +84,8 @@ export default function AttendancePage() {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [digits, loading, message]); // handleKey가 digits/loading을 참조, message로 팝업 시 엔터 분기
-
-  function handleKey(key: string) {
-    if (key === "지우기") {
-      setDigits((d) => d.slice(0, -1));
-      setMessage(null);
-      setSelectModal(null);
-      return;
-    }
-    if (key === "확인") {
-      if (digits.length !== 4) {
-        setMessage({ type: "error", text: "전화번호 뒤 4자리를 입력해 주세요." });
-        return;
-      }
-      doCheck();
-      return;
-    }
-    if (digits.length < 4) {
-      setDigits((d) => d + key);
-      setMessage(null);
-      setSelectModal(null);
-    }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [digits, loading, message]);
 
   function isMembershipExpired(membershipEnd: string | null): boolean {
     if (!membershipEnd) return false;
@@ -235,7 +237,7 @@ export default function AttendancePage() {
             className="inline-block rounded-xl border-2 border-[var(--border)] bg-white p-2 lg:p-3"
             aria-label="회원가입 QR코드"
           >
-            <img
+            <Image
               src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(registerUrl)}`}
               alt="회원가입 링크 QR코드"
               width={160}

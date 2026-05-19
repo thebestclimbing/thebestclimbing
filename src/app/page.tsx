@@ -112,8 +112,6 @@ export default function Home() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
     fetch("/api/completers?limit=5")
       .then((res) => {
         if (!res.ok) throw new Error(res.statusText);

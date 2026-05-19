@@ -201,9 +201,11 @@ export default function SellerDashboardTabs({ mergedProducts, myIntents: initial
                       >
                         {product.status === 'active' ? '판매중' : product.status === 'draft' ? '임시저장' : product.status === 'sold' ? '판매완료' : '비활성'}
                       </Badge>
-                      <Link href={`/shop/seller/products/${product.id}/edit`}>
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">수정</Button>
-                      </Link>
+                      {product.status !== 'sold' && (
+                        <Link href={`/shop/seller/products/${product.id}/edit`}>
+                          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">수정</Button>
+                        </Link>
+                      )}
                       {product.buyers.length > 0 && (
                         <span className="rounded-full bg-purple-900 px-2 py-0.5 text-xs text-purple-300">
                           {product.buyers.length}명

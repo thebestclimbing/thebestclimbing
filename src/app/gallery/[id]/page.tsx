@@ -55,6 +55,7 @@ export default async function GalleryDetailPage({
         {row.images?.length ? (
           <div className="flex flex-col gap-4">
             {row.images.map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={i}
                 src={url}

@@ -65,10 +65,6 @@ function ymdToIso(ymd: number): string {
   return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
 }
 
-function todayYmd(): number {
-  return parseInt(todayISO().replace(/-/g, ""), 10);
-}
-
 /** 어제 날짜 YYYYMMDD (정지 당일을 1일로 보이게 하기 위함) */
 function yesterdayYmd(): number {
   const d = new Date();
