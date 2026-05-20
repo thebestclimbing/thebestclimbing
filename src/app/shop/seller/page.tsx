@@ -12,7 +12,7 @@ export default async function SellerDashboard() {
 
   const { data: products } = await supabase
     .from('products')
-    .select('id, title, price, status, product_images(id, url, is_primary, sort_order)')
+    .select('id, title, price, status, stock, product_images(id, url, is_primary, sort_order)')
     .eq('seller_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -21,7 +21,7 @@ export default async function SellerDashboard() {
     productIds.length > 0
       ? supabase
           .from('purchase_intents')
-          .select('id, memo, product_id, profiles(name)')
+          .select('id, memo, quantity, product_id, profiles(name)')
           .in('product_id', productIds)
           .order('created_at', { ascending: false })
       : { data: [] },
@@ -32,13 +32,13 @@ export default async function SellerDashboard() {
       .order('created_at', { ascending: false }),
   ])
 
-  type Buyer = { id: string; name: string | null; memo: string | null }
-  type IntentWithBuyer = { product_id: string; profiles: { name: string } | null }
+  type Buyer = { id: string; name: string | null; memo: string | null; quantity: number }
+  type IntentWithBuyer = { product_id: string; quantity: number; profiles: { name: string } | null }
   const buyerMap = (intents ?? []).reduce<Record<string, Buyer[]>>((acc, intent) => {
     const i = intent as unknown as IntentWithBuyer
     const pid = i.product_id
     if (!acc[pid]) acc[pid] = []
-    acc[pid].push({ id: intent.id, name: i.profiles?.name ?? null, memo: intent.memo as string | null })
+    acc[pid].push({ id: intent.id, name: i.profiles?.name ?? null, memo: intent.memo as string | null, quantity: i.quantity ?? 1 })
     return acc
   }, {})
 
@@ -52,6 +52,7 @@ export default async function SellerDashboard() {
       title: product.title,
       price: product.price,
       status: product.status,
+      stock: product.stock,
       imageUrl: primaryImage?.url ?? null,
       buyers: buyerMap[product.id] ?? [],
     }
