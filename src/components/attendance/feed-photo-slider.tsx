@@ -20,7 +20,7 @@ export default function FeedPhotoSlider() {
         .catch(() => {})
     }
     load()
-    const t = setInterval(load, 5 * 60 * 1000)
+    const t = setInterval(load, 3 * 60 * 1000)
     return () => clearInterval(t)
   }, [])
 
