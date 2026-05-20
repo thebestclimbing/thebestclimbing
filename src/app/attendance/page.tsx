@@ -226,18 +226,17 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      {/* 오른쪽: 위아래 1:1 분할 */}
+      {/* 오른쪽: 위아래 1:2 분할 */}
       {registerUrl && (
         <div className="mt-6 flex flex-1 flex-col md:mt-0 md:min-w-0">
-          {/* 위쪽 절반: 회원가입 QR */}
-          <div className="flex flex-1 flex-col items-center justify-start md:pt-28">
-            <p className="mb-2 text-sm font-medium text-[var(--chalk)] md:text-base lg:text-lg">회원가입 바로가기</p>
-            <p className="mb-2 text-xs text-[var(--chalk-muted)] md:mb-3 lg:text-sm">QR 스캔 시 회원가입 페이지로 이동</p>
+          {/* 위쪽 1: 회원가입 QR */}
+          <div className="flex flex-[1] flex-col items-center justify-start md:pt-16">
+            <p className="mb-3 text-center text-2xl font-black tracking-widest uppercase bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-lg md:text-3xl">Sign Up</p>
             <a
               href="/member/register"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block rounded-xl border-2 border-[var(--border)] bg-white p-2 lg:p-3"
+              className="inline-block rounded-xl border-2 border-[var(--border)] bg-white p-2"
               aria-label="회원가입 QR코드"
             >
               <Image
@@ -245,18 +244,12 @@ export default function AttendancePage() {
                 alt="회원가입 링크 QR코드"
                 width={160}
                 height={160}
-                className="block h-28 w-28 md:h-36 md:w-36 lg:h-44 lg:w-44"
+                className="block h-20 w-20 md:h-24 md:w-24 lg:h-28 lg:w-28"
               />
             </a>
-            <Link
-              href="/member/register"
-              className="mt-3 inline-block text-sm font-medium text-[var(--primary)] underline hover:no-underline md:text-base lg:text-lg"
-            >
-              회원가입
-            </Link>
           </div>
-          {/* 아래쪽 절반: 피드 사진 슬라이더 */}
-          <div className="flex h-52 flex-col gap-2 p-2 md:h-auto md:flex-1 md:pb-6">
+          {/* 아래쪽 2: 피드 사진 슬라이더 */}
+          <div className="flex h-72 flex-col gap-2 p-2 md:h-auto md:flex-[2] md:pb-6">
             <p className="text-center text-2xl font-black tracking-widest uppercase bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-lg md:text-3xl">Our Best Climb!!</p>
             <FeedPhotoSlider />
           </div>
