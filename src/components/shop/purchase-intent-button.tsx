@@ -67,7 +67,7 @@ export default function PurchaseIntentButton({ productId, initialIntent, isOwner
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="relative">
       <div className="flex items-center gap-2">
         <div className="flex items-center rounded-full border border-slate-700 bg-slate-800">
           <button
@@ -99,13 +99,15 @@ export default function PurchaseIntentButton({ productId, initialIntent, isOwner
           ✕
         </button>
       </div>
-      <textarea
-        value={memo}
-        onChange={(e) => setMemo(e.target.value)}
-        placeholder="판매자에게 메모 (선택사항)"
-        rows={2}
-        className="w-full resize-none rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
-      />
+      <div className="absolute right-0 top-full z-10 mt-2 w-64">
+        <textarea
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          placeholder="판매자에게 메모 (선택사항)"
+          rows={2}
+          className="w-full resize-none rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white shadow-lg placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
+        />
+      </div>
     </div>
   )
 }
