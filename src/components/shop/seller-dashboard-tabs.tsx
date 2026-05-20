@@ -14,8 +14,9 @@ type MergedProduct = {
   title: string
   price: number
   status: string
+  stock: number
   imageUrl: string | null
-  buyers: { id: string; name: string | null; memo: string | null }[]
+  buyers: { id: string; name: string | null; memo: string | null; quantity: number }[]
 }
 
 type MyIntent = {
@@ -39,11 +40,14 @@ interface Props {
   purchaseHistory: PurchaseHistoryItem[]
 }
 
-function BuyerRow({ buyer, isSold }: { buyer: { id: string; name: string | null; memo: string | null }; isSold: boolean }) {
+function BuyerRow({ buyer, isSold }: { buyer: { id: string; name: string | null; memo: string | null; quantity: number }; isSold: boolean }) {
   return (
     <div className="px-4 py-2.5">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-slate-300">{buyer.name ?? '(이름 없음)'}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-slate-300">{buyer.name ?? '(이름 없음)'}</span>
+          <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-400">{buyer.quantity}개</span>
+        </div>
         {!isSold && <ConfirmPurchaseButton intentId={buyer.id} />}
       </div>
       <p className="mt-0.5 pl-3 whitespace-pre-wrap text-sm text-slate-400">{buyer.memo || '메모 없음'}</p>
@@ -184,7 +188,7 @@ export default function SellerDashboardTabs({ mergedProducts, myIntents: initial
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-white">{product.title}</p>
-                      <p className="text-xs text-slate-400">{Number(product.price).toLocaleString()}원</p>
+                      <p className="text-xs text-slate-400">{Number(product.price).toLocaleString()}원 · 재고 {product.stock}개</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <Badge

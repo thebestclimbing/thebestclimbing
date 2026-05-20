@@ -85,7 +85,7 @@ export async function updateCartQuantity(cartItemId: string, quantity: number) {
   return { error: null }
 }
 
-export async function addPurchaseIntent(productId: string) {
+export async function addPurchaseIntent(productId: string, quantity = 1) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'unauthenticated' as const }
@@ -93,12 +93,29 @@ export async function addPurchaseIntent(productId: string) {
   const { error } = await supabase
     .from('purchase_intents')
     .upsert(
-      { user_id: user.id, product_id: productId },
-      { onConflict: 'user_id,product_id', ignoreDuplicates: true }
+      { user_id: user.id, product_id: productId, quantity },
+      { onConflict: 'user_id,product_id' }
     )
   if (error) return { error: error.message }
 
   revalidatePath('/shop/intents')
+  return { error: null }
+}
+
+export async function addPurchaseIntentsFromCart(items: { productId: string; quantity: number }[]) {
+  if (items.length === 0) return { error: null }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const rows = items.map(({ productId, quantity }) => ({ user_id: user.id, product_id: productId, quantity }))
+  const { error } = await supabase
+    .from('purchase_intents')
+    .upsert(rows, { onConflict: 'user_id,product_id' })
+  if (error) return { error: error.message }
+
+  revalidatePath('/shop/cart')
+  revalidatePath('/shop/seller')
   return { error: null }
 }
 
@@ -217,14 +234,14 @@ export async function confirmPurchase(intentId: string) {
 
   const { data: intent } = await admin
     .from('purchase_intents')
-    .select('product_id, user_id')
+    .select('product_id, user_id, quantity')
     .eq('id', intentId)
     .single()
   if (!intent) return { error: 'not found' as const }
 
   const { data: product } = await admin
     .from('products')
-    .select('id, title, price, seller_id, product_images(id, url, is_primary, sort_order)')
+    .select('id, title, price, stock, seller_id, product_images(id, url, is_primary, sort_order)')
     .eq('id', intent.product_id)
     .single()
   if (!product) return { error: 'not found' as const }
@@ -248,17 +265,32 @@ export async function confirmPurchase(intentId: string) {
     })
   if (historyError) return { error: historyError.message }
 
-  const { error: deleteError } = await admin
+  // 확정된 구매 의향만 삭제
+  const { error: deleteIntentError } = await admin
     .from('purchase_intents')
     .delete()
-    .eq('product_id', intent.product_id)
-  if (deleteError) return { error: deleteError.message }
+    .eq('id', intentId)
+  if (deleteIntentError) return { error: deleteIntentError.message }
 
-  const { error: updateError } = await admin
-    .from('products')
-    .update({ status: 'sold' })
-    .eq('id', intent.product_id)
-  if (updateError) return { error: updateError.message }
+  const intentQty = (intent.quantity as number) ?? 1
+  const newStock = (product.stock as number) - intentQty
+
+  if (newStock <= 0) {
+    // 재고 소진 → 나머지 intent 전부 삭제 + 판매완료
+    await admin.from('purchase_intents').delete().eq('product_id', intent.product_id)
+    const { error: updateError } = await admin
+      .from('products')
+      .update({ status: 'sold', stock: 0 })
+      .eq('id', intent.product_id)
+    if (updateError) return { error: updateError.message }
+  } else {
+    // 재고 남음 → stock만 차감, status 유지
+    const { error: updateError } = await admin
+      .from('products')
+      .update({ stock: newStock })
+      .eq('id', intent.product_id)
+    if (updateError) return { error: updateError.message }
+  }
 
   revalidatePath('/shop/seller')
   return { error: null }

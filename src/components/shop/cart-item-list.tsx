@@ -1,9 +1,10 @@
 'use client'
 
-import { useOptimistic, useTransition } from 'react'
+import { useOptimistic, useTransition, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { removeFromCart, updateCartQuantity, clearCart } from '@/app/shop/actions'
+import { useRouter } from 'next/navigation'
+import { removeFromCart, updateCartQuantity, clearCart, addPurchaseIntentsFromCart } from '@/app/shop/actions'
 import NoImagePlaceholder from '@/components/shop/no-image-placeholder'
 
 type CartItem = {
@@ -41,6 +42,35 @@ export default function CartItemList({
   const intentSet = new Set(intentProductIds)
   const [optimisticItems, dispatch] = useOptimistic(items, reducer)
   const [, startTransition] = useTransition()
+  const router = useRouter()
+  const [checked, setChecked] = useState<Set<string>>(
+    () => new Set(items.filter((i) => !intentSet.has(i.product.id)).map((i) => i.product.id))
+  )
+  const [ordering, setOrdering] = useState(false)
+
+  const toggleCheck = (productId: string) => {
+    setChecked((prev) => {
+      const next = new Set(prev)
+      if (next.has(productId)) next.delete(productId)
+      else next.add(productId)
+      return next
+    })
+  }
+
+  const newlyChecked = [...checked].filter((id) => !intentSet.has(id))
+
+  const handleOrder = async () => {
+    if (newlyChecked.length === 0) return
+    if (!confirm(`선택한 ${newlyChecked.length}개 상품에 구매 희망을 신청할까요?`)) return
+    setOrdering(true)
+    const items = newlyChecked.map((productId) => {
+      const item = optimisticItems.find((i) => i.product.id === productId)
+      return { productId, quantity: item?.quantity ?? 1 }
+    })
+    const result = await addPurchaseIntentsFromCart(items)
+    setOrdering(false)
+    if (!result.error) router.refresh()
+  }
 
   const handleQuantity = (item: CartItem, newQty: number) => {
     startTransition(async () => {
@@ -108,6 +138,14 @@ export default function CartItemList({
             key={item.id}
             className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4"
           >
+            {/* 체크박스 */}
+            <input
+              type="checkbox"
+              checked={intentSet.has(item.product.id) || checked.has(item.product.id)}
+              disabled={intentSet.has(item.product.id)}
+              onChange={() => toggleCheck(item.product.id)}
+              className="h-4 w-4 shrink-0 accent-emerald-500 disabled:opacity-50"
+            />
             {/* 썸네일 */}
             <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-slate-800">
               {item.product.imageUrl ? (
@@ -181,10 +219,11 @@ export default function CartItemList({
           <span className="text-xl font-bold text-white">{total.toLocaleString()}원</span>
         </div>
         <button
-          disabled
-          className="w-full rounded-xl bg-slate-700 py-4 text-sm font-semibold text-slate-400"
+          onClick={handleOrder}
+          disabled={newlyChecked.length === 0 || ordering}
+          className="w-full rounded-xl py-4 text-sm font-semibold transition disabled:bg-slate-700 disabled:text-slate-400 enabled:bg-emerald-600 enabled:text-white enabled:hover:bg-emerald-500"
         >
-          주문하기 (준비 중)
+          {ordering ? '처리중...' : `주문하기${newlyChecked.length > 0 ? ` (${newlyChecked.length}개)` : ''}`}
         </button>
       </div>
     </>

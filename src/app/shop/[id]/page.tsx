@@ -129,7 +129,7 @@ export default async function ProductDetailPage({
           <div className="mt-3 flex items-center justify-between">
             <p className="text-sm text-slate-500">재고: {product.stock}개</p>
             <div className="flex gap-2">
-              <PurchaseIntentButton productId={product.id} initialIntent={intent} isOwner={isOwner} />
+              <PurchaseIntentButton productId={product.id} initialIntent={intent} isOwner={isOwner} stock={product.stock} />
               <AddToCartButton productId={product.id} stock={product.stock} isOwner={isOwner} />
             </div>
           </div>
