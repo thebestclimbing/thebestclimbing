@@ -6,6 +6,7 @@ import Link from "next/link";
 import FeedPhotoSlider from "@/components/attendance/feed-photo-slider";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { formatPhone } from "@/lib/format";
+import { House } from "lucide-react";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "지우기", "0", "확인"];
 
@@ -259,9 +260,10 @@ export default function AttendancePage() {
       {/* 메인으로 - 우측 상단 버튼 (PC에서만 표시) */}
       <Link
         href="/"
-        className="absolute right-4 top-4 z-10 hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] md:right-6 md:top-6 md:inline-block md:px-5 md:py-3 md:text-base"
+        className="absolute right-4 top-4 z-10 hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2.5 text-[var(--chalk)] shadow-sm transition hover:bg-[var(--surface-muted)] md:right-6 md:top-6 md:inline-flex md:p-3"
+        aria-label="메인으로"
       >
-        메인으로
+        <House size={20} />
       </Link>
 
       {/* 결과 모달: 확인 버튼 누르면 닫고 새로고침 */}
