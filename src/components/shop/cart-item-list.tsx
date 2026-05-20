@@ -176,7 +176,9 @@ export default function CartItemList({
             </div>
 
             {/* 수량 조절 */}
-            {!intentSet.has(item.product.id) && (
+            {intentSet.has(item.product.id) ? (
+              <span className="w-8 text-center text-sm text-slate-400">{item.quantity}개</span>
+            ) : (
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleQuantity(item, item.quantity - 1)}
