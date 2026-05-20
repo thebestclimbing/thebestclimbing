@@ -13,6 +13,7 @@ interface Props {
 
 export default function PurchaseIntentButton({ productId, initialIntent, isOwner, stock }: Props) {
   const [hasIntent, setHasIntent] = useState(initialIntent !== null)
+  const [showForm, setShowForm] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [memo, setMemo] = useState('')
   const [loading, setLoading] = useState(false)
@@ -26,6 +27,7 @@ export default function PurchaseIntentButton({ productId, initialIntent, isOwner
     if (result?.error === 'unauthenticated') { router.push(`/login?next=${encodeURIComponent(pathname)}`); return }
     if (result?.error) return
     setHasIntent(true)
+    setShowForm(false)
   }
 
   const handleCancel = async () => {
@@ -52,6 +54,18 @@ export default function PurchaseIntentButton({ productId, initialIntent, isOwner
     )
   }
 
+  if (!showForm) {
+    return (
+      <button
+        onClick={() => setShowForm(true)}
+        disabled={stock === 0}
+        className="rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-500 disabled:opacity-70"
+      >
+        🛍️ 구매
+      </button>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
@@ -73,10 +87,16 @@ export default function PurchaseIntentButton({ productId, initialIntent, isOwner
         </div>
         <button
           onClick={handleAdd}
-          disabled={loading || stock === 0}
+          disabled={loading}
           className="rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-500 disabled:opacity-70"
         >
-          {loading ? '...' : '🛍️ 구매'}
+          {loading ? '...' : '신청하기'}
+        </button>
+        <button
+          onClick={() => setShowForm(false)}
+          className="rounded-full px-2 py-2.5 text-sm text-slate-500 hover:text-slate-300"
+        >
+          ✕
         </button>
       </div>
       <textarea
