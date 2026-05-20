@@ -256,7 +256,7 @@ export default function AttendancePage() {
             </Link>
           </div>
           {/* 아래쪽 절반: 피드 사진 슬라이더 */}
-          <div className="flex flex-1 flex-col p-2 md:pb-6 gap-2">
+          <div className="flex h-52 flex-col gap-2 p-2 md:h-auto md:flex-1 md:pb-6">
             <p className="text-center text-2xl font-black tracking-widest uppercase bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-lg md:text-3xl">Our Best Climb!!</p>
             <FeedPhotoSlider />
           </div>
