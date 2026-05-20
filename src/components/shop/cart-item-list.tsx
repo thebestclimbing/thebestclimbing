@@ -176,22 +176,24 @@ export default function CartItemList({
             </div>
 
             {/* 수량 조절 */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => handleQuantity(item, item.quantity - 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 text-sm text-slate-400 hover:border-slate-500 hover:text-white"
-              >
-                −
-              </button>
-              <span className="w-8 text-center text-sm text-white">{item.quantity}</span>
-              <button
-                onClick={() => handleQuantity(item, item.quantity + 1)}
-                disabled={item.quantity >= item.product.stock}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 text-sm text-slate-400 hover:border-slate-500 hover:text-white disabled:opacity-40"
-              >
-                +
-              </button>
-            </div>
+            {!intentSet.has(item.product.id) && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleQuantity(item, item.quantity - 1)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 text-sm text-slate-400 hover:border-slate-500 hover:text-white"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center text-sm text-white">{item.quantity}</span>
+                <button
+                  onClick={() => handleQuantity(item, item.quantity + 1)}
+                  disabled={item.quantity >= item.product.stock}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 text-sm text-slate-400 hover:border-slate-500 hover:text-white disabled:opacity-40"
+                >
+                  +
+                </button>
+              </div>
+            )}
 
             {/* 삭제 */}
             <button
