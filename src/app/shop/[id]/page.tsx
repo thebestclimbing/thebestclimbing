@@ -3,8 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import type { ProductImage } from '@/lib/shop/types'
-import AddToCartButton from '@/components/shop/add-to-cart-button'
-import PurchaseIntentButton from '@/components/shop/purchase-intent-button'
+import ProductActions from '@/components/shop/product-actions'
 import NoImagePlaceholder from '@/components/shop/no-image-placeholder'
 
 export default async function ProductDetailPage({
@@ -128,10 +127,7 @@ export default async function ProductDetailPage({
 
           <div className="mt-3 flex items-center justify-between">
             <p className="text-sm text-slate-500">재고: {product.stock}개</p>
-            <div className="flex gap-2">
-              <PurchaseIntentButton productId={product.id} initialIntent={intent} isOwner={isOwner} stock={product.stock} />
-              <AddToCartButton productId={product.id} stock={product.stock} isOwner={isOwner} />
-            </div>
+            <ProductActions productId={product.id} initialIntent={intent} isOwner={isOwner} stock={product.stock} />
           </div>
         </div>
       </div>

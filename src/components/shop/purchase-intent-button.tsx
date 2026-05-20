@@ -9,11 +9,12 @@ interface Props {
   initialIntent: { id: string } | null
   isOwner?: boolean
   stock: number
+  quantity: number
+  onQuantityChange: (q: number) => void
 }
 
-export default function PurchaseIntentButton({ productId, initialIntent, isOwner, stock }: Props) {
+export default function PurchaseIntentButton({ productId, initialIntent, isOwner, stock, quantity, onQuantityChange }: Props) {
   const [hasIntent, setHasIntent] = useState(initialIntent !== null)
-  const [quantity, setQuantity] = useState(1)
   const [memo, setMemo] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -34,7 +35,7 @@ export default function PurchaseIntentButton({ productId, initialIntent, isOwner
     setLoading(false)
     if (result?.error) return
     setHasIntent(false)
-    setQuantity(1)
+    onQuantityChange(1)
     setMemo('')
   }
 
@@ -57,14 +58,14 @@ export default function PurchaseIntentButton({ productId, initialIntent, isOwner
       <div className="flex items-center gap-2">
         <div className="flex items-center rounded-full border border-slate-700 bg-slate-800">
           <button
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
             className="px-3 py-2 text-sm text-slate-400 hover:text-white"
           >
             −
           </button>
           <span className="min-w-[1.5rem] text-center text-sm font-semibold text-white">{quantity}</span>
           <button
-            onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
+            onClick={() => onQuantityChange(Math.min(stock, quantity + 1))}
             disabled={quantity >= stock}
             className="px-3 py-2 text-sm text-slate-400 hover:text-white disabled:opacity-40"
           >
