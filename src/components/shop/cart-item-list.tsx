@@ -101,10 +101,9 @@ export default function CartItemList({
     })
   }
 
-  const total = optimisticItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  )
+  const total = optimisticItems
+    .filter((item) => checked.has(item.product.id))
+    .reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 
   if (optimisticItems.length === 0) {
     return (
@@ -141,7 +140,7 @@ export default function CartItemList({
             {/* 체크박스 */}
             <input
               type="checkbox"
-              checked={intentSet.has(item.product.id) || checked.has(item.product.id)}
+              checked={checked.has(item.product.id)}
               disabled={intentSet.has(item.product.id)}
               onChange={() => toggleCheck(item.product.id)}
               className="h-4 w-4 shrink-0 accent-emerald-500 disabled:opacity-50"
