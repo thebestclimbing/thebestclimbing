@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import FeedPhotoSlider from "@/components/attendance/feed-photo-slider";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { formatPhone } from "@/lib/format";
 
@@ -225,32 +226,40 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      {/* 오른쪽: 회원가입 QR (PC에서 같은 행, 2분할) */}
+      {/* 오른쪽: 위아래 1:1 분할 */}
       {registerUrl && (
-        <div className="mt-6 flex flex-1 flex-col items-center justify-center md:mt-0 md:min-w-0">
-          <p className="mb-2 text-sm font-medium text-[var(--chalk)] md:text-base lg:text-lg">회원가입 바로가기</p>
-          <p className="mb-2 text-xs text-[var(--chalk-muted)] md:mb-3 lg:text-sm">QR 스캔 시 회원가입 페이지로 이동</p>
-          <a
-            href="/member/register"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block rounded-xl border-2 border-[var(--border)] bg-white p-2 lg:p-3"
-            aria-label="회원가입 QR코드"
-          >
-            <Image
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(registerUrl)}`}
-              alt="회원가입 링크 QR코드"
-              width={160}
-              height={160}
-              className="block h-28 w-28 md:h-36 md:w-36 lg:h-44 lg:w-44"
-            />
-          </a>
-          <Link
-            href="/member/register"
-            className="mt-3 inline-block text-sm font-medium text-[var(--primary)] underline hover:no-underline md:text-base lg:text-lg"
-          >
-            회원가입
-          </Link>
+        <div className="mt-6 flex flex-1 flex-col md:mt-0 md:min-w-0">
+          {/* 위쪽 절반: 회원가입 QR */}
+          <div className="flex flex-1 flex-col items-center justify-start md:pt-28">
+            <p className="mb-2 text-sm font-medium text-[var(--chalk)] md:text-base lg:text-lg">회원가입 바로가기</p>
+            <p className="mb-2 text-xs text-[var(--chalk-muted)] md:mb-3 lg:text-sm">QR 스캔 시 회원가입 페이지로 이동</p>
+            <a
+              href="/member/register"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-xl border-2 border-[var(--border)] bg-white p-2 lg:p-3"
+              aria-label="회원가입 QR코드"
+            >
+              <Image
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(registerUrl)}`}
+                alt="회원가입 링크 QR코드"
+                width={160}
+                height={160}
+                className="block h-28 w-28 md:h-36 md:w-36 lg:h-44 lg:w-44"
+              />
+            </a>
+            <Link
+              href="/member/register"
+              className="mt-3 inline-block text-sm font-medium text-[var(--primary)] underline hover:no-underline md:text-base lg:text-lg"
+            >
+              회원가입
+            </Link>
+          </div>
+          {/* 아래쪽 절반: 피드 사진 슬라이더 */}
+          <div className="flex flex-1 flex-col p-2 md:pb-6 gap-2">
+            <p className="text-center text-2xl font-black tracking-widest uppercase bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-lg md:text-3xl">Our Best Climb!!</p>
+            <FeedPhotoSlider />
+          </div>
         </div>
       )}
 
