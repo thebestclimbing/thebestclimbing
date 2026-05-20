@@ -30,6 +30,11 @@ export default function AdminPage() {
             게시판관리
           </Link>
         </li>
+        <li>
+          <Link href="/admin/events" className="text-blue-600 hover:underline">
+            이벤트관리
+          </Link>
+        </li>
       </ul>
     </div>
   );
