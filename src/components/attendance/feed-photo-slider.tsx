@@ -35,7 +35,7 @@ export default function FeedPhotoSlider() {
   if (urls.length === 0) return null
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-2xl">
+    <div className="relative flex-1 w-full overflow-hidden rounded-2xl">
       {urls.map((url, i) => (
         <div
           key={url}
