@@ -295,3 +295,40 @@ export async function confirmPurchase(intentId: string) {
   revalidatePath('/shop/seller')
   return { error: null }
 }
+
+export async function toggleProductStatus(productId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'unauthenticated' as const }
+
+  const { data: product, error: fetchError } = await supabase
+    .from('products')
+    .select('id, status, seller_id')
+    .eq('id', productId)
+    .single()
+
+  if (fetchError || !product) return { error: '상품을 찾을 수 없습니다.' }
+  if ((product as { seller_id: string }).seller_id !== user.id) return { error: '권한이 없습니다.' }
+  if ((product as { status: string }).status === 'sold') return { error: '판매완료 상품은 변경할 수 없습니다.' }
+
+  const newStatus = (product as { status: string }).status === 'active' ? 'inactive' : 'active'
+  const { error } = await supabase
+    .from('products')
+    .update({ status: newStatus })
+    .eq('id', productId)
+
+  if (error) return { error: error.message }
+  revalidatePath('/shop/seller')
+  return { error: null, newStatus }
+}
+
+export async function adminDeactivateProduct(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
+  if (!profile?.is_admin) return
+  const productId = formData.get('productId') as string
+  await supabase.from('products').update({ status: 'inactive' }).eq('id', productId)
+  revalidatePath('/shop/admin')
+}
