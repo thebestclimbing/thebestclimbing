@@ -214,7 +214,6 @@ export default function Home() {
           className="mb-6 flex items-center justify-between rounded-2xl bg-gradient-to-r from-emerald-900 to-slate-800 border border-emerald-700 px-4 py-3 transition hover:from-emerald-800 hover:border-emerald-500"
         >
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🧗</span>
             <div>
               <p className="text-sm font-bold text-white">BestShop</p>
               <p className="text-xs text-slate-300">클라이밍 장비 & 회원 마켓</p>
