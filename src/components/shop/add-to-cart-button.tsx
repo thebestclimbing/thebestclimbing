@@ -8,9 +8,10 @@ interface Props {
   productId: string
   stock: number
   isOwner?: boolean
+  quantity?: number
 }
 
-export default function AddToCartButton({ productId, stock, isOwner }: Props) {
+export default function AddToCartButton({ productId, stock, isOwner, quantity = 1 }: Props) {
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
   const router = useRouter()
@@ -43,7 +44,7 @@ export default function AddToCartButton({ productId, stock, isOwner }: Props) {
 
   const handleClick = async () => {
     setLoading(true)
-    const result = await addToCart(productId, 1)
+    const result = await addToCart(productId, quantity)
     setLoading(false)
 
     if (result?.error === 'unauthenticated') {

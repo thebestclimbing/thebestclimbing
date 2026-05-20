@@ -101,10 +101,9 @@ export default function CartItemList({
     })
   }
 
-  const total = optimisticItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  )
+  const total = optimisticItems
+    .filter((item) => checked.has(item.product.id))
+    .reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 
   if (optimisticItems.length === 0) {
     return (
@@ -141,7 +140,7 @@ export default function CartItemList({
             {/* 체크박스 */}
             <input
               type="checkbox"
-              checked={intentSet.has(item.product.id) || checked.has(item.product.id)}
+              checked={checked.has(item.product.id)}
               disabled={intentSet.has(item.product.id)}
               onChange={() => toggleCheck(item.product.id)}
               className="h-4 w-4 shrink-0 accent-emerald-500 disabled:opacity-50"
@@ -176,22 +175,26 @@ export default function CartItemList({
             </div>
 
             {/* 수량 조절 */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => handleQuantity(item, item.quantity - 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 text-sm text-slate-400 hover:border-slate-500 hover:text-white"
-              >
-                −
-              </button>
-              <span className="w-8 text-center text-sm text-white">{item.quantity}</span>
-              <button
-                onClick={() => handleQuantity(item, item.quantity + 1)}
-                disabled={item.quantity >= item.product.stock}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 text-sm text-slate-400 hover:border-slate-500 hover:text-white disabled:opacity-40"
-              >
-                +
-              </button>
-            </div>
+            {intentSet.has(item.product.id) ? (
+              <span className="w-8 text-center text-sm text-slate-400">{item.quantity}개</span>
+            ) : (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleQuantity(item, item.quantity - 1)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 text-sm text-slate-400 hover:border-slate-500 hover:text-white"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center text-sm text-white">{item.quantity}</span>
+                <button
+                  onClick={() => handleQuantity(item, item.quantity + 1)}
+                  disabled={item.quantity >= item.product.stock}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 text-sm text-slate-400 hover:border-slate-500 hover:text-white disabled:opacity-40"
+                >
+                  +
+                </button>
+              </div>
+            )}
 
             {/* 삭제 */}
             <button

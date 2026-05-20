@@ -85,7 +85,7 @@ export async function updateCartQuantity(cartItemId: string, quantity: number) {
   return { error: null }
 }
 
-export async function addPurchaseIntent(productId: string, quantity = 1) {
+export async function addPurchaseIntent(productId: string, quantity = 1, memo = '') {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'unauthenticated' as const }
@@ -93,7 +93,7 @@ export async function addPurchaseIntent(productId: string, quantity = 1) {
   const { error } = await supabase
     .from('purchase_intents')
     .upsert(
-      { user_id: user.id, product_id: productId, quantity },
+      { user_id: user.id, product_id: productId, quantity, memo },
       { onConflict: 'user_id,product_id' }
     )
   if (error) return { error: error.message }

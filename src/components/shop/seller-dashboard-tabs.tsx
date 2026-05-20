@@ -188,7 +188,9 @@ export default function SellerDashboardTabs({ mergedProducts, myIntents: initial
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-white">{product.title}</p>
-                      <p className="text-xs text-slate-400">{Number(product.price).toLocaleString()}원 · 재고 {product.stock}개</p>
+                      <p className="text-xs text-slate-400">
+                        {Number(product.price).toLocaleString()}원{product.status !== 'sold' && ` · 재고 ${product.stock}개`}
+                      </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <Badge
