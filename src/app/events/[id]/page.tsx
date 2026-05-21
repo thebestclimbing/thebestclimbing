@@ -129,13 +129,14 @@ export default async function EventDetailPage({
     type HoldParticipantRow = { user_id: string; profiles: { name: string } | null }
     const participantRows = (holdParticipants ?? []) as unknown as HoldParticipantRow[]
     const participantIds = participantRows.map((p) => p.user_id)
+    const queryIds = [...new Set([...participantIds, user.id])]
 
     let allHoldLogs: { profile_id: string; progress_hold_count: number }[] = []
-    if (participantIds.length > 0) {
+    if (queryIds.length > 0) {
       const { data: logsData } = await supabase
         .from('exercise_logs')
         .select('profile_id, progress_hold_count')
-        .in('profile_id', participantIds)
+        .in('profile_id', queryIds)
         .gte('logged_at', event.start_date)
         .lte('logged_at', `${event.end_date}T23:59:59`)
       allHoldLogs = (logsData ?? []) as { profile_id: string; progress_hold_count: number }[]
