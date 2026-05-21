@@ -80,6 +80,9 @@ export default function Home() {
   const [loadingNotice, setLoadingNotice] = useState(true);
   const [rankPointLeaders, setRankPointLeaders] = useState<{ rank: number; name: string; point: number }[]>([]);
   const [loadingRankPoint, setLoadingRankPoint] = useState(true);
+  type ActiveEvent = { id: string; title: string; prize_description: string; start_date: string; end_date: string };
+  const [activeEvents, setActiveEvents] = useState<ActiveEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
   const touchStartX = useRef<number | null>(null);
   const justSwiped = useRef(false);
 
@@ -187,6 +190,18 @@ export default function Home() {
 
   useEffect(() => {
     let cancelled = false;
+    fetch("/api/events/active")
+      .then((res) => (res.ok ? res.json() : { events: [] }))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.events)) setActiveEvents(data.events);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoadingEvents(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
     fetch("/api/rank-point-leaders")
       .then((res) => (res.ok ? res.json() : { leaders: [] }))
       .then((data) => {
@@ -209,18 +224,49 @@ export default function Home() {
   return (
     <HomeMotion>
       <div className="pt-4 md:pt-6">
-        {process.env.NODE_ENV === 'development' && <Link
-          href="/shop"
-          className="mb-6 flex items-center justify-between rounded-2xl bg-gradient-to-r from-emerald-900 to-slate-800 border border-emerald-700 px-4 py-3 transition hover:from-emerald-800 hover:border-emerald-500"
-        >
-          <div className="flex items-center gap-3">
+        <div className="mb-6 grid grid-cols-2 gap-4">
+          {/* 진행중인 이벤트 */}
+          <section aria-label="진행중인 이벤트">
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <h2 className="text-lg font-semibold text-[var(--chalk)] md:text-xl">이벤트</h2>
+              <Link href="/events" className="shrink-0 mr-2 text-sm text-[var(--chalk-muted)] underline hover:text-[var(--chalk)]">더보기</Link>
+            </div>
+            <div className="card rounded-2xl divide-y divide-[var(--border)]">
+              {loadingEvents ? (
+                <div className="flex items-center justify-center py-6">
+                  <LoadingSpinner size="md" />
+                </div>
+              ) : activeEvents.length === 0 ? (
+                <p className="px-3 py-2 text-sm text-[var(--chalk-muted)]">진행중인 이벤트가 없습니다.</p>
+              ) : (
+                activeEvents.map((ev) => (
+                  <Link key={ev.id} href={`/events/${ev.id}`} className="flex items-center justify-between gap-4 px-3 py-1.5 hover:bg-[var(--surface-muted)] md:py-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="shrink-0 rounded-full bg-[var(--primary)] px-1.5 py-0.5 text-xs text-white">진행중</span>
+                      <span className="truncate text-sm font-medium text-[var(--chalk)]">{ev.title}</span>
+                    </div>
+                    <span className="shrink-0 text-xs text-[var(--chalk-muted)]">{ev.start_date} ~ {ev.end_date}</span>
+                  </Link>
+                ))
+              )}
+            </div>
+          </section>
+
+          {/* BestShop 배너 */}
+          <Link
+            href="/shop"
+            className="flex items-center justify-between rounded-2xl border border-emerald-700 bg-gradient-to-r from-emerald-900 to-slate-800 px-4 py-3 transition hover:border-emerald-500 hover:from-emerald-800"
+          >
             <div>
-              <p className="text-sm font-bold text-white">BestShop</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-bold text-white">BestShop</p>
+                <span className="rounded-full bg-emerald-700 px-1.5 py-0.5 text-xs text-emerald-200">베타테스트중</span>
+              </div>
               <p className="text-xs text-slate-300">클라이밍 장비 & 회원 마켓</p>
             </div>
-          </div>
-          <span className="text-sm font-medium text-emerald-300">바로가기 →</span>
-        </Link>}
+            <span className="text-sm font-medium text-emerald-300">바로가기 →</span>
+          </Link>
+        </div>
 
         <div className="mb-6 md:grid md:grid-cols-2 md:gap-6">
         <section className="mb-6 md:mb-0" aria-label="센터공지">

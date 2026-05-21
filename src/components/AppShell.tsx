@@ -129,6 +129,7 @@ const ADMIN_LINKS = [
   { href: "/admin/reservations", label: "예약관리" },
   { href: "/admin/completions", label: "완등관리" },
   { href: "/admin/notices", label: "공지관리" },
+  { href: "/admin/events", label: "이벤트관리" },
   { href: "/admin/board", label: "게시판관리" },
 ] as const;
 
@@ -295,6 +296,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/notice") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
         공지
+      </Link>
+      <Link
+        href="/events"
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/events") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+      >
+        이벤트
       </Link>
       <Link
         href="/statistics/ranking"
@@ -508,6 +515,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
                 <Link href="/notice" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   공지
+                </Link>
+                <Link href="/events" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                  이벤트
                 </Link>
                 <Link href="/statistics/ranking" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   랭킹 순위

@@ -19,11 +19,13 @@ export default function ExerciseLogForm({
   profileId,
   routes,
   completedRouteIds = [],
+  eventRouteIds = [],
   onSuccess,
 }: {
   profileId: string;
   routes: RouteRow[];
   completedRouteIds?: string[];
+  eventRouteIds?: string[];
   onSuccess?: () => void;
 }) {
   const router = useRouter();
@@ -92,6 +94,7 @@ export default function ExerciseLogForm({
             value={routeId}
             onChange={setRouteId}
             onSelectRoute={(r) => setProgressHoldCountStr(String(r.hold_count))}
+            eventRouteIds={eventRouteIds}
             required
           />
         </div>
