@@ -87,6 +87,7 @@ export default async function EventsPage() {
   )
 
   const progressMap = Object.fromEntries(progressList.map((p) => [p.eventId, p]))
+  const today = new Date().toISOString().slice(0, 10)
 
   const { data: rewardLogs } = await supabase
     .from('event_reward_logs')
@@ -106,6 +107,7 @@ export default async function EventsPage() {
             const isEventFull = prog.totalTarget > 0 && prog.totalAchieved >= prog.totalTarget
             const isRewarded = rewardedSet.has(event.id)
             const percent = prog.totalTarget > 0 ? Math.min(100, Math.round((prog.totalAchieved / prog.totalTarget) * 100)) : 0
+            const effectiveStatus = event.status === 'active' && event.end_date < today ? 'ended' : event.status
             return (
               <Link key={event.id} href={`/events/${event.id}`}>
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 transition hover:border-[var(--primary)]">
@@ -113,7 +115,7 @@ export default async function EventsPage() {
                     <h2 className="font-semibold text-[var(--chalk)]">{event.title}</h2>
                     {isRewarded ? (
                       <span className="shrink-0 rounded-full bg-emerald-500 px-2 py-0.5 text-xs text-white">수령완료</span>
-                    ) : event.status === 'ended' ? (
+                    ) : effectiveStatus === 'ended' ? (
                       isEventFull ? (
                         <span className="shrink-0 rounded-full bg-yellow-500 px-2 py-0.5 text-xs text-white">달성</span>
                       ) : (

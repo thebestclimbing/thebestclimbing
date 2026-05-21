@@ -170,7 +170,9 @@ export default async function EventDetailPage({
     .eq('user_id', user.id)
     .maybeSingle()
 
-  const statusLabel = event.status === 'active' ? '진행중' : event.status === 'ended' ? '종료' : '준비중'
+  const today = new Date().toISOString().slice(0, 10)
+  const effectiveStatus = event.status === 'active' && event.end_date < today ? 'ended' : event.status
+  const statusLabel = effectiveStatus === 'active' ? '진행중' : effectiveStatus === 'ended' ? '종료' : '준비중'
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
