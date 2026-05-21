@@ -37,7 +37,7 @@ export default async function EventsPage() {
             .select('progress_hold_count')
             .eq('profile_id', user.id)
             .gte('logged_at', event.start_date)
-            .lte('logged_at', event.end_date),
+            .lte('logged_at', `${event.end_date}T23:59:59`),
           supabase
             .from('event_participants')
             .select('id')
