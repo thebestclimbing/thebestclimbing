@@ -65,6 +65,22 @@ export default async function ExercisePage() {
     .select("id, wall_type, grade_value, grade_detail, name, hold_count")
     .order("name");
 
+  // 현재 유저가 참여 중인 활성 이벤트의 루트 ID
+  const today = new Date().toISOString().slice(0, 10)
+  const { data: participations } = await supabase
+    .from("event_participants")
+    .select("route_id, events(status, start_date, end_date)")
+    .eq("user_id", user.id)
+    .not("route_id", "is", null)
+  type EventInfo = { status: string; start_date: string; end_date: string }
+  type ParticipationRow = { route_id: string; events: EventInfo | EventInfo[] | null }
+  const eventRouteIds = ((participations ?? []) as unknown as ParticipationRow[])
+    .filter((p) => {
+      const e = Array.isArray(p.events) ? p.events[0] : p.events
+      return e && e.status === "active" && e.start_date <= today && e.end_date >= today
+    })
+    .map((p) => p.route_id)
+
   // 이달의 운동량 (한국 시간 기준 이번 달)
   const { start: monthStart, end: monthEnd } = getMonthStartEndKST();
   const { data: monthLogsRaw } = await supabase
@@ -159,6 +175,7 @@ export default async function ExercisePage() {
         profileId={user.id}
         routes={routes ?? []}
         completedRouteIds={Array.from(new Set(logs.filter((l) => l.is_completed).map((l) => l.route.id)))}
+        eventRouteIds={eventRouteIds}
       />
       <section className="mt-8 lg:mt-10">
         <ExerciseMonthStats

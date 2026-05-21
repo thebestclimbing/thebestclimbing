@@ -13,12 +13,14 @@ export function RouteSelect({
   value,
   onChange,
   onSelectRoute,
+  eventRouteIds = [],
   className = "",
 }: {
   routes: RouteOption[];
   value: string;
   onChange: (routeId: string) => void;
   onSelectRoute?: (route: RouteOption) => void;
+  eventRouteIds?: string[];
   required?: boolean;
   className?: string;
 }) {
@@ -95,7 +97,12 @@ export function RouteSelect({
                       : "text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
                   }`}
                 >
-                  {r.name} (홀드 {r.hold_count})
+                  <span className="flex items-center gap-1.5">
+                    {r.name} (홀드 {r.hold_count})
+                    {eventRouteIds.includes(r.id) && (
+                      <span className="rounded bg-orange-500/10 px-1 py-0.5 text-xs font-medium text-orange-500">이벤트중</span>
+                    )}
+                  </span>
                 </button>
               </li>
             ))}

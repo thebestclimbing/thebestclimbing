@@ -17,10 +17,12 @@ export default function ExerciseLogAddSection({
   profileId,
   routes,
   completedRouteIds = [],
+  eventRouteIds = [],
 }: {
   profileId: string;
   routes: RouteRow[];
   completedRouteIds?: string[];
+  eventRouteIds?: string[];
 }) {
   const [showForm, setShowForm] = useState(false);
 
@@ -84,6 +86,7 @@ export default function ExerciseLogAddSection({
               profileId={profileId}
               routes={routes}
               completedRouteIds={completedRouteIds}
+              eventRouteIds={eventRouteIds}
               onSuccess={() => setShowForm(false)}
             />
           </motion.div>
