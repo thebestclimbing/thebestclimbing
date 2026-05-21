@@ -224,7 +224,7 @@ export default function Home() {
   return (
     <HomeMotion>
       <div className="pt-4 md:pt-6">
-        <div className="mb-6 grid grid-cols-2 gap-4">
+        <div className="mb-6 flex flex-col gap-4 sm:grid sm:grid-cols-2">
           {/* 진행중인 이벤트 */}
           <section aria-label="진행중인 이벤트">
             <div className="mb-3 flex items-center justify-between gap-4">
@@ -255,7 +255,7 @@ export default function Home() {
           {/* BestShop 배너 */}
           <Link
             href="/shop"
-            className="flex items-center justify-between rounded-2xl border border-emerald-700 bg-gradient-to-r from-emerald-900 to-slate-800 px-4 py-3 transition hover:border-emerald-500 hover:from-emerald-800"
+            className="order-first sm:order-last flex items-center justify-between rounded-2xl border border-emerald-700 bg-gradient-to-r from-emerald-900 to-slate-800 px-4 py-3 transition hover:border-emerald-500 hover:from-emerald-800"
           >
             <div>
               <div className="flex items-center gap-2">
