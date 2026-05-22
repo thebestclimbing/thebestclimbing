@@ -55,7 +55,7 @@ export default async function ProductDetailPage({
     <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10">
         {/* 이미지 */}
-        <div>
+        <div className="md:sticky md:top-6 md:self-start">
           <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-800">
             {primaryImage ? (
               <Image
@@ -83,7 +83,7 @@ export default async function ProductDetailPage({
         </div>
 
         {/* 상품 정보 */}
-        <div>
+        <div className="flex flex-col">
           <div className="mb-2 flex items-center gap-2">
             {product.is_official && (
               <Badge className="bg-blue-600 text-white">공식 스토어</Badge>
@@ -125,8 +125,8 @@ export default async function ProductDetailPage({
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between">
-            <p className="text-sm text-slate-500">재고: {product.stock}개</p>
+          <div className="mt-auto pt-6">
+            <p className="mb-3 text-sm text-slate-500">재고: {product.stock}개</p>
             <ProductActions productId={product.id} initialIntent={intent} isOwner={isOwner} stock={product.stock} />
           </div>
         </div>
