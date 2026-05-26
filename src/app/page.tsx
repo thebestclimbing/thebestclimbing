@@ -239,15 +239,22 @@ export default function Home() {
               ) : activeEvents.length === 0 ? (
                 <p className="px-3 py-2 text-sm text-[var(--chalk-muted)]">진행중인 이벤트가 없습니다.</p>
               ) : (
-                activeEvents.map((ev) => (
-                  <Link key={ev.id} href={`/events/${ev.id}`} className="flex items-center justify-between gap-4 px-3 py-1.5 hover:bg-[var(--surface-muted)] md:py-2">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span className="shrink-0 rounded-full bg-[var(--primary)] px-1.5 py-0.5 text-xs text-white">진행중</span>
-                      <span className="truncate text-sm font-medium text-[var(--chalk)]">{ev.title}</span>
-                    </div>
-                    <span className="shrink-0 text-xs text-[var(--chalk-muted)]">{ev.start_date} ~ {ev.end_date}</span>
-                  </Link>
-                ))
+                activeEvents.map((ev) => {
+                  const sevenDaysLater = new Date()
+                  sevenDaysLater.setDate(sevenDaysLater.getDate() + 7)
+                  const isClosingSoon = new Date(ev.end_date) <= sevenDaysLater
+                  return (
+                    <Link key={ev.id} href={`/events/${ev.id}`} className="flex items-center justify-between gap-4 px-3 py-1.5 hover:bg-[var(--surface-muted)] md:py-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-xs text-white ${isClosingSoon ? 'bg-orange-500' : 'bg-[var(--primary)]'}`}>
+                          {isClosingSoon ? '마감임박' : '진행중'}
+                        </span>
+                        <span className="truncate text-sm font-medium text-[var(--chalk)]">{ev.title}</span>
+                      </div>
+                      <span className="shrink-0 text-xs text-[var(--chalk-muted)]">{ev.start_date} ~ {ev.end_date}</span>
+                    </Link>
+                  )
+                })
               )}
             </div>
           </section>

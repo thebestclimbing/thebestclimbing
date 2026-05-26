@@ -88,6 +88,9 @@ export default async function EventsPage() {
 
   const progressMap = Object.fromEntries(progressList.map((p) => [p.eventId, p]))
   const today = new Date().toISOString().slice(0, 10)
+  const sevenDaysLater = new Date()
+  sevenDaysLater.setDate(sevenDaysLater.getDate() + 7)
+  const sevenDaysLaterStr = sevenDaysLater.toISOString().slice(0, 10)
 
   const { data: rewardLogs } = await supabase
     .from('event_reward_logs')
@@ -108,6 +111,7 @@ export default async function EventsPage() {
             const isRewarded = rewardedSet.has(event.id)
             const percent = prog.totalTarget > 0 ? Math.min(100, Math.round((prog.totalAchieved / prog.totalTarget) * 100)) : 0
             const effectiveStatus = event.status === 'active' && event.end_date < today ? 'ended' : event.status
+            const isClosingSoon = effectiveStatus === 'active' && event.end_date >= today && event.end_date <= sevenDaysLaterStr
             return (
               <Link key={event.id} href={`/events/${event.id}`}>
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 transition hover:border-[var(--primary)]">
@@ -123,7 +127,9 @@ export default async function EventsPage() {
                       )
                     ) : event.mission_type === 'hold_count' && !prog.isParticipatingHold ? (
                       <div className="flex shrink-0 gap-1">
-                        <span className="rounded-full bg-[var(--primary)] px-2 py-0.5 text-xs text-white">진행중</span>
+                        <span className={`rounded-full px-2 py-0.5 text-xs text-white ${isClosingSoon ? 'bg-orange-500' : 'bg-[var(--primary)]'}`}>
+                          {isClosingSoon ? '마감임박' : '진행중'}
+                        </span>
                         <span className={`rounded-full px-2 py-0.5 text-xs text-white ${isEventFull ? 'bg-yellow-500' : 'bg-[var(--chalk-muted)]'}`}>
                           {isEventFull ? '미션조건달성' : '미션조건미달성'}
                         </span>
@@ -131,7 +137,9 @@ export default async function EventsPage() {
                     ) : isEventFull ? (
                       <span className="shrink-0 rounded-full bg-yellow-500 px-2 py-0.5 text-xs text-white">달성</span>
                     ) : (
-                      <span className="shrink-0 rounded-full bg-[var(--primary)] px-2 py-0.5 text-xs text-white">진행중</span>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs text-white ${isClosingSoon ? 'bg-orange-500' : 'bg-[var(--primary)]'}`}>
+                        {isClosingSoon ? '마감임박' : '진행중'}
+                      </span>
                     )}
                   </div>
                   <p className="mb-3 text-sm text-[var(--chalk-muted)]">🎁 {event.prize_description}</p>
