@@ -407,7 +407,11 @@ export default function Home() {
                   <LoadingSpinner size="md" />
                 </div>
               ) : attendanceKingLeaders.length === 0 ? (
-                <p className="py-1 text-[var(--chalk-muted)]">없음</p>
+                <div className="flex flex-col items-center gap-1 py-4 text-center">
+                  <span className="text-2xl">📅</span>
+                  <p className="text-sm text-[var(--chalk-muted)]">아직 이번 달 기록이 없어요</p>
+                  <p className="text-xs text-[var(--chalk-muted)]/60">첫 번째 출석왕이 되어보세요!</p>
+                </div>
               ) : (
                 <ul className="flex flex-col gap-1.5">
                   {attendanceKingLeaders.map((l) => (
@@ -429,7 +433,11 @@ export default function Home() {
                   <LoadingSpinner size="md" />
                 </div>
               ) : holdKingLeaders.length === 0 ? (
-                <p className="py-1 text-[var(--chalk-muted)]">없음</p>
+                <div className="flex flex-col items-center gap-1 py-4 text-center">
+                  <span className="text-2xl">🏆</span>
+                  <p className="text-sm text-[var(--chalk-muted)]">아직 이번 달 기록이 없어요</p>
+                  <p className="text-xs text-[var(--chalk-muted)]/60">첫 번째 홀드왕이 되어보세요!</p>
+                </div>
               ) : (
                 <ul className="flex flex-col gap-1.5">
                   {holdKingLeaders.map((l) => (
