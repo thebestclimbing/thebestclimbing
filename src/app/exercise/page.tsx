@@ -3,9 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getMonthStartEndKST, getWeekStartEndKST } from "@/lib/date";
 import type { GradeDetail, GradeValue } from "@/types/database";
-import ExerciseLogAddSection from "./ExerciseLogAddSection";
+import ExerciseLogSection from "./ExerciseLogSection";
 import ExerciseMonthStats from "./ExerciseMonthStats";
-import ExerciseLogList from "./ExerciseLogList";
 
 export default async function ExercisePage() {
   const supabase = await createClient();
@@ -171,11 +170,13 @@ export default async function ExercisePage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 lg:max-w-5xl lg:px-6 lg:py-10 xl:max-w-6xl xl:px-8 xl:py-12">
-      <ExerciseLogAddSection
+      <ExerciseLogSection
         profileId={user.id}
         routes={routes ?? []}
         completedRouteIds={Array.from(new Set(logs.filter((l) => l.is_completed).map((l) => l.route.id)))}
         eventRouteIds={eventRouteIds}
+        logs={logs}
+        completedRouteIdToDate={completedRouteIdToDate}
       />
       <section className="mt-8 lg:mt-10">
         <ExerciseMonthStats
@@ -185,16 +186,6 @@ export default async function ExercisePage() {
           routeCount={routeCount}
           attendanceCount={monthAttendanceCount}
           weekSummaries={weekSummaries}
-        />
-      </section>
-      <section className="mt-8 lg:mt-10">
-        <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)] md:text-xl lg:text-2xl">
-          기록 목록
-        </h2>
-        <ExerciseLogList
-          logs={logs}
-          profileId={user.id}
-          completedRouteIdToDate={completedRouteIdToDate}
         />
       </section>
       <p className="mt-6 lg:mt-8">

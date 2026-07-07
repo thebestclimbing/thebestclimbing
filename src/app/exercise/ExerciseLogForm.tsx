@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
 import { RouteSelect } from "@/components/RouteSelect";
+import type { LogInsertPayload } from "./ExerciseLogSection";
 
 interface RouteRow {
   id: string;
@@ -21,14 +21,15 @@ export default function ExerciseLogForm({
   completedRouteIds = [],
   eventRouteIds = [],
   onSuccess,
+  onInsert,
 }: {
   profileId: string;
   routes: RouteRow[];
   completedRouteIds?: string[];
   eventRouteIds?: string[];
   onSuccess?: () => void;
+  onInsert?: (payload: LogInsertPayload) => void;
 }) {
-  const router = useRouter();
   const [routeId, setRouteId] = useState("");
   const [progressHoldCountStr, setProgressHoldCountStr] = useState("");
   const [attemptCountStr, setAttemptCountStr] = useState("1");
@@ -66,7 +67,15 @@ export default function ExerciseLogForm({
       setError(err.message);
       return;
     }
-    router.refresh();
+    const selectedRoute = routes.find((r) => r.id === routeId)!;
+    onInsert?.({
+      route: selectedRoute,
+      progress_hold_count: progressHoldCount,
+      attempt_count: Math.max(1, parseInt(attemptCountStr, 10) || 1),
+      is_round_trip: isRoundTrip,
+      round_trip_count: roundTripCount,
+      logged_at: loggedAt,
+    });
     setRouteId("");
     setProgressHoldCountStr("");
     setAttemptCountStr("1");

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ExerciseLogForm from "./ExerciseLogForm";
+import type { LogInsertPayload } from "./ExerciseLogSection";
 
 interface RouteRow {
   id: string;
@@ -18,11 +19,13 @@ export default function ExerciseLogAddSection({
   routes,
   completedRouteIds = [],
   eventRouteIds = [],
+  onInsert,
 }: {
   profileId: string;
   routes: RouteRow[];
   completedRouteIds?: string[];
   eventRouteIds?: string[];
+  onInsert?: (payload: LogInsertPayload) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
 
@@ -88,6 +91,7 @@ export default function ExerciseLogAddSection({
               completedRouteIds={completedRouteIds}
               eventRouteIds={eventRouteIds}
               onSuccess={() => setShowForm(false)}
+              onInsert={onInsert}
             />
           </motion.div>
         )}
