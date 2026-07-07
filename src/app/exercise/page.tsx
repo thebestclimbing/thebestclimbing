@@ -177,17 +177,18 @@ export default async function ExercisePage() {
         eventRouteIds={eventRouteIds}
         logs={logs}
         completedRouteIdToDate={completedRouteIdToDate}
-      />
-      <section className="mt-8 lg:mt-10">
-        <ExerciseMonthStats
-          totalHolds={totalHolds}
-          averageHolds={averageHolds}
-          maxDailyHolds={maxDailyHolds}
-          routeCount={routeCount}
-          attendanceCount={monthAttendanceCount}
-          weekSummaries={weekSummaries}
-        />
-      </section>
+      >
+        <section className="mt-8 lg:mt-10">
+          <ExerciseMonthStats
+            totalHolds={totalHolds}
+            averageHolds={averageHolds}
+            maxDailyHolds={maxDailyHolds}
+            routeCount={routeCount}
+            attendanceCount={monthAttendanceCount}
+            weekSummaries={weekSummaries}
+          />
+        </section>
+      </ExerciseLogSection>
       <p className="mt-6 lg:mt-8">
         <Link
           href="/"

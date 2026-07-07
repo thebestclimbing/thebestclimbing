@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import React, { useOptimistic, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import ExerciseLogAddSection from "./ExerciseLogAddSection";
 import ExerciseLogList from "./ExerciseLogList";
@@ -51,6 +51,7 @@ export default function ExerciseLogSection({
   eventRouteIds,
   logs,
   completedRouteIdToDate,
+  children,
 }: {
   profileId: string;
   routes: RouteRow[];
@@ -58,6 +59,7 @@ export default function ExerciseLogSection({
   eventRouteIds: string[];
   logs: LogItem[];
   completedRouteIdToDate: Record<string, string>;
+  children?: React.ReactNode;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -102,6 +104,7 @@ export default function ExerciseLogSection({
         eventRouteIds={eventRouteIds}
         onInsert={handleInsert}
       />
+      {children}
       <section className="mt-8 lg:mt-10">
         <h2 className="mb-4 text-lg font-semibold text-[var(--chalk)] md:text-xl lg:text-2xl">
           기록 목록
