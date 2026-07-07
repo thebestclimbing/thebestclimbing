@@ -29,7 +29,7 @@ export default async function ExercisePage() {
     `
     )
     .eq("profile_id", user.id)
-    .order("logged_at", { ascending: false });
+    .order("created_at", { ascending: false });
 
   type LogItem = {
     id: string;
