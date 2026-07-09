@@ -8,6 +8,13 @@ type CompletedMember = {
   completedAt: string;
 };
 
+type TotalMember = {
+  memberId: string;
+  memberName: string;
+  count: number;
+  hasCompleted: boolean;
+};
+
 export type RouteStat = {
   routeId: string;
   routeName: string;
@@ -17,10 +24,11 @@ export type RouteStat = {
   completed: number;
   total: number;
   completedMembers: CompletedMember[];
+  totalMembers: TotalMember[];
 };
 
 export function RouteCompletionsClient({ stats }: { stats: RouteStat[] }) {
-  const [modal, setModal] = useState<RouteStat | null>(null);
+  const [modal, setModal] = useState<{ stat: RouteStat; type: 'completed' | 'total' } | null>(null);
 
   useEffect(() => {
     if (modal) {
@@ -50,13 +58,20 @@ export function RouteCompletionsClient({ stats }: { stats: RouteStat[] }) {
                 <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.grade}</td>
                 <td className="p-1.5 sm:p-2">
                   <button
-                    onClick={() => setModal(s)}
+                    onClick={() => setModal({ stat: s, type: 'completed' })}
                     className="font-medium text-[var(--primary)] underline hover:opacity-70"
                   >
                     {s.completed}
                   </button>
                 </td>
-                <td className="p-1.5 sm:p-2 text-[var(--chalk-muted)]">{s.total}</td>
+                <td className="p-1.5 sm:p-2">
+                  <button
+                    onClick={() => setModal({ stat: s, type: 'total' })}
+                    className="font-medium text-[var(--primary)] underline hover:opacity-70"
+                  >
+                    {s.total}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -74,7 +89,9 @@ export function RouteCompletionsClient({ stats }: { stats: RouteStat[] }) {
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-semibold text-[var(--chalk)]">
-                {modal.routeName} 완등 회원 ({modal.completed}명)
+                {modal.type === 'completed'
+                  ? `${modal.stat.routeName} 완등 회원 (${modal.stat.completed}명)`
+                  : `${modal.stat.routeName} 일지 등록 회원 (${modal.stat.totalMembers.length}명)`}
               </h2>
               <button
                 onClick={() => setModal(null)}
@@ -84,25 +101,50 @@ export function RouteCompletionsClient({ stats }: { stats: RouteStat[] }) {
               </button>
             </div>
             <div className="overflow-y-auto overscroll-contain flex-1">
-              {modal.completedMembers.length === 0 ? (
-                <p className="text-sm text-[var(--chalk-muted)]">완등 회원 없음</p>
+              {modal.type === 'completed' ? (
+                modal.stat.completedMembers.length === 0 ? (
+                  <p className="text-sm text-[var(--chalk-muted)]">완등 회원 없음</p>
+                ) : (
+                  <table className="w-full text-sm text-left">
+                    <thead className="sticky top-0 bg-[var(--surface)]">
+                      <tr className="border-b border-[var(--border)]">
+                        <th className="pb-2 pr-3 font-medium text-[var(--chalk-muted)]">회원명</th>
+                        <th className="pb-2 font-medium text-[var(--chalk-muted)]">완등일</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {modal.stat.completedMembers.map((m, i) => (
+                        <tr key={`${m.memberId}-${i}`} className="border-b border-[var(--border)]">
+                          <td className="py-1.5 pr-3 text-[var(--chalk)]">{m.memberName}</td>
+                          <td className="py-1.5 text-[var(--chalk-muted)]">{m.completedAt.slice(0, 10)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )
               ) : (
-                <table className="w-full text-sm text-left">
-                  <thead className="sticky top-0 bg-[var(--surface)]">
-                    <tr className="border-b border-[var(--border)]">
-                      <th className="pb-2 pr-3 font-medium text-[var(--chalk-muted)]">회원명</th>
-                      <th className="pb-2 font-medium text-[var(--chalk-muted)]">완등일</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {modal.completedMembers.map((m, i) => (
-                      <tr key={`${m.memberId}-${i}`} className="border-b border-[var(--border)]">
+                modal.stat.totalMembers.length === 0 ? (
+                  <p className="text-sm text-[var(--chalk-muted)]">등록 회원 없음</p>
+                ) : (
+                  <table className="w-full text-sm text-left">
+                    <thead className="sticky top-0 bg-[var(--surface)]">
+                      <tr className="border-b border-[var(--border)]">
+                        <th className="pb-2 pr-3 font-medium text-[var(--chalk-muted)]">회원명</th>
+                        <th className="pb-2 pr-3 font-medium text-[var(--chalk-muted)]">등록 횟수</th>
+                        <th className="pb-2 font-medium text-[var(--chalk-muted)]">완등</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {modal.stat.totalMembers.map((m) => (
+                      <tr key={m.memberId} className="border-b border-[var(--border)]">
                         <td className="py-1.5 pr-3 text-[var(--chalk)]">{m.memberName}</td>
-                        <td className="py-1.5 text-[var(--chalk-muted)]">{m.completedAt.slice(0, 10)}</td>
+                        <td className="py-1.5 pr-3 text-[var(--chalk-muted)]">{m.count}회</td>
+                        <td className="py-1.5 text-[var(--chalk-muted)]">{m.hasCompleted ? "✓" : "-"}</td>
                       </tr>
                     ))}
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                )
               )}
             </div>
           </div>
