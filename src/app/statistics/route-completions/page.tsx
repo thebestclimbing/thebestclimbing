@@ -12,6 +12,7 @@ type RouteAccum = {
   gradeDetail: string;
   total: number;
   memberMap: Map<string, { memberName: string; completedAt: string }>;
+  totalMemberMap: Map<string, { memberName: string; count: number; hasCompleted: boolean }>;
 };
 
 export default async function RouteCompletionsStatsPage() {
@@ -29,10 +30,17 @@ export default async function RouteCompletionsStatsPage() {
         gradeDetail: log.route?.grade_detail ?? "",
         total: 0,
         memberMap: new Map(),
+        totalMemberMap: new Map(),
       });
     }
     const r = byRoute.get(rid)!;
     r.total += 1;
+    const existing = r.totalMemberMap.get(log.profile_id);
+    r.totalMemberMap.set(log.profile_id, {
+      memberName: log.profile?.name ?? "-",
+      count: (existing?.count ?? 0) + 1,
+      hasCompleted: (existing?.hasCompleted ?? false) || log.is_completed,
+    });
     if (log.is_completed) {
       const existing = r.memberMap.get(log.profile_id);
       if (!existing || log.logged_at > existing.completedAt) {
@@ -49,6 +57,9 @@ export default async function RouteCompletionsStatsPage() {
       const completedMembers = Array.from(r.memberMap.entries())
         .map(([memberId, v]) => ({ memberId, ...v }))
         .sort((a, b) => b.completedAt.localeCompare(a.completedAt));
+      const totalMembers = Array.from(r.totalMemberMap.entries())
+        .map(([memberId, v]) => ({ memberId, memberName: v.memberName, count: v.count, hasCompleted: v.hasCompleted }))
+        .sort((a, b) => b.count - a.count);
       return {
         routeId: r.routeId,
         routeName: r.routeName,
@@ -58,6 +69,7 @@ export default async function RouteCompletionsStatsPage() {
         completed: completedMembers.length,
         total: r.total,
         completedMembers,
+        totalMembers,
       };
     })
     .sort((a, b) => {
