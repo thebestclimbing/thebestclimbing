@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatGrade } from "@/types/database";
 import type { GradeValue, GradeDetail } from "@/types/database";
 
@@ -39,6 +39,17 @@ export function RankingTableWithModal({
       setModal((m) => (m ? { ...m, routes: [], loading: false } : null));
     }
   }
+
+  useEffect(() => {
+    if (modal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [modal]);
 
   function closeModal() {
     setModal(null);
@@ -106,7 +117,7 @@ export function RankingTableWithModal({
                 <span className="text-xl leading-none">×</span>
               </button>
             </div>
-            <div className="overflow-y-auto p-4">
+            <div className="overflow-y-auto overscroll-contain p-4">
               {modal.loading ? (
                 <p className="text-sm text-[var(--chalk-muted)]">불러오는 중...</p>
               ) : modal.routes.length === 0 ? (

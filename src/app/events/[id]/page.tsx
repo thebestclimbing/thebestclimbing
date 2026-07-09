@@ -203,7 +203,7 @@ export default async function EventDetailPage({
         eventRoutes={eventRouteDetails}
         participatingRouteIds={participatingRouteIds}
         isParticipatingHold={isParticipatingHold}
-        eventStatus={event.status}
+        eventStatus={effectiveStatus}
         fullRouteIds={eventRouteDetails
           .filter((er) => er.target_count > 0 && (routeCompletersMap.get(er.route_id) ?? 0) >= er.target_count)
           .map((er) => er.route_id)}
