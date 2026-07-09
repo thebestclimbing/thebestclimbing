@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WALL_TYPE_LABELS } from "@/types/database";
 import type { WallType } from "@/types/database";
 
@@ -21,6 +21,15 @@ export type MemberStat = {
 
 export function MemberCompletionsClient({ stats }: { stats: MemberStat[] }) {
   const [modal, setModal] = useState<MemberStat | null>(null);
+
+  useEffect(() => {
+    if (modal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [modal]);
 
   return (
     <>
@@ -72,7 +81,7 @@ export function MemberCompletionsClient({ stats }: { stats: MemberStat[] }) {
                 ✕
               </button>
             </div>
-            <div className="overflow-y-auto flex-1">
+            <div className="overflow-y-auto overscroll-contain flex-1">
               <table className="w-full text-sm text-left">
                 <thead className="sticky top-0 bg-[var(--surface)]">
                   <tr className="border-b border-[var(--border)]">

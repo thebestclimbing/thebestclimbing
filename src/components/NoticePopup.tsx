@@ -28,6 +28,15 @@ export function NoticePopup() {
       });
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
   function close() {
     sessionStorage.setItem(STORAGE_KEY, "1");
     setOpen(false);
@@ -41,7 +50,7 @@ export function NoticePopup() {
       onClick={close}
     >
       <div
-        className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl"
+        className="max-h-[80vh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="mb-4 text-lg font-bold text-[var(--chalk)]">{notice.title}</h2>
