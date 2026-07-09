@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type WeekDatum = {
   date: string;
@@ -34,6 +34,15 @@ export default function ExerciseMonthStats({
 }: Props) {
   const [weekGraphOpen, setWeekGraphOpen] = useState(false);
   const [selectedWeekIndex, setSelectedWeekIndex] = useState(0);
+
+  useEffect(() => {
+    if (weekGraphOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [weekGraphOpen]);
 
   const items = [
     { label: "진행한 홀드 수", value: totalHolds, unit: "개" },

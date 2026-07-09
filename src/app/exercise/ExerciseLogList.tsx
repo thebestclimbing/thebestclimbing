@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -50,6 +50,15 @@ export default function ExerciseLogList({
   const [memoLogId, setMemoLogId] = useState<string | null>(null);
   const [memoDraft, setMemoDraft] = useState("");
   const [savingMemoId, setSavingMemoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (memoLogId) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [memoLogId]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return logs;

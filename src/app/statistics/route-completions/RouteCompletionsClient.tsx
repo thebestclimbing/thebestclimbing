@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type CompletedMember = {
   memberId: string;
@@ -21,6 +21,15 @@ export type RouteStat = {
 
 export function RouteCompletionsClient({ stats }: { stats: RouteStat[] }) {
   const [modal, setModal] = useState<RouteStat | null>(null);
+
+  useEffect(() => {
+    if (modal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [modal]);
 
   return (
     <>
@@ -74,7 +83,7 @@ export function RouteCompletionsClient({ stats }: { stats: RouteStat[] }) {
                 ✕
               </button>
             </div>
-            <div className="overflow-y-auto flex-1">
+            <div className="overflow-y-auto overscroll-contain flex-1">
               {modal.completedMembers.length === 0 ? (
                 <p className="text-sm text-[var(--chalk-muted)]">완등 회원 없음</p>
               ) : (

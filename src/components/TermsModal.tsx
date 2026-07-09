@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AccountCopyBlock } from "@/components/AccountCopyBlock";
 
 const TERMS_CONTENT = (
@@ -52,6 +52,15 @@ export function TermsModalButton({
 }) {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
   return (
     <>
       <button
@@ -73,7 +82,7 @@ export function TermsModalButton({
           onClick={() => setOpen(false)}
         >
           <div
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="mb-4 text-xl font-bold text-[var(--chalk)]">이용약관</h2>
