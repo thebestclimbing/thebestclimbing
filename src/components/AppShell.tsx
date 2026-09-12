@@ -134,15 +134,22 @@ const ADMIN_LINKS = [
   { href: "/admin/board", label: "게시판관리" },
 ] as const;
 
+const RANK_LINKS = [
+  { href: "/statistics/ranking", label: "센터랭크" },
+  { href: "/statistics/outdoor-ranking", label: "외벽랭크" },
+] as const;
+
 const STATS_LINKS = [
   { href: "/statistics/member-completions", label: "회원별 루트 완등" },
   { href: "/statistics/route-holds", label: "루트별 평균 홀드수" },
   { href: "/statistics/route-completions", label: "루트별 완등" },
 ] as const;
 
-const RANK_LINKS = [
-  { href: "/statistics/ranking", label: "센터랭크" },
-  { href: "/statistics/outdoor-ranking", label: "외벽랭크" },
+const COMMUNITY_LINKS = [
+  { href: "/board", label: "게시판" },
+  { href: "/feed", label: "피드" },
+  { href: "/notice", label: "공지" },
+  { href: "/events", label: "이벤트" },
 ] as const;
 
 /** 이름에서 아바타용 이니셜 추출 (최대 2자) */
@@ -184,9 +191,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [profileName, setProfileName] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
-  const [statsOpen, setStatsOpen] = useState(false);
   const [rankOpen, setRankOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [communityOpen, setCommunityOpen] = useState(false);
   const [exerciseOpen, setExerciseOpen] = useState(false);
+
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setMenuOpen(false);
+    setAdminOpen(false);
+    setRankOpen(false);
+    setStatsOpen(false);
+    setCommunityOpen(false);
+    setExerciseOpen(false);
+  }
 
   const isAuthPage = pathname === "/login" || pathname === "/member/register";
   const isShopPage = pathname.startsWith("/shop");
@@ -223,15 +242,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     });
   }, [pathname]);
 
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   const isAdmin = role === "admin";
 
   const navLinks = (
     <>
       <Link
-        href="/"
-        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        href="/attendance"
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/attendance" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
       >
-        메인
+        출석
+      </Link>
+      <Link
+        href="/reservation"
+        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/reservation" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+      >
+        예약
       </Link>
       <div className="relative">
         <button
@@ -281,42 +317,43 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </AnimatePresence>
       </div>
-      <Link
-        href="/attendance"
-        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/attendance" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
-      >
-        출석
-      </Link>
-      <Link
-        href="/reservation"
-        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname === "/reservation" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
-      >
-        예약
-      </Link>
-      <Link
-        href="/board"
-        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/board") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
-      >
-        게시판
-      </Link>
-      <Link
-        href="/feed"
-        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/feed") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
-      >
-        피드
-      </Link>
-      <Link
-        href="/notice"
-        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/notice") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
-      >
-        공지
-      </Link>
-      <Link
-        href="/events"
-        className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/events") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
-      >
-        이벤트
-      </Link>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setCommunityOpen((o) => !o)}
+          className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${["/board", "/feed", "/notice", "/events"].some((p) => pathname.startsWith(p)) ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+        >
+          커뮤니티 ▾
+        </button>
+        <AnimatePresence>
+          {communityOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                aria-hidden
+                onClick={() => setCommunityOpen(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="absolute left-0 top-full z-50 mt-1 min-w-[140px] rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2 shadow-lg"
+              >
+                {COMMUNITY_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setCommunityOpen(false)}
+                    className={`block px-4 py-2 text-sm ${pathname.startsWith(item.href) ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk)]"} hover:bg-[var(--surface-muted)]`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
       <div className="relative">
         <button
           type="button"
@@ -358,7 +395,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <button
           type="button"
           onClick={() => setStatsOpen((o) => !o)}
-          className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/statistics") ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
+          className={`text-sm transition hover:text-[var(--primary)] lg:text-base ${pathname.startsWith("/statistics") && pathname !== "/statistics/ranking" && pathname !== "/statistics/outdoor-ranking" ? "font-semibold text-[var(--primary)]" : "text-[var(--chalk-muted)]"}`}
         >
           통계 ▾
         </button>
@@ -374,7 +411,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
-                className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2 shadow-lg"
+                className="absolute left-0 top-full z-50 mt-1 min-w-[180px] rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2 shadow-lg"
               >
                 {STATS_LINKS.map((item) => (
                   <Link
@@ -534,78 +571,167 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
               <nav className="flex flex-col gap-1 overflow-y-auto p-4">
-                <Link href="/" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  메인
-                </Link>
-                <div className="my-2 border-t border-[var(--border)] pt-2">
-                <span className="px-4 py-2 block text-xs font-medium text-[var(--chalk-muted)]">운동일지</span>
-                <Link href="/exercise" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  나의 운동일지
-                </Link>
-                <Link href="/exercise/members" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  회원 운동일지
-                </Link>
-                <Link href="/exercise/outdoor" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  외벽운동일지
-                </Link>
-              </div>
                 <Link href="/attendance" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   출석
                 </Link>
                 <Link href="/reservation" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
                   예약
                 </Link>
-                <Link href="/board" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  게시판
-                </Link>
-                <Link href="/feed" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  피드
-                </Link>
-                <Link href="/notice" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  공지
-                </Link>
-                <Link href="/events" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-3 text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
-                  이벤트
-                </Link>
-                <div className="my-2 border-t border-[var(--border)]" />
-                <span className="px-4 py-2 text-xs font-medium text-[var(--chalk-muted)]">랭킹 순위</span>
-                {RANK_LINKS.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                <div className="my-2 border-t border-[var(--border)] pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setExerciseOpen((o) => !o)}
+                    className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
                   >
-                    {item.label}
-                  </Link>
-                ))}
-                <div className="my-2 border-t border-[var(--border)]" />
-                <span className="px-4 py-2 text-xs font-medium text-[var(--chalk-muted)]">통계</span>
-                {STATS_LINKS.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                {isAdmin && (
-                  <>
-                    <div className="my-2 border-t border-[var(--border)]" />
-                    <span className="px-4 py-2 text-xs font-medium text-[var(--chalk-muted)]">관리자</span>
-                    {ADMIN_LINKS.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMenuOpen(false)}
-                        className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                    <span>운동일지</span>
+                    <span className="text-[var(--chalk-muted)]">{exerciseOpen ? "▴" : "▾"}</span>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {exerciseOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="flex flex-col overflow-hidden"
                       >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </>
+                        <Link href="/exercise" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                          나의 운동일지
+                        </Link>
+                        <Link href="/exercise/members" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                          회원 운동일지
+                        </Link>
+                        <Link href="/exercise/outdoor" onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]">
+                          외벽운동일지
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <div className="my-2 border-t border-[var(--border)] pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setCommunityOpen((o) => !o)}
+                    className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                  >
+                    <span>커뮤니티</span>
+                    <span className="text-[var(--chalk-muted)]">{communityOpen ? "▴" : "▾"}</span>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {communityOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="flex flex-col overflow-hidden"
+                      >
+                        {COMMUNITY_LINKS.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setMenuOpen(false)}
+                            className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <div className="my-2 border-t border-[var(--border)] pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setRankOpen((o) => !o)}
+                    className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                  >
+                    <span>랭킹 순위</span>
+                    <span className="text-[var(--chalk-muted)]">{rankOpen ? "▴" : "▾"}</span>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {rankOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="flex flex-col overflow-hidden"
+                      >
+                        {RANK_LINKS.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setMenuOpen(false)}
+                            className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <div className="my-2 border-t border-[var(--border)] pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStatsOpen((o) => !o)}
+                    className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                  >
+                    <span>통계</span>
+                    <span className="text-[var(--chalk-muted)]">{statsOpen ? "▴" : "▾"}</span>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {statsOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="flex flex-col overflow-hidden"
+                      >
+                        {STATS_LINKS.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setMenuOpen(false)}
+                            className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                {isAdmin && (
+                  <div className="my-2 border-t border-[var(--border)] pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setAdminOpen((o) => !o)}
+                      className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                    >
+                      <span>관리자</span>
+                      <span className="text-[var(--chalk-muted)]">{adminOpen ? "▴" : "▾"}</span>
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {adminOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="flex flex-col overflow-hidden"
+                        >
+                          {ADMIN_LINKS.map((item) => (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setMenuOpen(false)}
+                              className="rounded-xl px-4 py-2.5 pl-6 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+                            >
+                              {item.label}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 )}
                 {user && (
                   <>
