@@ -72,8 +72,10 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [attendanceKingLeaders, setAttendanceKingLeaders] = useState<{ rank: number; name: string; count: number }[]>([]);
   const [holdKingLeaders, setHoldKingLeaders] = useState<{ rank: number; name: string; count: number }[]>([]);
+  const [clipKingLeaders, setClipKingLeaders] = useState<{ rank: number; name: string; count: number }[]>([]);
   const [loadingAttendanceKing, setLoadingAttendanceKing] = useState(true);
   const [loadingHoldKing, setLoadingHoldKing] = useState(true);
+  const [loadingClipKing, setLoadingClipKing] = useState(true);
   type NoticeItem = { id: string; title: string; created_at: string };
   const [centerNotices, setCenterNotices] = useState<NoticeItem[]>([]);
   const [climbingNotices, setClimbingNotices] = useState<NoticeItem[]>([]);
@@ -165,6 +167,22 @@ export default function Home() {
       .catch(() => {})
       .finally(() => {
         if (!cancelled) setLoadingHoldKing(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/clip-king")
+      .then((res) => (res.ok ? res.json() : { leaders: [] }))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.leaders)) setClipKingLeaders(data.leaders);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingClipKing(false);
       });
     return () => {
       cancelled = true;
@@ -375,9 +393,10 @@ export default function Home() {
           </p>
         )}
 
+        <div className="mb-6 md:mb-8">
         <section
-          className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 md:mb-8"
-          aria-label="센터랭크·외벽랭크 및 홀드왕·출석왕"
+          className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4"
+          aria-label="센터랭크·외벽랭크"
         >
           <div
             className="card flex flex-col rounded-2xl p-3 md:p-4"
@@ -451,6 +470,11 @@ export default function Home() {
               </ul>
             )}
           </div>
+        </section>
+        <section
+          className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4"
+          aria-label="홀드왕·출석왕·외벽왕"
+        >
           <div className="card flex flex-col rounded-2xl p-3 md:p-4" aria-label={`${currentMonthLabel}의 홀드왕`}>
             <h2 className="mb-2 text-sm font-semibold text-[var(--chalk)] md:text-base">
               {currentMonthLabel}의 홀드왕
@@ -503,7 +527,34 @@ export default function Home() {
               </ul>
             )}
           </div>
+          <div className="card flex flex-col rounded-2xl p-3 md:p-4" aria-label={`${currentMonthLabel}의 외벽왕`}>
+            <h2 className="mb-2 text-sm font-semibold text-[var(--chalk)] md:text-base">
+              {currentMonthLabel}의 외벽왕
+            </h2>
+            {loadingClipKing ? (
+              <div className="flex flex-1 items-center justify-center py-2">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : clipKingLeaders.length === 0 ? (
+              <div className="flex flex-col items-center gap-1 py-4 text-center">
+                <span className="text-2xl">🧗</span>
+                <p className="text-sm text-[var(--chalk-muted)]">아직 이번 달 기록이 없어요</p>
+                <p className="text-xs text-[var(--chalk-muted)]/60">첫 번째 외벽왕이 되어보세요!</p>
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-1.5">
+                {clipKingLeaders.map((l) => (
+                  <li key={l.name} className="grid grid-cols-[2rem_1fr_4rem] items-center gap-1 rounded-lg bg-[var(--surface-muted)]/50 px-2 py-1.5 md:px-3">
+                    <span className="font-semibold text-[var(--primary)]">{l.rank}위</span>
+                    <span className="truncate text-center font-medium text-[var(--chalk)]">{l.name}</span>
+                    <span className="whitespace-nowrap text-right text-sm text-[var(--chalk-muted)]">{l.count}개</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
+        </div>
 
         <section
           className="card rounded-2xl overflow-hidden touch-pan-y"
