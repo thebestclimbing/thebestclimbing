@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTimeKST } from "@/lib/date";
 import { NoticeCommentSection } from "./NoticeCommentSection";
+import { DispatchDisplay } from "./DispatchDisplay";
 
 export default async function NoticeDetailPage({
   params,
@@ -18,6 +19,7 @@ export default async function NoticeDetailPage({
       id,
       title,
       body,
+      notice_type,
       created_at,
       author:profiles(id, name)
     `
@@ -45,6 +47,7 @@ export default async function NoticeDetailPage({
     id: string;
     title: string;
     body: string;
+    notice_type: "센터공지" | "등반공지";
     created_at: string;
     author: { id: string; name: string } | { id: string; name: string }[] | null;
   };
@@ -63,6 +66,45 @@ export default async function NoticeDetailPage({
     author: (c as unknown as CommentRow).author,
   }));
 
+  let dispatchDisplayList: { vehicleModel: string; ownerName: string; passengerNames: string[] }[] = [];
+  if (row.notice_type === "등반공지") {
+    const { data: dispatchRows } = await supabase
+      .from("notice_dispatches")
+      .select(
+        `
+        id,
+        vehicle:member_vehicles(model, owner:profiles(name)),
+        passengers:dispatch_passengers(profile:profiles(name))
+      `
+      )
+      .eq("notice_id", id);
+
+    type DispatchRow = {
+      id: string;
+      vehicle:
+        | { model: string; owner: { name: string } | { name: string }[] | null }
+        | { model: string; owner: { name: string } | { name: string }[] | null }[]
+        | null;
+      passengers: { profile: { name: string } | { name: string }[] | null }[] | null;
+    };
+    dispatchDisplayList = (dispatchRows ?? []).map((d) => {
+      const r = d as unknown as DispatchRow;
+      const vehicle = Array.isArray(r.vehicle) ? r.vehicle[0] : r.vehicle;
+      const owner = vehicle ? (Array.isArray(vehicle.owner) ? vehicle.owner[0] : vehicle.owner) : null;
+      const passengerNames = (r.passengers ?? [])
+        .map((p) => {
+          const profile = Array.isArray(p.profile) ? p.profile[0] : p.profile;
+          return profile?.name ?? "";
+        })
+        .filter(Boolean);
+      return {
+        vehicleModel: vehicle?.model ?? "",
+        ownerName: owner?.name ?? "",
+        passengerNames,
+      };
+    });
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <article className="card rounded-2xl p-6">
@@ -77,6 +119,8 @@ export default async function NoticeDetailPage({
           {row.body || "(내용 없음)"}
         </div>
       </article>
+
+      {row.notice_type === "등반공지" && <DispatchDisplay dispatches={dispatchDisplayList} />}
 
       <NoticeCommentSection
         noticeId={id}

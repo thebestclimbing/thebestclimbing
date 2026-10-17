@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatPhone } from "@/lib/format";
 import { LogoutButton } from "@/components/LogoutButton";
+import { MemberVehicleForm } from "./MemberVehicleForm";
 
 export default async function MemberPage() {
   const supabase = await createClient();
@@ -23,6 +24,12 @@ export default async function MemberPage() {
       </div>
     );
   }
+
+  const { data: vehicle } = await supabase
+    .from("member_vehicles")
+    .select("model, seat_count, memo")
+    .eq("profile_id", user.id)
+    .maybeSingle();
 
   // 완등한 루트의 랭크포인트 합산 (루트당 1회만 카운트 — 최초 완등 기준)
   const { data: completedLogs } = await supabase
@@ -85,6 +92,11 @@ export default async function MemberPage() {
           </div>
         </dl>
       </div>
+      <MemberVehicleForm
+        key={vehicle ? "registered" : "new"}
+        profileId={user.id}
+        initial={vehicle ?? null}
+      />
       <div className="mt-4 flex flex-wrap items-center gap-4">
         <Link
           href="/"
