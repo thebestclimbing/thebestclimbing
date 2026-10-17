@@ -145,6 +145,31 @@ export interface NoticeComment {
   created_at: string;
 }
 
+export interface MemberVehicle {
+  id: string;
+  profile_id: string;
+  model: string;
+  seat_count: number;
+  memo: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NoticeDispatch {
+  id: string;
+  notice_id: string;
+  vehicle_id: string;
+  created_at: string;
+}
+
+export interface DispatchPassenger {
+  id: string;
+  dispatch_id: string;
+  notice_id: string;
+  profile_id: string;
+  created_at: string;
+}
+
 export interface PhotoAlbumPost {
   id: string;
   author_id: string;
@@ -169,6 +194,9 @@ export interface Database {
       free_board_posts: { Row: FreeBoardPost; Insert: Omit<FreeBoardPost, "id" | "created_at" | "updated_at">; Update: Partial<FreeBoardPost> };
       notices: { Row: Notice; Insert: Omit<Notice, "id" | "created_at" | "updated_at">; Update: Partial<Notice> };
       notice_comments: { Row: NoticeComment; Insert: Omit<NoticeComment, "id" | "created_at">; Update: Partial<NoticeComment> };
+      member_vehicles: { Row: MemberVehicle; Insert: Omit<MemberVehicle, "id" | "created_at" | "updated_at">; Update: Partial<MemberVehicle> };
+      notice_dispatches: { Row: NoticeDispatch; Insert: Omit<NoticeDispatch, "id" | "created_at">; Update: Partial<NoticeDispatch> };
+      dispatch_passengers: { Row: DispatchPassenger; Insert: Omit<DispatchPassenger, "id" | "created_at">; Update: Partial<DispatchPassenger> };
       photo_album_posts: { Row: PhotoAlbumPost; Insert: Omit<PhotoAlbumPost, "id" | "created_at" | "updated_at">; Update: Partial<PhotoAlbumPost> };
     };
   };
