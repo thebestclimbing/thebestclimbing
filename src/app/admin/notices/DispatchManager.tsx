@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
+
 export interface DispatchVehicleOption {
   id: string;
   model: string;
@@ -129,22 +131,96 @@ export function DispatchManager({
                   );
                 })}
               </div>
-              <select
-                value=""
-                onChange={(e) => addPassenger(entry.vehicleId, e.target.value)}
-                className="input-base mt-2 w-auto text-sm"
-              >
-                <option value="">+ 탑승자 추가</option>
-                {selectableMembers.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
+              <PassengerCombobox
+                members={selectableMembers}
+                onSelect={(profileId) => addPassenger(entry.vehicleId, profileId)}
+              />
             </div>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function PassengerCombobox({
+  members,
+  onSelect,
+}: {
+  members: DispatchMemberOption[];
+  onSelect: (profileId: string) => void;
+}) {
+  const [inputValue, setInputValue] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const filtered = useMemo(() => {
+    const q = inputValue.trim().toLowerCase();
+    if (!q) return members;
+    return members.filter((m) => m.name.toLowerCase().includes(q));
+  }, [members, inputValue]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function handleSelect(member: DispatchMemberOption) {
+    onSelect(member.id);
+    setInputValue("");
+    setIsOpen(false);
+  }
+
+  return (
+    <div className="relative mt-2 w-48" ref={containerRef}>
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => {
+          setInputValue(e.target.value);
+          setIsOpen(true);
+        }}
+        onFocus={() => setIsOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (filtered.length > 0) {
+              handleSelect(filtered[0]);
+            } else {
+              setInputValue("");
+            }
+          }
+        }}
+        placeholder="+ 탑승자 검색"
+        className="input-base w-full text-sm"
+        autoComplete="off"
+      />
+      {isOpen && filtered.length > 0 && (
+        <ul
+          className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-[var(--border)] bg-[var(--surface)] py-1 shadow-lg"
+          role="listbox"
+        >
+          {filtered.map((m) => (
+            <li
+              key={m.id}
+              role="option"
+              aria-selected={false}
+              onClick={() => handleSelect(m)}
+              className="cursor-pointer px-3 py-1.5 text-sm text-[var(--chalk)] hover:bg-[var(--surface-muted)]"
+            >
+              {m.name}
+            </li>
+          ))}
+        </ul>
+      )}
+      {isOpen && inputValue && filtered.length === 0 && (
+        <p className="absolute z-10 mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--chalk-muted)] shadow-lg">
+          일치하는 회원이 없습니다.
+        </p>
+      )}
     </div>
   );
 }
