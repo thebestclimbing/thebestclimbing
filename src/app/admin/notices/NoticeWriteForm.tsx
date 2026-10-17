@@ -4,6 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/SubmitButton";
+import {
+  DispatchManager,
+  type DispatchEntry,
+  type DispatchVehicleOption,
+  type DispatchMemberOption,
+} from "./DispatchManager";
 
 type NoticeInitial = {
   id: string;
@@ -16,9 +22,15 @@ type NoticeInitial = {
 export function NoticeWriteForm({
   authorId,
   notice,
+  vehicles = [],
+  members = [],
+  initialDispatches = [],
 }: {
   authorId: string;
   notice?: NoticeInitial;
+  vehicles?: DispatchVehicleOption[];
+  members?: DispatchMemberOption[];
+  initialDispatches?: DispatchEntry[];
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(notice?.title ?? "");
@@ -27,15 +39,44 @@ export function NoticeWriteForm({
   const [noticeType, setNoticeType] = useState<"센터공지" | "등반공지">(
     notice?.notice_type ?? "센터공지"
   );
+  const [dispatches, setDispatches] = useState<DispatchEntry[]>(initialDispatches);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const isEdit = Boolean(notice?.id);
+
+  async function saveDispatches(
+    supabase: ReturnType<typeof createClient>,
+    noticeId: string
+  ): Promise<string | null> {
+    const validVehicleIds = new Set(vehicles.map((v) => v.id));
+    for (const d of dispatches) {
+      if (!validVehicleIds.has(d.vehicleId)) continue;
+      const { data: dispatchRow, error: dispatchErr } = await supabase
+        .from("notice_dispatches")
+        .insert({ notice_id: noticeId, vehicle_id: d.vehicleId })
+        .select("id")
+        .single();
+      if (dispatchErr || !dispatchRow) return dispatchErr?.message ?? "배차 등록 실패";
+      if (d.passengerIds.length > 0) {
+        const { error: passErr } = await supabase.from("dispatch_passengers").insert(
+          d.passengerIds.map((profileId) => ({
+            dispatch_id: dispatchRow.id,
+            notice_id: noticeId,
+            profile_id: profileId,
+          }))
+        );
+        if (passErr) return passErr.message;
+      }
+    }
+    return null;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
     const supabase = createClient();
+
     if (isEdit) {
       const { error: err } = await supabase
         .from("notices")
@@ -46,25 +87,55 @@ export function NoticeWriteForm({
           notice_type: noticeType,
         })
         .eq("id", notice!.id);
-      setLoading(false);
       if (err) {
+        setLoading(false);
         setError(err.message);
         return;
+      }
+      const { error: delErr } = await supabase
+        .from("notice_dispatches")
+        .delete()
+        .eq("notice_id", notice!.id);
+      if (delErr) {
+        setLoading(false);
+        setError(delErr.message);
+        return;
+      }
+      if (noticeType === "등반공지") {
+        const dispatchErrMsg = await saveDispatches(supabase, notice!.id);
+        if (dispatchErrMsg) {
+          setLoading(false);
+          setError(dispatchErrMsg);
+          return;
+        }
       }
     } else {
-      const { error: err } = await supabase.from("notices").insert({
-        author_id: authorId,
-        title: title.trim(),
-        body: body.trim() || "",
-        popup_yn: popupYn,
-        notice_type: noticeType,
-      });
-      setLoading(false);
-      if (err) {
-        setError(err.message);
+      const { data: inserted, error: err } = await supabase
+        .from("notices")
+        .insert({
+          author_id: authorId,
+          title: title.trim(),
+          body: body.trim() || "",
+          popup_yn: popupYn,
+          notice_type: noticeType,
+        })
+        .select("id")
+        .single();
+      if (err || !inserted) {
+        setLoading(false);
+        setError(err?.message ?? "등록 실패");
         return;
       }
+      if (noticeType === "등반공지") {
+        const dispatchErrMsg = await saveDispatches(supabase, inserted.id);
+        if (dispatchErrMsg) {
+          setLoading(false);
+          setError(dispatchErrMsg);
+          return;
+        }
+      }
     }
+    setLoading(false);
     router.push("/admin/notices");
     router.refresh();
   }
@@ -129,6 +200,14 @@ export function NoticeWriteForm({
             팝업여부 Y (최초 사이트 진입 시 팝업으로 표시)
           </label>
         </div>
+        {noticeType === "등반공지" && (
+          <DispatchManager
+            availableVehicles={vehicles}
+            availableMembers={members}
+            dispatches={dispatches}
+            onChange={setDispatches}
+          />
+        )}
       </div>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       <div className="mt-4">
