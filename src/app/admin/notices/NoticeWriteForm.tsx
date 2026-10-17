@@ -130,7 +130,11 @@ export function NoticeWriteForm({
         const dispatchErrMsg = await saveDispatches(supabase, inserted.id);
         if (dispatchErrMsg) {
           setLoading(false);
-          setError(dispatchErrMsg);
+          alert(
+            `공지는 저장되었으나 배차 등록 중 오류가 발생했습니다: ${dispatchErrMsg}\n수정 화면에서 다시 시도해주세요.`
+          );
+          router.push(`/admin/notices/${inserted.id}/edit`);
+          router.refresh();
           return;
         }
       }
