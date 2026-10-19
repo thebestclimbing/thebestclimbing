@@ -19,7 +19,8 @@ export type OutdoorLocation = "ilsan" | "munhak";
 
 export type HoldColor =
   | "red" | "orange" | "yellow" | "green" | "blue"
-  | "indigo" | "violet" | "white" | "black" | "pink";
+  | "indigo" | "violet" | "white" | "black" | "pink"
+  | "gray" | "mint";
 
 export type GradeValue = "5.9" | "10" | "11" | "12" | "13";
 export type GradeDetail = "a" | "b" | "c" | "d";
@@ -219,10 +220,12 @@ export const HOLD_COLOR_LABELS: Record<HoldColor, string> = {
   white: "흰색",
   black: "검정",
   pink: "분홍",
+  gray: "회색",
+  mint: "민트",
 };
 
 export const OUTDOOR_LOCATIONS: OutdoorLocation[] = ["ilsan", "munhak"];
-export const HOLD_COLORS: HoldColor[] = ["red", "orange", "yellow", "green", "blue", "indigo", "violet", "white", "black", "pink"];
+export const HOLD_COLORS: HoldColor[] = ["red", "orange", "yellow", "green", "blue", "indigo", "violet", "white", "black", "pink", "gray", "mint"];
 
 export const WALL_TYPE_LABELS: Record<WallType, string> = {
   vertical: "직벽",
